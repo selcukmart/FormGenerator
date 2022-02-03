@@ -3,6 +3,12 @@
   "description": "description",
   "minimum-stability": "stable",
   "type": "library",
+  "keywords": [
+    "form",
+    "html",
+    "generate",
+    "form generator"
+  ],
   "license": "MIT",
   "authors": [
     {
