@@ -92,11 +92,13 @@ $form_generator_array = [
      * Form Inputs
      */
     'inputs' => [
+        // this is a section
         'decision' => [
             [
                 'type' => 'form_section',
                 'label' => 'Address Information'
             ],
+            // this is a form input row
             [
                 'type' => 'text',
                 'attributes' => [
@@ -146,6 +148,7 @@ $form_generator_array = [
                 ]
             ],
         ],
+        // this is other section
         'corporate-info' => [
             [
                 'type' => 'form_section',

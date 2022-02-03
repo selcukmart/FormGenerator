@@ -21,128 +21,237 @@ Form Generator Array Example
 
 ```php
 $form_generator_array = [
+    /**
+     * json,XML,HTML
+     * json and xml are not coded yet
+     */
+    'data' => [
+        'connection' => [
             /**
-             * json,XML,HTML
-             * json and xml are not coded yet
+             * optional
+             * if you will use database operation you must set this
              */
-            'export' => [
-                //'format' => 'Bootstrapv3FormWizard',
-                'format' => 'Bootstrapv3Form',
-                'type' => 'html'
+            'db' => [
+                /**
+                 * This must be an object, and it must implement FormGenerator\Tools\DB\DBInterface
+                 * There is an example in FormGenerator\Tools\DB\ folder as DBExample
+                 */
+                'object' => ''
+            ]
+        ],
+        /**
+         * Data Structure Start For DB usage
+         * There are several other data getting formats, they are explaining with other data title
+         * if data comes from table id must set here
+         */
+        'id' => '6',
+        /**
+         * if it doesn't set, the system will use id column name
+         */
+        'id_column_name' => 'branchID',
+        /**
+         * if data comes from table it must set here
+         */
+        'table' => 'abc',
+        /// Data Structure Finish
+    ],
+    'export' => [
+        /**
+         * Optional
+         * Default runs Generic
+         */
+        //'format' => 'Bootstrapv3FormWizard',
+        'format' => $format,
+        'type' => 'html',
+        /**
+         * Default Smarty
+         * optional
+         */
+        'render' => [
+            // twig, mustache, blade
+            'by' => 'smarty',
+            // This must be an object
+            'smarty' => $smarty,
+        ],
+        /**
+         * optional
+         */
+        'input-types' => [
+            // default: FormGenerator_namespace\FormGeneratorInputTypes
+            // if you set your namespace the system will run your FormGeneratorInputTypes folder
+            // only name space your folder name must be FormGeneratorInputTypes
+            'namespace' => ''
+        ],
+        /**
+         * optional
+         */
+        'export-object' => [
+            // default: FormGenerator_namespace\FormGeneratorExport
+            // if you set your namespace the system will run your FormGeneratorExport folder
+            // only name space your folder name must be FormGeneratorExport
+            'namespace' => ''
+        ],
+    ],
+
+
+    /**
+     * Form Inputs
+     */
+    'inputs' => [
+        // this is a section
+        'decision' => [
+            [
+                'type' => 'form_section',
+                'label' => 'Address Information'
             ],
-            /**
-             * Data Structer Start
-             * There are several other data getting formats, they are explaining with other data title
-             */
-            'data_id' => '6',
-            'data_table' => 'abc',
-            /// Data Structure Finish
-            /**
-             * Form Inputs
-             */
-            'inputs' => [
-                'decision' => [
-                    [
-                        'type' => 'form_section',
-                        'label' => 'Address Information'
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'addres_name',
+            // this is a form input row
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'addres_name',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'name',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'surname',
+                ]
+            ],
+            [
+                'type' => 'textarea',
+                'attributes' => [
+                    'name' => 'address',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'postal_code',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'phone',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'mobile_phone',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'attributes' => [
+                    'name' => 'mail',
+                ]
+            ],
+        ],
+        // this is other section
+        'corporate-info' => [
+            [
+                'type' => 'form_section',
+                'label' => 'Corporate Information'
+            ],
+            [
+                'type' => 'checkbox',
+                'attributes' => [
+                    'name' => 'abc'
+                ],
+                'dependency' => 'true',
+
+                'options' => [
+                    'data' => [
+                        'from' => 'key_value_array',
+                        'key_value_array' => [
+                            'a' => 'Checkbox Label 1',
+                            'b' => 'Checkbox Label 1',
+                            'c' => 'Checkbox Label 2',
                         ]
                     ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'name',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'surname',
-                        ]
-                    ],
-                    [
-                        'type' => 'textarea',
-                        'attributes' => [
-                            'name' => 'address',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'postal_code',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'phone',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'mobile_phone',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'attributes' => [
-                            'name' => 'mail',
-                        ]
-                    ],
-                    [
-                        'type' => 'radio',
-                        'attributes' => [
-                            'name' => 'invoice_type'
-                        ],
-                        'dependency' => 'true',
-                        'options' => [
-                            'data' => [
-                                'from' => 'key_value_array',
-                                'key_value_array' => [
-                                    '0' => 'abc',
-                                    '1' => 'def'
-                                ]
-                            ]
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'dependend' => [
-                            'group' => 'invoice_type',
-                            'dependend' => 'invoice_type-2'
-                        ],
-                        'attributes' => [
-                            'name' => 'company_name',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'dependend' => [
-                            'group' => 'invoice_type',
-                            'dependend' => 'invoice_type-2'
-                        ],
-                        'attributes' => [
-                            'name' => 'tax_administration',
-                        ]
-                    ],
-                    [
-                        'type' => 'text',
-                        'dependend' => [
-                            'group' => 'invoice_type',
-                            'dependend' => 'invoice_type-2'
-                        ],
-                        'attributes' => [
-                            'name' => 'tax_number',
+                    //checked values
+                    'control' => [
+                        'from' => 'key_value_array',
+                        'key_value_array' => [
+                            'a', 'c'
                         ]
                     ]
                 ]
+            ],
+            [
+                'type' => 'select',
+                'attributes' => [
+                    'name' => 'countries'
+                ],
+                'dependency' => 'true',
+
+                'options' => [
+                    'data' => [
+                        'from' => 'key_value_array',
+                        'key_value_array' => [
+                            'tr' => 'Turkey',
+                            'uk' => 'United Kingdom'
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'type' => 'radio',
+                'attributes' => [
+                    'name' => 'invoice_type'
+                ],
+                'default_value' => '0',
+                'dependency' => 'true',
+                'options' => [
+                    'data' => [
+                        'from' => 'key_value_array',
+                        'key_value_array' => [
+                            '0' => 'Individual',
+                            '1' => 'Institutional'
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'type' => 'text',
+                'dependend' => [
+                    'group' => 'invoice_type',
+                    'dependend' => 'invoice_type-2'
+                ],
+                'attributes' => [
+                    'name' => 'company_name',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'dependend' => [
+                    'group' => 'invoice_type',
+                    'dependend' => 'invoice_type-2'
+                ],
+                'attributes' => [
+                    'name' => 'tax_administration',
+                ]
+            ],
+            [
+                'type' => 'text',
+                'dependend' => [
+                    'group' => 'invoice_type',
+                    'dependend' => 'invoice_type-2'
+                ],
+                'attributes' => [
+                    'name' => 'tax_number',
+                ]
             ]
-        ];
+        ]
+    ]
+];
 ```
 
 #### Export As HTML
