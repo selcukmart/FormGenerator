@@ -1,6 +1,8 @@
 Form Generator
 ===================================
-
+```
+composer require selcukmart/form-generator
+```
 Form Generator can build form from array.
 ```php
 use FormGenerator\FormGenerator;
