@@ -19,6 +19,7 @@ class Textarea extends AbstractInputTypes implements InputTypeInterface
         'default_value' => '',
         'attributes' => [
             'value' => '',
+            'row' => 3,
             'type' => 'textarea',
             'class' => '',
             'placeholder' => ''
@@ -75,8 +76,6 @@ class Textarea extends AbstractInputTypes implements InputTypeInterface
             'label_attributes' => ''
         ];
     }
-
-
 
 
 }
