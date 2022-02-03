@@ -1,0 +1,31 @@
+{
+  "name": "selcukmart/form-generator",
+  "description": "description",
+  "minimum-stability": "stable",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "selcukmart",
+      "email": "admin@hostingdevi.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "": ""
+    },
+    "files": [
+      "Helpers/helpers.php"
+    ]
+  },
+  "require": {
+    "ext-mbstring": "*",
+    "ext-iconv": "*",
+    "ext-json": "*",
+    "smarty/smarty": "^3.0.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "^9.5"
+  }
+}
