@@ -20,12 +20,45 @@ add or edit
 Form Generator Array Example
 
 ```php
+$smarty = new Smarty();
+$smarty->setTemplateDir(__DIR__ . '/../SMARTY_TPL_FILES');
+$smarty->setCompileDir(__DIR__ . '/template_compile');
+$smarty->setCacheDir(__DIR__ . '/template_cache');
+$row = [
+    'id' => '7',
+    'type' => '1',
+    'user_id' => '8015',
+    'address_identification' => 'Work Adress',
+    'name' => 'Joe',
+    'surname' => 'DOE',
+    'address' => 'Test strasse berlin',
+    'postal_code' => '28100',
+    'country' => '',
+    'province' => '0',
+    'county' => '0',
+    'district' => '0',
+    'neighbourhood' => '0',
+    'phone' => '',
+    'mobile_phone' => '5542856789',
+    'mail' => null,
+    'invoice_type' => '1',
+    'identification_number' => '3514950',
+    'nationality_tc_or_not' => '1',
+    'company_name' => '',
+    'tax_department' => '',
+    'tax_number' => '',
+    'is_e_invoice_user' => '2',
+];
 $form_generator_array = [
     /**
      * json,XML,HTML
      * json and xml are not coded yet
      */
     'data' => [
+        'from' => 'row',
+        'row' => $row,
+        //'query' => DB::query("SELECT * FROM address WHERE id='7'"),
+        //'sql' =>"SELECT * FROM address WHERE id='7'",
         'connection' => [
             /**
              * optional
@@ -36,7 +69,7 @@ $form_generator_array = [
                  * This must be an object, and it must implement FormGenerator\Tools\DB\DBInterface
                  * There is an example in FormGenerator\Tools\DB\ folder as DBExample
                  */
-                'object' => ''
+                'object' => DB::class
             ]
         ],
         /**
@@ -44,15 +77,15 @@ $form_generator_array = [
          * There are several other data getting formats, they are explaining with other data title
          * if data comes from table id must set here
          */
-        'id' => '6',
+        'id' => '7',
         /**
          * if it doesn't set, the system will use id column name
          */
-        'id_column_name' => 'branchID',
+        'id_column_name' => 'id',
         /**
          * if data comes from table it must set here
          */
-        'table' => 'abc',
+        'table' => 'address',
         /// Data Structure Finish
     ],
     'export' => [
@@ -108,7 +141,7 @@ $form_generator_array = [
             [
                 'type' => 'text',
                 'attributes' => [
-                    'name' => 'addres_name',
+                    'name' => 'address_identification',
                 ]
             ],
             [
@@ -163,26 +196,67 @@ $form_generator_array = [
             [
                 'type' => 'checkbox',
                 'attributes' => [
-                    'name' => 'abc'
+                    'name' => 'iso'
                 ],
                 'dependency' => 'true',
-
+                'label' => 'Nationalities',
                 'options' => [
                     'data' => [
                         'from' => 'key_label_array',
                         'key_label_array' => [
-                            'a' => 'Checkbox Label 1',
-                            'b' => 'Checkbox Label 1',
-                            'c' => 'Checkbox Label 2',
-                        ]
+                            'us' => 'USA',
+                            'gb' => 'United Kingdom',
+                            'de' => 'Germany'
+                        ],
+//                        'from' => 'rows',
+//                        'rows' => [
+//                            [
+//                                'iso' => 'gb',
+//                                'name' => 'UK'
+//                            ],
+//                            [
+//                                'iso' => 'us',
+//                                'name' => 'USA'
+//                            ],
+//                            [
+//                                'iso' => 'de',
+//                                'name' => 'Germany'
+//                            ]
+//                        ],
+//                        'from' => 'query',
+//                        'query' => DB::query("select * from countries"),
+//                        'from' => 'sql',
+//                        'sql' => "select * from countries",
+                        /**
+                         * if using SQL/Query/ROWS, this is a MUST,key_label_array: DONT USE
+                         */
+//                        'settings' => [
+//                            'key' => 'iso',
+//                            'label' => 'name',
+//                        ],
                     ],
-                    //checked values
                     'control' => [
-                        'from' => 'key_label_array',
-                        'key_label_array' => [
-                            'a', 'c'
+                        'from' => 'sql',
+                        'sql' => "select iso from address_countries",
+                        /*
+                         * after parameters render as sql, generated sql will add the sql so how the query
+                         *  will go on, using WHERE or AND, if not choose the system will look at WHERE in it
+                        */
+                        'has_where' => false,
+                        'parameters' => [
+                            // optional, if is not defined the system detect as this.attributes.name: iso
+                            'this_field' => 'iso',
+                            // must set
+                            'foreign_field' => 'address_id',
                         ]
                     ]
+                    //checked values
+//                    'control' => [
+//                        'from' => 'key_label_array',
+//                        'key_label_array' => [
+//                            'gb', 'us'
+//                        ]
+//                    ]
                 ]
             ],
             [
@@ -252,6 +326,10 @@ $form_generator_array = [
         ]
     ]
 ];
+
+$form_generator = new FormGenerator($form_generator_array, 'edit');
+$form_generator->extract();
+echo $form_generator->getOutput();
 ```
 
 #### Export As HTML
