@@ -258,13 +258,34 @@ $form_generator_array = [
                     'name' => 'countries'
                 ],
                 'dependency' => 'true',
-
                 'options' => [
                     'data' => [
+//                        'from' => 'query',
+                        //'query' => DB::query("select * from countries"),
+                        //'sql' => "select * from countries",
+                        //'from' => 'rows',
+                        'rows' => [
+                            [
+                                'iso' => 'gb',
+                                'name' => 'UK'
+                            ],
+                            [
+                                'iso' => 'us',
+                                'name' => 'USA'
+                            ],
+                            [
+                                'iso' => 'de',
+                                'name' => 'Germany'
+                            ]
+                        ],
+//                        'settings' => [
+//                            'key' => 'iso',
+//                            'label' => 'name',
+//                        ],
                         'from' => 'key_label_array',
                         'key_label_array' => [
-                            'tr' => 'Turkey',
-                            'uk' => 'United Kingdom'
+                            '1' => 'Individual',
+                            '2' => 'Institutional'
                         ]
                     ]
                 ]
