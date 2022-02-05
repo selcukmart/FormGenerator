@@ -1,6 +1,6 @@
 <?php
 /**
- * Prepares rows
+ * Prepares row
  * @author selcukmart
  * 24.01.2021
  * 16:56
@@ -8,17 +8,24 @@
 
 namespace FormGenerator\Tools;
 
-
 use FormGenerator\FormGenerator;
+use GlobalTraits\ErrorMessagesWithResultTrait;
+use Helpers\Classes;
 
 class Row
 {
-    private
+    use ErrorMessagesWithResultTrait;
+
+    protected
         $row,
         $formGenerator,
         $generator_array = [],
         $data = [],
-        $err_message = '';
+        $options = [
+        'query',
+        'sql',
+        'row'
+    ];
 
     public function __construct(FormGenerator $formGenerator, array $generator_array)
     {
@@ -29,74 +36,34 @@ class Row
 
     public function setRow(): void
     {
-        if (isset($this->generator_array['data']['query'])) {
-            $this->data['query'] = $this->generator_array['data']['query'];
-            $this->query();
-        } elseif (isset($this->generator_array['data']['rows'])) {
-            $this->row = $this->generator_array['data']['rows'];
-        } elseif (isset($this->generator_array['data']['id'], $this->generator_array['data']['table'])) {
-            $this->data['id'] = $this->generator_array['data']['id'];
-            $this->data['id_column_name'] = $this->generator_array['data']['id_column_name'] ?? 'id';
-            $this->data['table'] = $this->generator_array['data']['table'];
-            $this->db();
-        } elseif (isset($this->generator_array['data']['from'])) {
-            $this->data = $this->generator_array['data'];
-            $from = $this->data['from'];
-            $this->{$from}();
+        if ($this->isFrom()) {
+            $from = $this->generator_array['data']['from'];
+            $this->execute($from);
+        } elseif ($this->isFromDbTable()) {
+            $this->execute('db_table');
+        } else {
+            $this->detectFrom();
         }
+    }
+
+    /**
+     * @param $from
+     * @author selcukmart
+     * 5.02.2022
+     * 13:50
+     */
+    private function execute($from): void
+    {
+        $from = __NAMESPACE__ . '\FormDataProviders\\' . Classes::prepareFromString($from);
+        $class = new $from($this->formGenerator, $this->generator_array);
+        $this->row = $class->execute();
     }
 
     public function getOptionsSettings()
     {
-        if(isset($this->generator_array['data']['settings'])){
+        if (isset($this->generator_array['data']['settings'])) {
             return $this->generator_array['data']['settings'];
         }
-    }
-
-    private function db()
-    {
-        if (!$this->getId()) {
-            $this->err_message = 'ID empty';
-            return;
-        }
-
-        $this->row = $this->formGenerator->getDb()::getRow($this->getIdColumnName(), $this->getId(), $this->getTable());
-    }
-
-    private function sql()
-    {
-        if (empty($this->getSql())) {
-            $this->err_message = 'SQL empty';
-            return;
-        }
-        $this->data['query'] = $this->formGenerator->getDb()::query($this->getSql());
-        $this->query();
-    }
-
-    private function query()
-    {
-        if (empty($this->data['query'])) {
-            $this->err_message = 'Query is empty';
-            return;
-        }
-        foreach ($this->data['query'] as $datum) {
-            $this->row[] = $datum;
-        }
-    }
-
-    private function key_label_array()
-    {
-        foreach ($this->data['key_label_array'] as $index => $datum) {
-            $this->row[] = [
-                'key' => $index,
-                'label' => $datum
-            ];
-        }
-    }
-
-    private function array()
-    {
-        $this->row = $this->data['array'];
     }
 
     /**
@@ -108,60 +75,42 @@ class Row
     }
 
 
-    /**
-     * @return string
-     */
-    public function getErrMessage(): string
-    {
-        return $this->err_message;
-    }
-
     public function __destruct()
     {
 
     }
 
     /**
-     * @return mixed
+     * @return bool
      * @author selcukmart
      * 5.02.2022
-     * 12:15
+     * 14:10
      */
-    private function getTable()
+    private function isFromDbTable(): bool
     {
-        return $this->data['table'];
+        return isset($this->generator_array['data']['id'], $this->generator_array['data']['table']) && !empty($this->generator_array['data']['id']) && !empty($this->generator_array['data']['table']);
     }
 
     /**
-     * @return mixed
+     * @return bool
      * @author selcukmart
      * 5.02.2022
-     * 12:15
+     * 14:10
      */
-    private function getId()
+    private function isFrom(): bool
     {
-        return $this->data['id'];
+        return isset($this->generator_array['data']['from']) && $this->generator_array['data']['from'] !== 'db';
     }
 
-    /**
-     * @return mixed
-     * @author selcukmart
-     * 5.02.2022
-     * 12:16
-     */
-    private function getIdColumnName()
+    private function detectFrom(): void
     {
-        return $this->data['id_column_name'];
+        foreach ($this->options as $option) {
+            if (isset($this->generator_array['data'][$option])) {
+                $this->execute($option);
+                break;
+            }
+        }
     }
 
-    /**
-     * @return mixed
-     * @author selcukmart
-     * 5.02.2022
-     * 12:16
-     */
-    private function getSql()
-    {
-        return $this->data['sql'];
-    }
+
 }

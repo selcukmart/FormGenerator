@@ -18,6 +18,8 @@ interface DBInterface
 
     public static function query($sql);
 
+    public static function fetch($query): array;
+
     public static function select($where_arr, $table);
 
     public static function getAllFieldOptions($table): array;

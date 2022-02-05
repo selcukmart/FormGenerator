@@ -33,7 +33,7 @@ class Text extends AbstractInputTypes implements InputTypeInterface
         $field = $this->item['attributes']['name'];
 
         $this->cleanIDInAttributesIfNecessary();
-        $row_table = $this->formGenerator->getRowTable();
+        $row_table = $this->formGenerator->getRow();
 
 
         if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {

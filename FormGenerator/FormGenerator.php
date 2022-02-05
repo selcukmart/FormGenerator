@@ -28,7 +28,7 @@ class FormGenerator
         $message = '',
         $export_format,
         $export_type,
-        $row_table,
+        $row,
         $inputs,
         $has_filter = false,
         $input_filter = [],
@@ -60,29 +60,27 @@ class FormGenerator
         $this->setInputTypesFolderNamespace();
         $this->setDB();
         $this->databaseVariables();
-        $this->setRowTable();
+        $this->setRow();
     }
 
 
-    public function setRowTable(): void
+    public function setRow(): void
     {
+        if ($this->isAdd()) {
+            return;
+        }
         $row_table_detection = new Row($this, $this->generator_array);
         $row_table_detection->setRow();
-        $this->row_table = $row_table_detection->getRow();
-        if (empty($this->row_table)) {
-            global $row_table;
-            if ($row_table) {
-                $this->row_table = $row_table;
-            }
-        }
+        $this->row = $row_table_detection->getRow();
+
     }
 
     /**
      * @return mixed
      */
-    public function getRowTable()
+    public function getRow()
     {
-        return $this->row_table;
+        return $this->row;
     }
 
     public function extract(): void
@@ -398,6 +396,9 @@ class FormGenerator
     {
 
         $db_class = $this->generator_array['data']['connection']['db']['object'] ?? '';
+        if (!$db_class) {
+            return;
+        }
         $db_object = new $db_class;
         if ($db_object instanceof DBInterface) {
             $this->db = $db_class;
@@ -442,5 +443,15 @@ class FormGenerator
     public function getTable()
     {
         return $this->table;
+    }
+
+    public function isAdd()
+    {
+        return $this->scope !== 'edit';
+    }
+
+    public function isEdit()
+    {
+        return $this->scope === 'edit';
     }
 }

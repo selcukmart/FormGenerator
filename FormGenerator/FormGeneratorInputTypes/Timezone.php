@@ -36,7 +36,7 @@ class Timezone extends AbstractInputTypes implements InputTypeInterface
 
         $field = $this->field = $this->item['attributes']['name'];
 
-        $this->row_table = $this->formGenerator->getRowTable();
+        $this->row_table = $this->formGenerator->getRow();
 
         if (isset($this->row_table[$this->field])) {
             $this->item['attributes']['value'] = $this->row_table[$this->field];

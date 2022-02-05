@@ -1,8 +1,6 @@
 ![query](https://s3.eu-central-1.amazonaws.com/static.testbank.az/uploads/files/15-1619421581-ok-image.png)
 
 
-
-
 ###### What Does This Class Do?
 
 It serves to prevent the input fields with fixed values from appearing in the form by determining their default values.
@@ -10,7 +8,7 @@ It serves to prevent the input fields with fixed values from appearing in the fo
 ###### How to use
 
 ![keyvalue](https://s3.eu-central-1.amazonaws.com/static.testbank.az/uploads/files/15-1619421818-ok-image.png)
-```
+```php
           [
             'type' => 'radio',
             'label' => 'Components Include Place',

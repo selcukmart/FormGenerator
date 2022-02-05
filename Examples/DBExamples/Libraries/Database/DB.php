@@ -12,7 +12,7 @@ use PDO;
  * Class DBExample
  * @package FormGenerator\Tools\DB
  * @author selcukmart
- * @desc it is only example, it did not test
+ * @desc it is only example, it is not a professional solution for DB operations.
  * 3.02.2022
  * 14:53
  */
@@ -29,8 +29,12 @@ class DB implements DBInterface
     {
         $dbh = self::getInstance();
         $sql = "SELECT * FROM $table WHERE $column='$id' LIMIT 1";
-        $query = self::query($sql);
-        return $dbh->query($query->queryString)->fetch(PDO::FETCH_ASSOC);
+        return $dbh->query($sql)->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function fetch($query): array
+    {
+        return $query->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function rowCount($query): int
@@ -83,7 +87,7 @@ class DB implements DBInterface
                 }
                 if (!is_array($value)) {
                     $value = addslashes($value);
-                    $sql .= $column . $operator . "'" . $value . "'" . $end;
+                    $sql .= $column . $operator . "'" . $value . "' " . $end;
                 } else {
                     $sql .= $column . " IN (" . self::implodeSQL($value) . ") " . $end;
                 }

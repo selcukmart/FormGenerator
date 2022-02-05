@@ -17,12 +17,41 @@ $smarty = new Smarty();
 $smarty->setTemplateDir(__DIR__ . '/../SMARTY_TPL_FILES');
 $smarty->setCompileDir(__DIR__ . '/template_compile');
 $smarty->setCacheDir(__DIR__ . '/template_cache');
+$row = [
+    'id' => '7',
+    'type' => '1',
+    'user_id' => '8015',
+    'address_identification' => 'Work Adress',
+    'name' => 'Joe',
+    'surname' => 'DOE',
+    'address' => 'Test strasse berlin',
+    'postal_code' => '28100',
+    'country' => '',
+    'province' => '0',
+    'county' => '0',
+    'district' => '0',
+    'neighbourhood' => '0',
+    'phone' => '',
+    'mobile_phone' => '5542856789',
+    'mail' => null,
+    'invoice_type' => '1',
+    'identification_number' => '3514950',
+    'nationality_tc_or_not' => '1',
+    'company_name' => '',
+    'tax_department' => '',
+    'tax_number' => '',
+    'is_e_invoice_user' => '2',
+];
 $form_generator_array = [
     /**
      * json,XML,HTML
      * json and xml are not coded yet
      */
     'data' => [
+        'from' => 'row',
+        'row' => $row,
+        //'query' => DB::query("SELECT * FROM address WHERE id='7'"),
+        //'sql' =>"SELECT * FROM address WHERE id='7'",
         'connection' => [
             /**
              * optional
@@ -294,3 +323,4 @@ $form_generator_array = [
 $form_generator = new FormGenerator($form_generator_array, 'edit');
 $form_generator->extract();
 echo $form_generator->getOutput();
+

@@ -51,7 +51,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
 
         $this->cleanIDInAttributesIfNecessary();
 
-        $this->row_table = $this->formGenerator->getRowTable();
+        $this->row_table = $this->formGenerator->getRow();
 
         if (isset($this->row_table[$this->field])) {
             $this->item['attributes']['value'] = $this->row_table[$this->field];

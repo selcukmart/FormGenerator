@@ -20,7 +20,7 @@ class StaticText extends AbstractInputTypes implements InputTypeInterface
     {
         $this->item = $item;
         $item ['template'] = 'STATIC_TEXT';
-        $row_table = $this->formGenerator->getRowTable();
+        $row_table = $this->formGenerator->getRow();
         if (isset($item['content_callback']) && is_callable($item['content_callback'])) {
             $item['content'] = call_user_func_array($item['content_callback'], [$row_table, $item]);
         } else {

@@ -14,23 +14,26 @@ class CheckedControl
 {
     private
         $checked = false,
-        $row_table = null,
+        $row = null,
         $control_array,
         $checkeds = [],
         $ckeck_id = 0,
         $field,
         $formGenerator;
 
-    public function __construct(FormGenerator $formGenerator, array $control_array, $field, $row_table = null)
+    public function __construct(FormGenerator $formGenerator, array $control_array, $field, $row = null)
     {
         $this->formGenerator = $formGenerator;
-        $this->row_table = $row_table;
+        $this->row = $row;
         $this->field = $field;
         $this->control_array = $control_array;
     }
 
     public function control($id): bool
     {
+        if($this->formGenerator->isAdd()){
+            return false;
+        }
         if (empty($id)) {
             $this->checked = false;
             return $this->checked;
@@ -68,7 +71,7 @@ class CheckedControl
         }
         $start = $has_where ? ' AND ' : ' WHERE ';
 
-        $sql .= $start . $this_field . "='" . $this->ckeck_id . "' AND " . $foreign_field . "=" . $this->row_table['id'] . " LIMIT 1";
+        $sql .= $start . $this_field . "='" . $this->ckeck_id . "' AND " . $foreign_field . "=" . $this->row['id'] . " LIMIT 1";
         $this->checked = (bool)$this->getDb()::rowCount($this->getDb()::query($sql));
         return $this->checked;
     }

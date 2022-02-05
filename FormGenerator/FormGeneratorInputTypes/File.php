@@ -16,7 +16,7 @@ class File extends AbstractInputTypes implements InputTypeInterface
     public function prepare(array $item):array
     {
         $this->item = $item;
-        $this->row_table = $this->formGenerator->getRowTable();
+        $this->row_table = $this->formGenerator->getRow();
         $previous_file = '';
         $name = $this->item['attributes']['name'];
         if (!isset($this->item['attributes']['id'])) {

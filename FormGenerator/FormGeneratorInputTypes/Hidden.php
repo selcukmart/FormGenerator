@@ -34,7 +34,7 @@ class Hidden extends AbstractInputTypes implements InputTypeInterface
             $this->item['attributes']['id'] = $this->item['attributes']['name'];
         }
 
-        $row_table = $this->formGenerator->getRowTable();
+        $row_table = $this->formGenerator->getRow();
 
 
         if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {

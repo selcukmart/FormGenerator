@@ -124,9 +124,9 @@ it is used using 'data' parameter under 'options'
 
 ###### Data Control Structure
 
-It can be checked if it is checked or not using these structures.
+Using these structures: It can be checked if it is checked or not.
 
-it is used using 'control' parameter under 'options'
+it is used 'control' parameter under 'options'
 
 1. SQL
 

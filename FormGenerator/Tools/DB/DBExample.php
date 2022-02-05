@@ -26,11 +26,11 @@ class DBExample implements DBInterface
         return $dbh;
     }
 
-    public static function getRow($id, $table): array
+    public static function getRow($column,$id, $table): array
     {
         $dbh = self::getInstance();
-        $query = self::query("SELECT * FROM $table WHERE id='$id' LIMIT 1");
-        return $dbh->query($query->queryString)->fetch(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM $table WHERE $column='$id' LIMIT 1";
+        return $dbh->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function rowCount($query): int
@@ -40,9 +40,19 @@ class DBExample implements DBInterface
         return $dbh->query("SELECT FOUND_ROWS()")->fetchColumn();
     }
 
+    public static function fetch($query): array
+    {
+        return $query->fetch(PDO::FETCH_ASSOC);
+    }
+
     public static function query($sql)
     {
-        return self::getInstance()->prepare($sql)->execute();
+        $dbh = self::getInstance();
+        $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+        $dbh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $sth = $dbh->prepare($sql);
+        $sth->execute();
+        return $sth;
     }
 
     public static function select($where_arr, $table)
@@ -78,7 +88,7 @@ class DBExample implements DBInterface
                 }
                 if (!is_array($value)) {
                     $value = addslashes($value);
-                    $sql .= $column . $operator . "'" . $value . "'" . $end;
+                    $sql .= $column . $operator . "'" . $value . "' " . $end;
                 } else {
                     $sql .= $column . " IN (" . self::implodeSQL($value) . ") " . $end;
                 }

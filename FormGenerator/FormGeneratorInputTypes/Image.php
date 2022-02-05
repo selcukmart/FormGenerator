@@ -18,7 +18,7 @@ class Image extends AbstractInputTypes implements InputTypeInterface
     {
         $this->item = $item;
         $this->field = $this->item['attributes']['name'];
-        $this->row_table = $this->formGenerator->getRowTable();
+        $this->row_table = $this->formGenerator->getRow();
         $this->setLabel();
         $this->item['attributes']['src'] = $this->row_table[$this->field];
         $this->unit_parts = [
