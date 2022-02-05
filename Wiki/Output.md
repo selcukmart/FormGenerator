@@ -8,7 +8,7 @@ Lists items that are related to each other.
 
 ```
    [
-        'type' => 'generic',
+        'type' => 'output',
         'output' => '<div class="locales">' . Locales::select($parent_id = 0) . '</div>',
         'label' => 'Locales'
      ]

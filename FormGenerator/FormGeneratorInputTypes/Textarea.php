@@ -39,12 +39,7 @@ class Textarea extends AbstractInputTypes implements InputTypeInterface
         $row_table = $this->formGenerator->getRow();
 
 
-        if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {
-            $this->item['attributes']['value'] = htmlspecialchars(call_user_func_array($this->item['value_callback'], [$row_table, $this->field]));
-        } elseif (isset($row_table[$this->field])) {
-            $this->item['attributes']['value'] = htmlspecialchars($row_table[$this->field]);
-
-        }
+        $this->valueCallback($row_table, $field);
 
         $this->setDefinedDefaultValue();
         $this->setDBDefaultValue($field);

@@ -75,9 +75,12 @@ abstract class AbstractFormGeneratorExport
         }
 
         $class = $this->formGenerator->getInputTypesNamespace() . $class_name;
+
+        if(!class_exists($class)){
+            $class = $this->formGenerator->getInputTypesNamespace() .'Generic';
+        }
         $this->run = new $class($this->formGenerator);
         $this->input_parts = $this->run->prepare($item);
-
 
         $help_block = $this->getHelpBlock($item);
         if (!isset($this->input_parts['input_belove_desc'])) {

@@ -32,7 +32,6 @@ abstract class AbstractInputTypes
     {
         $export_type = is_null($export_type) ? strtoupper($this->item['type']) : $export_type;
         $result = $this->formGenerator->render($input_dom_array['attributes'], $export_type, true);
-
         if (!$result) {
             $input_dom_array = $this->clearUnnecessaryAttributes($input_dom_array);
             $result = Dom::generator($input_dom_array);
@@ -79,6 +78,7 @@ abstract class AbstractInputTypes
 
         return $input_dom_array;
     }
+
     /**
      * @param $field
      * @author selcukmart
@@ -109,6 +109,7 @@ abstract class AbstractInputTypes
     protected function cleanIDInAttributesIfNecessary(): void
     {
         if (!isset($this->item['attributes']['id'])) {
+            $this->item['dont_set_id'] = $this->item['dont_set_id'] ?? false;
             if (!$this->item['dont_set_id']) {
                 $this->item['attributes']['id'] = $this->item['attributes']['name'];
             }
@@ -121,6 +122,22 @@ abstract class AbstractInputTypes
     {
         if (empty($this->item['attributes']['placeholder'])) {
             $this->item['attributes']['placeholder'] = $this->label->getLabelWithoutHelp();
+        }
+    }
+
+    /**
+     * @param $row_table
+     * @param $field
+     * @author selcukmart
+     * 5.02.2022
+     * 16:22
+     */
+    protected function valueCallback($row_table, $field): void
+    {
+        if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {
+            $this->item['attributes']['value'] = htmlspecialchars(call_user_func_array($this->item['value_callback'], [$row_table, $field]));
+        } elseif (isset($row_table[$field])) {
+            $this->item['attributes']['value'] = htmlspecialchars($row_table[$field]);
         }
     }
 

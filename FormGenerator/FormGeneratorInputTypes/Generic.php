@@ -8,34 +8,55 @@
 namespace FormGenerator\FormGeneratorInputTypes;
 
 
-use FormGenerator\Tools\Label;
-
 class Generic extends AbstractInputTypes implements InputTypeInterface
 {
-
-
     private
         $default_generator_arr = [
-        'output' => '',
+        'default_value' => '',
+        'attributes' => [
+            'value' => '',
+            'class' => '',
+            'placeholder' => ''
+        ],
         'dont_set_id' => false,
+        'value_callback' => ''
     ];
 
 
     public function prepare(array $item): array
     {
+
         $this->item = $item;
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);
+        $this->item['attributes']['type'] =  $this->item['attributes']['type']??$this->item['type'];
+        $this->item['attributes']['name'] = $this->item['attributes']['name'] ?? $this->item['attributes']['type'];
+        $field = $this->item['attributes']['name'];
+        $this->cleanIDInAttributesIfNecessary();
+        $row_table = $this->formGenerator->getRow();
+
+
+        $this->valueCallback($row_table, $field);
+
+        $this->setDefinedDefaultValue();
+        $this->setDBDefaultValue($field);
         $this->setLabel();
-        $export_type = strtoupper($this->formGenerator->getExportType());
-        $result = $this->formGenerator->render($this->item, $export_type, true);
-        $this->item['output'] = $result ?: $this->item['output'];
+
+        if (empty($this->item['attributes']['placeholder'])) {
+            $this->item['attributes']['placeholder'] = $this->label->getLabelWithoutHelp();
+        }
+
+        $input_dom_array = [
+            'element' => 'input',
+            'attributes' => $this->item['attributes'],
+            'content' => ''
+        ];
+
         return [
-            'input' => $this->item['output'],
+            'input' => $this->domExport($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''
         ];
     }
-
 
 }

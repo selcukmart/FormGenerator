@@ -6,7 +6,7 @@
             <span class="fileinput-new"> Select Photo </span>
             <span class="fileinput-exists"> Change</span>
             <input type="hidden">
-            <input name="{$name}" id="{$name}" type="file">
+            <input name="{$name}" id="{$name}" type="file"  {$input_attr}>
         </span>
         <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Sil </a> </div>
 </div>

@@ -13,7 +13,6 @@ class Hidden extends AbstractInputTypes implements InputTypeInterface
 
 
     private
-        $unit_parts = [],
         $default_generator_arr = [
         'default_value' => '',
         'attributes' => [
@@ -28,37 +27,26 @@ class Hidden extends AbstractInputTypes implements InputTypeInterface
     {
         $this->item = $item;
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);
+        $this->item['attributes']['type'] =  $this->item['attributes']['type']??$this->item['type'];
         $field = $this->field = $this->item['attributes']['name'];
-
-        if (!isset($this->item['attributes']['id'])) {
-            $this->item['attributes']['id'] = $this->item['attributes']['name'];
-        }
+        $this->item['attributes']['id'] = $this->item['attributes']['id'] ?? $this->item['attributes']['name'];
 
         $row_table = $this->formGenerator->getRow();
 
 
-        if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {
-            $this->item['attributes']['value'] = htmlspecialchars(call_user_func_array($this->item['value_callback'], [$row_table, $this->field]));
-        } else {
-            $this->item['attributes']['value'] = isset($row_table[$this->field]) ? htmlspecialchars($row_table[$this->field]) : '';
-        }
+        $this->valueCallback($row_table, $field);
 
         $this->setDefinedDefaultValue();
         $this->setDBDefaultValue($field);
-
 
         $input_dom_array = [
             'element' => 'input',
             'attributes' => $this->item['attributes'],
             'content' => ''
         ];
-        $this->unit_parts = [
+        return [
             'input' => $this->domExport($input_dom_array),
-            'template' => 'HIDDEN'
         ];
-
-        return $this->unit_parts;
     }
-
 
 }

@@ -11,13 +11,11 @@ namespace FormGenerator\FormGeneratorInputTypes;
 class Text extends AbstractInputTypes implements InputTypeInterface
 {
 
-
     private
         $default_generator_arr = [
         'default_value' => '',
         'attributes' => [
             'value' => '',
-            'type' => 'text',
             'class' => '',
             'placeholder' => ''
         ],
@@ -30,17 +28,14 @@ class Text extends AbstractInputTypes implements InputTypeInterface
     {
         $this->item = $item;
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);
+        $this->item['attributes']['type'] =  $this->item['attributes']['type']??$this->item['type'];
         $field = $this->item['attributes']['name'];
 
         $this->cleanIDInAttributesIfNecessary();
         $row_table = $this->formGenerator->getRow();
 
 
-        if (!empty($this->item['value_callback']) && is_callable($this->item['value_callback'])) {
-            $this->item['attributes']['value'] = htmlspecialchars(call_user_func_array($this->item['value_callback'], [$row_table, $field]));
-        } elseif (isset($row_table[$field])) {
-            $this->item['attributes']['value'] = htmlspecialchars($row_table[$field]);
-        }
+        $this->valueCallback($row_table, $field);
 
         $this->setDefinedDefaultValue();
         $this->setDBDefaultValue($field);
@@ -64,8 +59,5 @@ class Text extends AbstractInputTypes implements InputTypeInterface
             'label_attributes' => ''
         ];
     }
-
-
-
 
 }

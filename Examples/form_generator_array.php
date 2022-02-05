@@ -119,12 +119,21 @@ $form_generator_array = [
         ],
     ],
 
-
     /**
+     * Optional
+     */
+    'form' => [
+        'id' => 'xform',
+        'name' => 'xform',
+        'action' => '',
+        'method' => 'post',
+        'enctype' => 'multipart/form-data'
+    ],
+    /**
+     * Optional
      * Form Inputs
      */
     'inputs' => [
-        // this is a section
         'decision' => [
             [
                 'type' => 'form_section',
@@ -262,31 +271,31 @@ $form_generator_array = [
                     'data' => [
 //                        'from' => 'query',
                         //'query' => DB::query("select * from countries"),
-                        //'sql' => "select * from countries",
+                        'sql' => "select * from countries",
                         //'from' => 'rows',
-                        'rows' => [
-                            [
-                                'iso' => 'gb',
-                                'name' => 'UK'
-                            ],
-                            [
-                                'iso' => 'us',
-                                'name' => 'USA'
-                            ],
-                            [
-                                'iso' => 'de',
-                                'name' => 'Germany'
-                            ]
-                        ],
-//                        'settings' => [
-//                            'key' => 'iso',
-//                            'label' => 'name',
+//                        'rows' => [
+//                            [
+//                                'iso' => 'gb',
+//                                'name' => 'UK'
+//                            ],
+//                            [
+//                                'iso' => 'us',
+//                                'name' => 'USA'
+//                            ],
+//                            [
+//                                'iso' => 'de',
+//                                'name' => 'Germany'
+//                            ]
 //                        ],
-                        'from' => 'key_label_array',
-                        'key_label_array' => [
-                            '1' => 'Individual',
-                            '2' => 'Institutional'
-                        ]
+                        'settings' => [
+                            'key' => 'iso',
+                            'label' => 'name',
+                        ],
+//                        'from' => 'key_label_array',
+//                        'key_label_array' => [
+//                            '1' => 'Individual',
+//                            '2' => 'Institutional'
+//                        ]
                     ]
                 ]
             ],
@@ -358,11 +367,128 @@ $form_generator_array = [
                     'name' => 'tax_number',
                 ]
             ]
+        ],
+        'cv' => [
+            [
+                'type' => 'form_section',
+                'label' => 'CV'
+            ],
+            [
+                'type' => 'file',
+                'label' => 'Upload Your Resume',
+                'attributes' => [
+                    'name' => 'cv',
+                    'input_attr' => 'accept="application/pdf"'
+                ]
+            ],
+            [
+                'type' => 'image',
+                'label' => 'Upload Your Photo',
+                'attributes' => [
+                    'name' => 'photo',
+                    'input_attr' => 'accept="image/*"'
+                ]
+            ],
+            [
+                'type' => 'timezone',
+                'attributes' => [
+                    'name' => 'timezone',
+                ]
+            ],
+            [
+                'type' => 'color',
+                'attributes' => [
+                    'name' => 'color',
+                ]
+            ],
+            [
+                'type' => 'date',
+                'attributes' => [
+                    'name' => 'date',
+                ]
+            ],
+            [
+                'type' => 'datetime-local',
+                'attributes' => [
+                    'name' => 'datetime-local',
+                ]
+            ],
+            [
+                'type' => 'hidden',
+                'attributes' => [
+                    'name' => 'hidden',
+                ]
+            ],
+            [
+                'type' => 'month',
+                'attributes' => [
+                    'name' => 'month',
+                ]
+            ],
+            [
+                'type' => 'number',
+                'attributes' => [
+                    'name' => 'number',
+                ]
+            ],
+            [
+                'type' => 'password',
+                'attributes' => [
+                    'name' => 'password',
+                ]
+            ],
+            [
+                'type' => 'range',
+                'attributes' => [
+                    'name' => 'range',
+                ]
+            ],
+            [
+                'type' => 'search',
+                'attributes' => [
+                    'name' => 'search',
+                ]
+            ],
+            [
+                'type' => 'tel',
+                'attributes' => [
+                    'name' => 'tel',
+                ]
+            ],
+            [
+                'type' => 'time',
+                'attributes' => [
+                    'name' => 'time',
+                ]
+            ],
+            [
+                'type' => 'url',
+                'attributes' => [
+                    'name' => 'url',
+                ]
+            ],
+            [
+                'type' => 'week',
+                'attributes' => [
+                    'name' => 'week',
+                ]
+            ]
+        ],
+        'save' => [
+            [
+                'type' => 'button',
+            ],
+            [
+                'type' => 'reset',
+            ],
+            [
+                'type' => 'submit',
+            ]
         ]
     ]
 ];
 
-$form_generator = new FormGenerator($form_generator_array, 'edit');
+$form_generator = new FormGenerator($form_generator_array, 'add');
 $form_generator->extract();
 echo $form_generator->getOutput();
 
