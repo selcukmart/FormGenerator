@@ -20,4 +20,14 @@ class Query extends AbstractFormDataProviders implements FormDataProvidersInterf
         }
         return DB::fetch($this->data['query']);
     }
+
+    public function execute4multiple(): array
+    {
+        $query = $this->data['query'];
+        $rows=[];
+        foreach ($query as $item) {
+            $rows[] = $item;
+        }
+        return $rows;
+    }
 }

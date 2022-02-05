@@ -274,15 +274,36 @@ $form_generator_array = [
                 'attributes' => [
                     'name' => 'invoice_type'
                 ],
-                'default_value' => '0',
+                'default_value' => '1',
                 'dependency' => 'true',
                 'options' => [
                     'data' => [
-                        'from' => 'key_label_array',
-                        'key_label_array' => [
-                            '0' => 'Individual',
-                            '1' => 'Institutional'
-                        ]
+//                        'from' => 'query',
+                        //'query' => DB::query("select * from countries"),
+                        //'from' => 'rows',
+                        'rows' => [
+                            [
+                                'iso' => 'gb',
+                                'name' => 'UK'
+                            ],
+                            [
+                                'iso' => 'us',
+                                'name' => 'USA'
+                            ],
+                            [
+                                'iso' => 'de',
+                                'name' => 'Germany'
+                            ]
+                        ],
+                        'settings' => [
+                            'key' => 'iso',
+                            'label' => 'name',
+                        ],
+//                        'from' => 'key_label_array',
+//                        'key_label_array' => [
+//                            '1' => 'Individual',
+//                            '2' => 'Institutional'
+//                        ]
                     ]
                 ]
             ],

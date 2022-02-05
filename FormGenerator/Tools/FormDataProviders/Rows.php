@@ -7,17 +7,17 @@
 
 namespace FormGenerator\Tools\FormDataProviders;
 
-class Row extends AbstractFormDataProviders implements FormDataProvidersInterface
+class Rows extends AbstractFormDataProviders implements FormDataProvidersInterface
 {
 
     public function execute(): array
     {
-        return $this->data['row'];
+        return $this->data['rows'];
 
     }
 
     public function execute4multiple(): array
     {
-        return [$this->data['row']];
+        return $this->execute();
     }
 }

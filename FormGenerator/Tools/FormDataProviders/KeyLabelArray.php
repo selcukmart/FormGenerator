@@ -24,4 +24,9 @@ class KeyLabelArray extends AbstractFormDataProviders implements FormDataProvide
         }
         return $row;
     }
+
+    public function execute4multiple(): array
+    {
+        return $this->execute();
+    }
 }

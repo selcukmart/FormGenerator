@@ -21,10 +21,12 @@ class Row
         $formGenerator,
         $generator_array = [],
         $data = [],
+        $multiple_like_radio_checkbox_select = false,
         $options = [
         'query',
         'sql',
-        'row'
+        'row',
+        'rows'
     ];
 
     public function __construct(FormGenerator $formGenerator, array $generator_array)
@@ -56,7 +58,12 @@ class Row
     {
         $from = __NAMESPACE__ . '\FormDataProviders\\' . Classes::prepareFromString($from);
         $class = new $from($this->formGenerator, $this->generator_array);
-        $this->row = $class->execute();
+        if ($this->isMultipleLikeRadioCheckboxSelect()) {
+            $this->row = $class->execute4multiple();
+        } else {
+            $this->row = $class->execute();
+        }
+
     }
 
     public function getOptionsSettings()
@@ -74,11 +81,6 @@ class Row
         return $this->row;
     }
 
-
-    public function __destruct()
-    {
-
-    }
 
     /**
      * @return bool
@@ -112,5 +114,24 @@ class Row
         }
     }
 
+    /**
+     * @param bool $multiple_like_radio_checkbox_select
+     */
+    public function setMultipleLikeRadioCheckboxSelect(bool $multiple_like_radio_checkbox_select): void
+    {
+        $this->multiple_like_radio_checkbox_select = $multiple_like_radio_checkbox_select;
+    }
 
+    /**
+     * @return bool
+     */
+    public function isMultipleLikeRadioCheckboxSelect(): bool
+    {
+        return $this->multiple_like_radio_checkbox_select;
+    }
+
+    public function __destruct()
+    {
+
+    }
 }

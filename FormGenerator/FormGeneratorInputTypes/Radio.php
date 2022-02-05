@@ -69,11 +69,13 @@ class Radio extends AbstractInputTypes implements InputTypeInterface
         ];
     }
 
-    private function radioGenerate()
+    private function radioGenerate(): string
     {
         $row = new Row($this->formGenerator, $this->row_data);
+        $row->setMultipleLikeRadioCheckboxSelect(true);
         $row->setRow();
         $this->row = $row->getRow();
+        $this->option_settings = $row->getOptionsSettings() ?? $this->option_settings;
         $key = $this->option_settings['key'];
         $this->labelx = $this->option_settings['label'];
 

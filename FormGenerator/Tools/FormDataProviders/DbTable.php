@@ -19,4 +19,9 @@ class DbTable extends AbstractFormDataProviders implements FormDataProvidersInte
         }
         return $this->getDb()::getRow($this->getIdColumnName(), $this->getId(), $this->getTable());
     }
+
+    public function execute4multiple(): array
+    {
+        return [$this->execute()];
+    }
 }

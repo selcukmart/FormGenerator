@@ -22,4 +22,14 @@ class Sql extends AbstractFormDataProviders implements FormDataProvidersInterfac
         return $this->getDb()::fetch($this->getDb()::query($this->getSql()));
 
     }
+
+    public function execute4multiple(): array
+    {
+        $query = $this->getDb()::query($this->getSql());
+        $rows=[];
+        foreach ($query as $item) {
+            $rows[] = $item;
+        }
+        return $rows;
+    }
 }
