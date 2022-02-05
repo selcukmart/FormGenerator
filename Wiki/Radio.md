@@ -19,8 +19,8 @@ In its simplest form, a radio button is an input element with its type property 
             ],
             'options' => [
                 'data' => [
-                    'from' => 'key_value_array',
-                    'key_value_array' => [
+                    'from' => 'key_label_array',
+                    'key_label_array' => [
                         'module' => 'Module',
                         'post_id' => 'Post ID',
                     ]

@@ -8,6 +8,7 @@
 namespace FormGenerator;
 
 
+use FormGenerator\Tools\DB\DBInterface;
 use FormGenerator\Tools\Filter;
 use FormGenerator\Tools\Row;
 use GlobalTraits\ResultsTrait;
@@ -46,10 +47,11 @@ class FormGenerator
 
     public function __construct(array $generator_array, $scope)
     {
+
         $this->scope = $scope;
         $this->generator_array = $generator_array;
         $this->inputs = $this->generator_array['inputs'];
-        $this->setRowTable();
+
         $this->setRenderObjectDetails();
         $this->export_format = $this->generator_array['export']['format'];
         $this->export_type = $this->generator_array['export']['type'];
@@ -58,6 +60,7 @@ class FormGenerator
         $this->setInputTypesFolderNamespace();
         $this->setDB();
         $this->databaseVariables();
+        $this->setRowTable();
     }
 
 
@@ -393,8 +396,11 @@ class FormGenerator
 
     private function setDB(): void
     {
-        if (isset($this->generator_array['data']['connection']['db']['object']) && is_object($this->generator_array['data']['connection']['db']['object'])) {
-            $this->db = $this->generator_array['data']['connection']['db']['object'];
+
+        $db_class = $this->generator_array['data']['connection']['db']['object'] ?? '';
+        $db_object = new $db_class;
+        if ($db_object instanceof DBInterface) {
+            $this->db = $db_class;
             $this->generator_array['data']['from'] = 'db';
         }
     }

@@ -12,7 +12,7 @@ interface DBInterface
 {
     public static function getInstance();
 
-    public static function getRow($id,$table): array;
+    public static function getRow($column, $id, $table): array;
 
     public static function rowCount($query): int;
 
@@ -20,5 +20,5 @@ interface DBInterface
 
     public static function select($where_arr, $table);
 
-    public static function getAllFieldOptions($table):array;
+    public static function getAllFieldOptions($table): array;
 }

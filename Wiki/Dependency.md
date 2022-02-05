@@ -17,8 +17,8 @@ The 2 options mentioned here determine what the dependent elements will be. Ther
             ],
             'options' => [
                 'data' => [
-                    'from' => 'key_value_array',
-                    'key_value_array' => [
+                    'from' => 'key_label_array',
+                    'key_label_array' => [
                         'module' => 'Module',
                         'post_id' => 'Text Field ID',
                     ]
@@ -49,8 +49,8 @@ component_type-file (depending on file value). If the file value is selected, th
             ],
             'options' => [
                 'data' => [
-                    'from' => 'key_value_array',
-                    'key_value_array' => [
+                    'from' => 'key_label_array',
+                    'key_label_array' => [
                         '0' => 'Put module between Header and Footer',
                         '1' => 'Install the module alone',
                     ]

@@ -24,7 +24,6 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
         'option_settings' => [
             'key' => 'key',
             'label' => 'label',
-
         ],
         'options' => '',
         'dont_set_id' => false,
@@ -71,13 +70,13 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
 
         $row = new Row($this->formGenerator, $this->row_data);
         $row->setRow();
+
         $this->row = $row->getRow();
+        $this->option_settings = $row->getOptionsSettings() ?? $this->option_settings;
         $key = $this->option_settings['key'];
-        $this->label = $this->option_settings['label'];
-
-        $checked_control = isset($this->item['options']['control']) && is_array($this->item['options']['control']) ? new CheckedControl($this->item['options']['control'], $this->row_table) : false;
+        $label = $this->option_settings['label'];
+        $checked_control = $this->checkedControl();
         foreach ($this->row as $option_row) {
-
             $id = $this->field . '-' . $option_row[$key];
             $attr = [
                 'type' => 'checkbox',
@@ -85,7 +84,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
                 'id' => $id,
                 'name' => $this->field . '[]'
             ];
-            $attr['label'] = isset($option_row[$this->label]) ? $option_row[$this->label] : '';
+            $attr['label'] = $option_row[$label] ?? '';
             if ($checked_control) {
                 $checked_control->control($option_row[$key]);
                 if ($checked_control->isChecked()) {
@@ -105,12 +104,23 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
             $arr = [
                 'element' => 'input',
                 'attributes' => $attr,
-                'content' => $this->label
+                'content' => $option_row[$label]
             ];
             $this->units_output .= $this->domExport($arr);
         }
-
+        //exit;
         return $this->units_output;
+    }
+
+    /**
+     * @return false|CheckedControl
+     * @author selcukmart
+     * 5.02.2022
+     * 11:31
+     */
+    private function checkedControl()
+    {
+        return isset($this->item['options']['control']) && is_array($this->item['options']['control']) ? new CheckedControl($this->formGenerator, $this->item['options']['control'], $this->field, $this->row_table) : false;
     }
 
 

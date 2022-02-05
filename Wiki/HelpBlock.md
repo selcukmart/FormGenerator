@@ -17,8 +17,8 @@ This class is used when a description line or a different html code is required.
                 ],
                 'options' => [
                     'data' => [
-                        'from' => 'key_value_array',
-                        'key_value_array' => [
+                        'from' => 'key_label_array',
+                        'key_label_array' => [
                             'no'=>'No,dont send',
                             'yes'=>'Yes, send
                         ]

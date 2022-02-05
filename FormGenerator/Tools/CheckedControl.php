@@ -8,6 +8,8 @@
 namespace FormGenerator\Tools;
 
 
+use FormGenerator\FormGenerator;
+
 class CheckedControl
 {
     private
@@ -15,11 +17,15 @@ class CheckedControl
         $row_table = null,
         $control_array,
         $checkeds = [],
-        $ckeck_id = 0;
+        $ckeck_id = 0,
+        $field,
+        $formGenerator;
 
-    public function __construct(array $control_array, $row_table = null)
+    public function __construct(FormGenerator $formGenerator, array $control_array, $field, $row_table = null)
     {
+        $this->formGenerator = $formGenerator;
         $this->row_table = $row_table;
+        $this->field = $field;
         $this->control_array = $control_array;
     }
 
@@ -35,39 +41,35 @@ class CheckedControl
             return $this->checked;
         }
         $this->checked = false;
-        if (!is_null($this->row_table)) {
-            $this->ckeck_id = $id;
-            $from = $this->control_array['from'];
-            $this->checkeds[$id] = $this->{$from}();
-        }elseif(isset($this->control_array['from'])){
-            $from = $this->control_array['from'];
-            $this->checkeds[$id] = $this->{$from}($id);
-        }
+        $this->ckeck_id = $id;
+        $from = $this->control_array['from'];
+        $this->checkeds[$id] = $this->{$from}();
         return $this->checked;
     }
 
-    private function key_value_array($id){
-        if(in_array($id, $this->control_array['key_value_array'], true)){
-            $this->checked = true;
-            return $id;
-        }
-    }
-
-    private function array2sql()
+    private function key_label_array()
     {
-        $this->control_array['array2sql'][$this->control_array['parameters']['this_field']] = $this->row_table['id'];
-        $this->control_array['array2sql'][$this->control_array['parameters']['foreign_field']] = $this->ckeck_id;
-        $this->checked = (bool)DB::rowCount(DB::select($this->control_array['array2sql'], $this->control_array['parameters']['table'], 1, false));
-        return $this->checked;
+        if (in_array($this->ckeck_id, $this->control_array['key_label_array'], true)) {
+            $this->checked = true;
+            return $this->checked;
+        }
     }
 
     private function sql()
     {
         $sql = $this->control_array['sql'];
-        $this_field = $this->control_array['parameters']['this_field'];
-        $foreign_field = $this->control_array['parameters']['foreign_field'];
-        $sql .= " AND " . $this_field . "='" . $this->row_table['id'] . "' AND " . $foreign_field . "=" . $this->ckeck_id . " LIMIT 1";
-        $this->checked = (bool)DB::rowCount(DB::query($sql));
+        $this_field = $this->thisField();
+        $foreign_field = $this->foreignField();
+        $has_where = false;
+        if (isset($this->control_array['has_where'])) {
+            $has_where = $this->control_array['has_where'];
+        } elseif (false !== stripos($sql, "where")) {
+            $has_where = true;
+        }
+        $start = $has_where ? ' AND ' : ' WHERE ';
+
+        $sql .= $start . $this_field . "='" . $this->ckeck_id . "' AND " . $foreign_field . "=" . $this->row_table['id'] . " LIMIT 1";
+        $this->checked = (bool)$this->getDb()::rowCount($this->getDb()::query($sql));
         return $this->checked;
     }
 
@@ -82,5 +84,49 @@ class CheckedControl
     public function __destruct()
     {
 
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:01
+     */
+    private function thisField()
+    {
+        return $this->control_array['parameters']['this_field'] ?? $this->field;
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:02
+     */
+    private function foreignField()
+    {
+        return $this->control_array['parameters']['foreign_field'];
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:03
+     */
+    private function getTable()
+    {
+        return $this->control_array['parameters']['table'];
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:03
+     */
+    private function getDb()
+    {
+        return $this->formGenerator->getDb();
     }
 }

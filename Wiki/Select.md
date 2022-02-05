@@ -25,7 +25,7 @@ Select performs the process of selecting the data according to the sql value ent
 ```
 
 Since there is from = sql in the options section, a database query is needed.
-In some cases, from = key_value_array is defined instead of sql. in these cases, the array element and its counterpart are included. An example of this is below.
+In some cases, from = key_label_array is defined instead of sql. in these cases, the array element and its counterpart are included. An example of this is below.
 
 ```
 [
@@ -35,8 +35,8 @@ In some cases, from = key_value_array is defined instead of sql. in these cases,
             ],
             'options' => [
                 'data' => [
-                    'from' => 'key_value_array',
-                    'key_value_array' => [
+                    'from' => 'key_label_array',
+                    'key_label_array' => [
                         '0' => 'Closed',
                         '1' => 'Open',
                     ]

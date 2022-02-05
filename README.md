@@ -169,8 +169,8 @@ $form_generator_array = [
 
                 'options' => [
                     'data' => [
-                        'from' => 'key_value_array',
-                        'key_value_array' => [
+                        'from' => 'key_label_array',
+                        'key_label_array' => [
                             'a' => 'Checkbox Label 1',
                             'b' => 'Checkbox Label 1',
                             'c' => 'Checkbox Label 2',
@@ -178,8 +178,8 @@ $form_generator_array = [
                     ],
                     //checked values
                     'control' => [
-                        'from' => 'key_value_array',
-                        'key_value_array' => [
+                        'from' => 'key_label_array',
+                        'key_label_array' => [
                             'a', 'c'
                         ]
                     ]
@@ -194,8 +194,8 @@ $form_generator_array = [
 
                 'options' => [
                     'data' => [
-                        'from' => 'key_value_array',
-                        'key_value_array' => [
+                        'from' => 'key_label_array',
+                        'key_label_array' => [
                             'tr' => 'Turkey',
                             'uk' => 'United Kingdom'
                         ]
@@ -211,8 +211,8 @@ $form_generator_array = [
                 'dependency' => 'true',
                 'options' => [
                     'data' => [
-                        'from' => 'key_value_array',
-                        'key_value_array' => [
+                        'from' => 'key_label_array',
+                        'key_label_array' => [
                             '0' => 'Individual',
                             '1' => 'Institutional'
                         ]

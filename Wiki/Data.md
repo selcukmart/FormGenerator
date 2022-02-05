@@ -23,8 +23,8 @@ It serves to prevent the input fields with fixed values from appearing in the fo
             ],
             'options' => [
                 'data' => [
-                    'from' => 'key_value_array',
-                    'key_value_array' => [
+                    'from' => 'key_label_array',
+                    'key_label_array' => [
                         '0' => 'Put module between Header and Footer',
                         '1' => 'Install the module alone',
                     ]
@@ -34,8 +34,8 @@ It serves to prevent the input fields with fixed values from appearing in the fo
                                                                
 ```
 
-The above code corresponds to 0 option value in the values given in the key_value_array part. manual value entry
-key_value_array is used when necessary.
+The above code corresponds to 0 option value in the values given in the key_label_array part. manual value entry
+key_label_array is used when necessary.
 
 
 

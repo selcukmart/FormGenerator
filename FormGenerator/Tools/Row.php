@@ -29,14 +29,15 @@ class Row
 
     public function setRow(): void
     {
-        if (isset($this->generator_array['query'])) {
-            $this->data['query'] = $this->generator_array['query'];
+        if (isset($this->generator_array['data']['query'])) {
+            $this->data['query'] = $this->generator_array['data']['query'];
             $this->query();
-        } elseif (isset($this->generator_array['rows'])) {
-            $this->row = $this->generator_array['rows'];
-        } elseif (isset($this->generator_array['data_id'], $this->generator_array['data_table'])) {
-            $this->data['id'] = $this->generator_array['data_id'];
-            $this->data['table'] = $this->generator_array['data_table'];
+        } elseif (isset($this->generator_array['data']['rows'])) {
+            $this->row = $this->generator_array['data']['rows'];
+        } elseif (isset($this->generator_array['data']['id'], $this->generator_array['data']['table'])) {
+            $this->data['id'] = $this->generator_array['data']['id'];
+            $this->data['id_column_name'] = $this->generator_array['data']['id_column_name'] ?? 'id';
+            $this->data['table'] = $this->generator_array['data']['table'];
             $this->db();
         } elseif (isset($this->generator_array['data']['from'])) {
             $this->data = $this->generator_array['data'];
@@ -45,23 +46,30 @@ class Row
         }
     }
 
+    public function getOptionsSettings()
+    {
+        if(isset($this->generator_array['data']['settings'])){
+            return $this->generator_array['data']['settings'];
+        }
+    }
+
     private function db()
     {
-        $this->data['id'] = (int)$this->data['id'];
-        if (!$this->data['id']) {
+        if (!$this->getId()) {
             $this->err_message = 'ID empty';
             return;
         }
-        $this->row = $this->formGenerator->getDb()::getRow($this->data['id'], $this->data['table']);
+
+        $this->row = $this->formGenerator->getDb()::getRow($this->getIdColumnName(), $this->getId(), $this->getTable());
     }
 
     private function sql()
     {
-        if (empty($this->data['sql'])) {
+        if (empty($this->getSql())) {
             $this->err_message = 'SQL empty';
             return;
         }
-        $this->data['query'] = $this->formGenerator->getDb()::query($this->data['sql']);
+        $this->data['query'] = $this->formGenerator->getDb()::query($this->getSql());
         $this->query();
     }
 
@@ -76,9 +84,9 @@ class Row
         }
     }
 
-    private function key_value_array()
+    private function key_label_array()
     {
-        foreach ($this->data['key_value_array'] as $index => $datum) {
+        foreach ($this->data['key_label_array'] as $index => $datum) {
             $this->row[] = [
                 'key' => $index,
                 'label' => $datum
@@ -111,5 +119,49 @@ class Row
     public function __destruct()
     {
 
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:15
+     */
+    private function getTable()
+    {
+        return $this->data['table'];
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:15
+     */
+    private function getId()
+    {
+        return $this->data['id'];
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:16
+     */
+    private function getIdColumnName()
+    {
+        return $this->data['id_column_name'];
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 5.02.2022
+     * 12:16
+     */
+    private function getSql()
+    {
+        return $this->data['sql'];
     }
 }
