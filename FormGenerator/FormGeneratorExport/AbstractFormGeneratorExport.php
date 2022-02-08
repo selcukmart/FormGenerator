@@ -11,7 +11,9 @@ use Helpers\Classes;
 
 abstract class AbstractFormGeneratorExport
 {
-    private static $instances = [];
+    private static
+        $instances = [],
+        $classnames = [];
 
     protected
         $formGenerator,
@@ -53,7 +55,7 @@ abstract class AbstractFormGeneratorExport
                 $item['group'] = $parent_group;
             }
 
-            if (isset($item['type'], $item['label']) && $item['type'] === 'form_section' && empty($item['label'])) {
+            if ($this->isExceptionalSituation($item)) {
                 continue;
             }
 
@@ -79,42 +81,13 @@ abstract class AbstractFormGeneratorExport
 
     protected function prepareInputParts(array $item): array
     {
-        if (isset($this->class_names[$item['type']])) {
-            $class_name = $this->class_names[$item['type']];
-        } else {
-            $class_name = Classes::prepareFromString($item['type']);
-            $this->class_names[$item['type']] = $class_name;
-        }
-
-        $input_factory_class = $this->formGenerator->getInputTypesNamespace() . $class_name;
-
-        if(!class_exists($input_factory_class)){
-            $input_factory_class = $this->formGenerator->getInputTypesNamespace() .'Generic';
-        }
-
+        $input_factory_class = $this->getInputFactoryClassName($item['type']);
         $input_factory = $input_factory_class::getInstance($this->formGenerator);
-
         $this->input_parts = $input_factory->createInput($item);
-        $help_block = $this->getHelpBlock($item);
-        if (!isset($this->input_parts['input_belove_desc'])) {
-            $this->input_parts['input_belove_desc'] = '';
-        }
+        $this->addHelpBlockToInputparts($item);
+        $this->addInputCapsuleAttributes2InputParts($item);
 
-        $this->input_parts['input_belove_desc'] .= $help_block;
 
-        if (!isset($this->input_parts['input_capsule_attributes'])) {
-            $this->input_parts['input_capsule_attributes'] = '';
-        }
-
-        $this->input_parts['input_capsule_attributes'] .= DependencyManagerV1::dependend($item);
-
-        $arr = [
-            'attributes' => [
-                'id' => $item['input-id']
-            ]
-        ];
-
-        $this->input_parts['input_capsule_attributes'] .= Dom::makeAttr($arr);
 
         return $this->input_parts;
     }
@@ -147,5 +120,83 @@ abstract class AbstractFormGeneratorExport
     public function __destruct()
     {
 
+    }
+
+    /**
+     * @param $type
+     * @return string
+     * @author selcukmart
+     * 8.02.2022
+     * 10:57
+     */
+    protected function getInputFactoryClassName($type): string
+    {
+        if (isset(self::$classnames[$type])) {
+            return self::$classnames[$type];
+        }
+        if (isset($this->class_names[$type])) {
+            $class_name = $this->class_names[$type];
+        } else {
+            $class_name = Classes::prepareFromString($type);
+            $this->class_names[$type] = $class_name;
+        }
+
+        $input_factory_class = $this->formGenerator->getInputTypesNamespace() . $class_name;
+
+        if (!class_exists($input_factory_class)) {
+            $input_factory_class = $this->formGenerator->getInputTypesNamespace() . 'Generic';
+        }
+        self::$classnames[$type] = $input_factory_class;
+        return $input_factory_class;
+    }
+
+    /**
+     * @param array $item
+     * @author selcukmart
+     * 8.02.2022
+     * 10:59
+     */
+    protected function addHelpBlockToInputparts(array $item): void
+    {
+        $help_block = $this->getHelpBlock($item);
+        if (!isset($this->input_parts['input_belove_desc'])) {
+            $this->input_parts['input_belove_desc'] = '';
+        }
+
+        $this->input_parts['input_belove_desc'] .= $help_block;
+    }
+
+    /**
+     * @param array $item
+     * @author selcukmart
+     * 8.02.2022
+     * 11:00
+     */
+    protected function addInputCapsuleAttributes2InputParts(array $item): void
+    {
+        if (!isset($this->input_parts['input_capsule_attributes'])) {
+            $this->input_parts['input_capsule_attributes'] = '';
+        }
+
+        $this->input_parts['input_capsule_attributes'] .= DependencyManagerV1::dependend($item);
+        $arr = [
+            'attributes' => [
+                'id' => $item['input-id']
+            ]
+        ];
+
+        $this->input_parts['input_capsule_attributes'] .= Dom::makeAttr($arr);
+    }
+
+    /**
+     * @param $item
+     * @return bool
+     * @author selcukmart
+     * 8.02.2022
+     * 11:02
+     */
+    protected function isExceptionalSituation($item): bool
+    {
+        return isset($item['type'], $item['label']) && $item['type'] === 'form_section' && empty($item['label']);
     }
 }
