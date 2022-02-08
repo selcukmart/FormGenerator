@@ -50,6 +50,7 @@ abstract class AbstractFormGeneratorExport
         if (is_null($items)) {
             $items = $this->formGenerator->getInputs();
         }
+
         foreach ($items as $group => $item) {
             if (!is_null($parent_group)) {
                 $item['group'] = $parent_group;
@@ -68,6 +69,11 @@ abstract class AbstractFormGeneratorExport
         }
     }
 
+    public function createForm($item)
+    {
+        $this->sendDataForRender($item, '');
+    }
+
     protected function getHelpBlock(array $item): string
     {
         $str = '';
@@ -83,22 +89,30 @@ abstract class AbstractFormGeneratorExport
         $input_factory_class = $this->getInputFactoryClassName($item['type']);
         $input_factory = $input_factory_class::getInstance($this->formGenerator);
         $this->input_parts = $input_factory->createInput($item);
-        $this->addHelpBlockToInputparts($item);
-        $this->addInputCapsuleAttributes2InputParts($item);
+        if (isset($item['type']) && $this->isForm($item['type'])) {
+            $this->addHelpBlockToInputparts($item);
+            $this->addInputCapsuleAttributes2InputParts($item);
+        }
+
         return $this->input_parts;
     }
 
 
     protected function sendDataForRender($item, $group): void
     {
-        if (!is_numeric($group) && is_string($group)) {
+        if (!empty($group) && !is_numeric($group) && is_string($group)) {
             unset($item['input-id']);
             $this->createHtmlOutput($item, $group);
             return;
         }
 
         $this->prepareInputParts($item);
-        $this->formGenerator->renderToHtml($this->input_parts, 'TEMPLATE');
+        $input_capsule = 'TEMPLATE';
+        if (!(isset($item['type']) && $this->isForm($item['type']))) {
+            $input_capsule = 'FORM_CAPSULE';
+        }
+
+        $this->formGenerator->renderToHtml($this->input_parts, $input_capsule);
     }
 
     /**
@@ -182,5 +196,17 @@ abstract class AbstractFormGeneratorExport
     public function __destruct()
     {
 
+    }
+
+    /**
+     * @param $type
+     * @return bool
+     * @author selcukmart
+     * 8.02.2022
+     * 16:53
+     */
+    protected function isForm($type): bool
+    {
+        return $type !== 'form';
     }
 }

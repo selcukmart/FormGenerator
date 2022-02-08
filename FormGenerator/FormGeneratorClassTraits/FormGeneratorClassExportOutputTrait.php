@@ -23,6 +23,14 @@ trait FormGeneratorClassExportOutputTrait
         $factory_class = $this->getFormGeneratorExportClassName();
         $factory = $factory_class::getInstance($this);
         $factory->createHtmlOutput();
+
+        if (isset($this->generator_array['form'])) {
+            $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput();
+            $this->removeOutput();
+            $this->generator_array['form']['type'] = 'form';
+            $this->generator_array['form']['input-id'] = $this->generator_array['form']['id'] ?? '';
+            $factory->createForm($this->generator_array['form']);
+        }
     }
 
     /**
@@ -60,6 +68,12 @@ trait FormGeneratorClassExportOutputTrait
     public function mergeOutputAsString(string $output): void
     {
         $this->html_output .= $output;
+
+    }
+
+    public function removeOutput()
+    {
+        $this->html_output = '';
     }
 
     /**

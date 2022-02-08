@@ -63,11 +63,6 @@ abstract class AbstractInputTypes
         return isset($this->item['default_value']) && $this->item['default_value'] !== '';
     }
 
-    public function __destruct()
-    {
-
-    }
-
     /**
      * @param $input_dom_array
      * @return mixed
@@ -146,6 +141,11 @@ abstract class AbstractInputTypes
         } elseif (isset($row_table[$field])) {
             $this->item['attributes']['value'] = htmlspecialchars($row_table[$field]);
         }
+    }
+
+    public function __destruct()
+    {
+
     }
 
 }
