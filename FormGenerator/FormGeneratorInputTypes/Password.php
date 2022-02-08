@@ -48,7 +48,7 @@ class Password extends AbstractInputTypes implements InputTypeInterface
             'content' => ''
         ];
         $this->unit_parts = [
-            'input' => $this->domExport($input_dom_array),
+            'input' => $this->toHtml($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''

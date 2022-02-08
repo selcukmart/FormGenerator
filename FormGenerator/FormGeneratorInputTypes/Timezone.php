@@ -57,7 +57,7 @@ class Timezone extends AbstractInputTypes implements InputTypeInterface
 
 
         return [
-            'input' => $this->domExport($input_dom_array),
+            'input' => $this->toHtml($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''
@@ -86,7 +86,7 @@ class Timezone extends AbstractInputTypes implements InputTypeInterface
                 'attributes' => $attr,
                 'content' => $option_label
             ];
-            $this->options .= Dom::generator($arr);
+            $this->options .= Dom::htmlGenerator($arr);
         }
         return $this->options;
     }

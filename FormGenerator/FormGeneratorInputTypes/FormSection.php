@@ -21,7 +21,7 @@ class FormSection extends AbstractInputTypes implements InputTypeInterface
         $this->setLabel();
         //return $this->item;
         return [
-            'input' => $this->domExport($this->item),
+            'input' => $this->toHtml($this->item),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''

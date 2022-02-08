@@ -57,7 +57,7 @@ class Textarea extends AbstractInputTypes implements InputTypeInterface
             'attributes' => $this->item['attributes'],
             'content' => $value
         ];
-        $output = $this->domExport($input_dom_array);
+        $output = $this->toHtml($input_dom_array);
         $output = Template::embed(['content' => ''], $output, [
             'use' => 'd',
             'clean_no_longer' => false

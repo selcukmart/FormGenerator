@@ -62,7 +62,7 @@ class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements Expor
             $this->tab_contents[$item['group']] = [];
         }
 
-        $this->tab_contents[$item['group']][] = $this->formGenerator->render($this->input_parts, 'TEMPLATE');
+        $this->tab_contents[$item['group']][] = $this->formGenerator->renderToHtml($this->input_parts, 'TEMPLATE');
     }
 
 }

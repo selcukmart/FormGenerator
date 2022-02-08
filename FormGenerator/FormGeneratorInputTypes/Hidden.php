@@ -45,7 +45,7 @@ class Hidden extends AbstractInputTypes implements InputTypeInterface
             'content' => ''
         ];
         return [
-            'input' => $this->domExport($input_dom_array),
+            'input' => $this->toHtml($input_dom_array),
             'input_capsule_attributes' => '',
             'label_attributes' => ''
         ];

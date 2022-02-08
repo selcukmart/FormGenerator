@@ -109,7 +109,7 @@ class Radio extends AbstractInputTypes implements InputTypeInterface
                 'content' => ''
             ];
 
-            $this->units_output .= $this->domExport($arr);
+            $this->units_output .= $this->toHtml($arr);
         }
 
         return $this->units_output;

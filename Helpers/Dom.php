@@ -32,7 +32,7 @@ class Dom
      * @param string $content
      * @return string
      */
-    public static function generator(array $elements, string $content = ''): string
+    public static function htmlGenerator(array $elements, string $content = ''): string
     {
         if (isset($elements['content']) && (is_string($elements['content']) || empty($elements['content']))) {
             $elements = [$elements];
@@ -40,7 +40,7 @@ class Dom
         if (_sizeof_form_generator($elements) > 0) {
             foreach ($elements as $element) {
                 if (isset($element['content']) && is_array($element['content']) && _sizeof_form_generator($element['content']) > 0) {
-                    $element['content'] = self::generator($element['content'], $content);
+                    $element['content'] = self::htmlGenerator($element['content'], $content);
                 }
                 if (is_array($element)) {
                     $content .= self::core($element);

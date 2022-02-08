@@ -40,13 +40,13 @@ abstract class AbstractInputTypes
         return self::$instances[$cls];
     }
 
-    protected function domExport($input_dom_array, $export_type = null)
+    protected function toHtml($input_dom_array, $export_type = null)
     {
         $export_type = is_null($export_type) ? strtoupper($this->item['type']) : $export_type;
-        $result = $this->formGenerator->render($input_dom_array['attributes'], $export_type, true);
+        $result = $this->formGenerator->renderToHtml($input_dom_array['attributes'], $export_type, true);
         if (!$result) {
             $input_dom_array = $this->clearUnnecessaryAttributes($input_dom_array);
-            $result = Dom::generator($input_dom_array);
+            $result = Dom::htmlGenerator($input_dom_array);
         }
         return $result;
     }

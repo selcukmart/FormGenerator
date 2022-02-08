@@ -72,7 +72,7 @@ abstract class AbstractFormGeneratorExport
     {
         $str = '';
         if (isset($item['help_block']) && !empty($item['help_block']) && !in_array($item['type'], $this->without_help_block, true)) {
-            $str = $this->formGenerator->render($item, 'HELP_BLOCK', true);
+            $str = $this->formGenerator->renderToHtml($item, 'HELP_BLOCK', true);
         }
         return $str;
 
@@ -98,7 +98,7 @@ abstract class AbstractFormGeneratorExport
         }
 
         $this->prepareInputParts($item);
-        $this->formGenerator->render($this->input_parts, 'TEMPLATE');
+        $this->formGenerator->renderToHtml($this->input_parts, 'TEMPLATE');
     }
 
     /**

@@ -52,7 +52,7 @@ class Generic extends AbstractInputTypes implements InputTypeInterface
         ];
 
         return [
-            'input' => $this->domExport($input_dom_array),
+            'input' => $this->toHtml($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''

@@ -29,11 +29,11 @@ trait FormGeneratorClassRenderTrait
         }
     }
 
-    public function render(array $input_parts, $template, $return = false)
+    public function renderToHtml(array $input_parts, $template, $return = false)
     {
-        $run = $this->getRenderInstance();
-        $run->setInputParts($input_parts);
-        return $run->createHtmlOutput($template, $return);
+        $renderFactory = $this->getRenderInstance();
+        $renderFactory->setInputParts($input_parts);
+        return $renderFactory->createHtmlOutput($template, $return);
     }
 
     /**

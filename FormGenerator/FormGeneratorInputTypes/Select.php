@@ -72,7 +72,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
         ];
 
         $this->unit_parts = [
-            'input' => $this->domExport($input_dom_array),
+            'input' => $this->toHtml($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''
@@ -120,7 +120,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
                 'attributes' => $attr,
                 'content' => $option_label
             ];
-            $options .= $this->domExport($arr, 'option');
+            $options .= $this->toHtml($arr, 'option');
         }
         return $options;
     }

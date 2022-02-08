@@ -20,7 +20,7 @@ class Image extends AbstractInputTypes implements InputTypeInterface
         $this->setLabel();
         $this->item['attributes']['src'] = $this->row_table[$this->field] ?? '';
         $this->unit_parts = [
-            'input' => $this->formGenerator->render($this->item['attributes'],'IMAGE',true),
+            'input' => $this->formGenerator->renderToHtml($this->item['attributes'],'IMAGE',true),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''

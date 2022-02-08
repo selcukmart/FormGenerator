@@ -32,7 +32,7 @@ class File extends AbstractInputTypes implements InputTypeInterface
         $this->item['attributes']['previous_file'] = $previous_file;
 
         return [
-            'input' => $this->domExport($this->item),
+            'input' => $this->toHtml($this->item),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''
