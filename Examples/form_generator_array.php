@@ -137,11 +137,13 @@ $form_generator_array = [
         'decision' => [
             [
                 'type' => 'form_section',
+                'help_block'=>'test help block',
                 'label' => 'Address Information'
             ],
             // this is a form input row
             [
                 'type' => 'text',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'address_identification',
                 ]
@@ -160,6 +162,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'textarea',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'address',
                 ]
@@ -197,6 +200,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'checkbox',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'iso'
                 ],
@@ -263,6 +267,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'select',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'countries'
                 ],
@@ -304,6 +309,7 @@ $form_generator_array = [
                 'attributes' => [
                     'name' => 'invoice_type'
                 ],
+                'help_block'=>'test help block',
                 'default_value' => '1',
                 'dependency' => 'true',
                 'options' => [
@@ -375,6 +381,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'file',
+                'help_block'=>'test help block',
                 'label' => 'Upload Your Resume',
                 'attributes' => [
                     'name' => 'cv',
@@ -383,6 +390,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'image',
+                'help_block'=>'test help block',
                 'label' => 'Upload Your Photo',
                 'attributes' => [
                     'name' => 'photo',
@@ -391,12 +399,14 @@ $form_generator_array = [
             ],
             [
                 'type' => 'timezone',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'timezone',
                 ]
             ],
             [
                 'type' => 'color',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'color',
                 ]
@@ -409,6 +419,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'datetime-local',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'datetime-local',
                 ]
@@ -427,6 +438,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'number',
+                'help_block'=>'test help block',
                 'attributes' => [
                     'name' => 'number',
                 ]

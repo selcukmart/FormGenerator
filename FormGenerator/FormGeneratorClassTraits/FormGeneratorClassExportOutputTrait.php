@@ -22,7 +22,7 @@ trait FormGeneratorClassExportOutputTrait
         }
         $class = $this->getFormGeneratorExportClassName();
         $run = $class::getInstance($this);
-        $run->extract();
+        $run->createOutput();
     }
 
     /**

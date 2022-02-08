@@ -16,7 +16,7 @@ class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements Expor
         $tab_contents=[],
         $is_string_group;
 
-    public function extract($items = null, $parent_group = null):void
+    public function createOutput($items = null, $parent_group = null):void
     {
         if (is_null($items)) {
             $items = $this->formGenerator->getInputs();

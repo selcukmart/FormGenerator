@@ -16,7 +16,5 @@ interface InputTypeInterface
 
     public function prepare(array $item):array;
 
-    public function getUnitParts(): array;
-
     public function __destruct();
 }

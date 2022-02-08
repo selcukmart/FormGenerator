@@ -5,7 +5,6 @@ namespace FormGenerator\FormGeneratorExport;
 
 
 use FormGenerator\FormGenerator;
-use FormGenerator\Render\RenderEngines\AbstractRenderEngines;
 use Helpers\Dom;
 use FormGenerator\Tools\DependencyManagerV1;
 use Helpers\Classes;
@@ -44,7 +43,7 @@ abstract class AbstractFormGeneratorExport
         return self::$instances[$cls];
     }
 
-    public function extract($items = null, $parent_group = null): void
+    public function createOutput($items = null, $parent_group = null): void
     {
         if (is_null($items)) {
             $items = $this->formGenerator->getInputs();
@@ -72,7 +71,7 @@ abstract class AbstractFormGeneratorExport
         $str = '';
         if (isset($item['help_block']) && !empty($item['help_block']) && !in_array($item['type'], $this->without_help_block, true)) {
             $item['help_block'] = ___($item['help_block']);
-            $str = $this->formGenerator->export($item, 'HELP_BLOCK', true);
+            $str = $this->formGenerator->render($item, 'HELP_BLOCK', true);
         }
         return $str;
 
@@ -135,7 +134,7 @@ abstract class AbstractFormGeneratorExport
     {
         if (!is_numeric($group) && is_string($group)) {
             unset($item['input-id']);
-            $this->extract($item, $group);
+            $this->createOutput($item, $group);
             return;
         }
 

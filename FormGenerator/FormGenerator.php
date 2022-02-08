@@ -29,7 +29,6 @@ class FormGenerator
 
     private static $instances = [];
     protected
-        // twig, mustache, blade
         $base_dir,
         $generator_array = [],
         $namespace;
@@ -62,14 +61,6 @@ class FormGenerator
     public function setGeneratorArray(array $generator_array): void
     {
         $this->generator_array = $generator_array;
-    }
-
-    /**
-     * @return array
-     */
-    public function getGeneratorArray(): array
-    {
-        return $this->generator_array;
     }
 
     /**
