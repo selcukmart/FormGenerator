@@ -10,14 +10,16 @@ namespace FormGenerator\Tools\FormDataProviders;
 class Row extends AbstractFormDataProviders implements FormDataProvidersInterface
 {
 
-    public function execute(): array
+    public function execute(array $generator_array): array
     {
+        $this->assignData($generator_array);
         return $this->data['row'];
 
     }
 
-    public function execute4multiple(): array
+    public function execute4multiple(array $generator_array): array
     {
+        $this->assignData($generator_array);
         return [$this->data['row']];
     }
 }

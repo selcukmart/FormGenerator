@@ -1,5 +1,6 @@
 <?php
 /**
+ * @pattern singleton and factory
  * @author selcukmart
  * 2.02.2022
  * 13:52
@@ -14,6 +15,7 @@ use Helpers\Dom;
 
 abstract class AbstractInputTypes
 {
+    private static $instances = [];
     protected
         $item,
         $label,
@@ -26,6 +28,16 @@ abstract class AbstractInputTypes
     public function __construct(FormGenerator $formGenerator)
     {
         $this->formGenerator = $formGenerator;
+    }
+
+    public static function getInstance(FormGenerator $formGenerator): AbstractInputTypes
+    {
+        $cls = static::class;
+        if (!isset(self::$instances[$cls])) {
+            self::$instances[$cls] = new static($formGenerator);
+        }
+
+        return self::$instances[$cls];
     }
 
     protected function domExport($input_dom_array, $export_type = null)

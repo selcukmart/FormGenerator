@@ -9,6 +9,7 @@ namespace FormGenerator\Tools\FormDataProviders;
 
 interface FormDataProvidersInterface
 {
-    public function execute(): array;
-    public function execute4multiple(): array;
+    public function execute(array $generator_array): array;
+
+    public function execute4multiple(array $generator_array): array;
 }

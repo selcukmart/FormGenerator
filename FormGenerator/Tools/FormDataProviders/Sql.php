@@ -13,8 +13,9 @@ use FormGenerator\Tools\Row;
 class Sql extends AbstractFormDataProviders implements FormDataProvidersInterface
 {
 
-    public function execute(): array
+    public function execute(array $generator_array): array
     {
+        $this->assignData($generator_array);
         if (empty($this->getSql())) {
             $this->formGenerator->setErrorMessage('SQL empty');
             return [];
@@ -23,10 +24,11 @@ class Sql extends AbstractFormDataProviders implements FormDataProvidersInterfac
 
     }
 
-    public function execute4multiple(): array
+    public function execute4multiple(array $generator_array): array
     {
+        $this->assignData($generator_array);
         $query = $this->getDb()::query($this->getSql());
-        $rows=[];
+        $rows = [];
         foreach ($query as $item) {
             $rows[] = $item;
         }

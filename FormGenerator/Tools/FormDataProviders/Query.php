@@ -12,8 +12,9 @@ use Examples\DBExamples\Libraries\Database\DB;
 class Query extends AbstractFormDataProviders implements FormDataProvidersInterface
 {
 
-    public function execute(): array
+    public function execute(array $generator_array): array
     {
+        $this->assignData($generator_array);
         if (empty($this->data['query'])) {
             $this->formGenerator->setErrorMessage('Query is empty');
             return [];
@@ -21,8 +22,9 @@ class Query extends AbstractFormDataProviders implements FormDataProvidersInterf
         return DB::fetch($this->data['query']);
     }
 
-    public function execute4multiple(): array
+    public function execute4multiple(array $generator_array): array
     {
+        $this->assignData($generator_array);
         $query = $this->data['query'];
         $rows=[];
         foreach ($query as $item) {

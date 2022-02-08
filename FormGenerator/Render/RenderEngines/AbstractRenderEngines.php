@@ -5,6 +5,7 @@ use FormGenerator\Render\Render;
 use GlobalTraits\ErrorMessagesWithResultTrait;
 
 /**
+ * @pattern singleton and factory
  * @author selcukmart
  * 2.02.2022
  * 11:45
@@ -12,6 +13,7 @@ use GlobalTraits\ErrorMessagesWithResultTrait;
 abstract class AbstractRenderEngines
 {
     use ErrorMessagesWithResultTrait;
+    private static $instances = [];
     protected
         $formGenerator,
         $render;
@@ -24,6 +26,11 @@ abstract class AbstractRenderEngines
 
     public static function getInstance(FormGenerator $formGenerator,$templateObject): AbstractRenderEngines
     {
-        return new static($formGenerator,$templateObject);
+        $cls = static::class;
+        if (!isset(self::$instances[$cls])) {
+            self::$instances[$cls] = new static($formGenerator,$templateObject);
+        }
+
+        return self::$instances[$cls];
     }
 }

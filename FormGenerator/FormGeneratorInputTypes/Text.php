@@ -51,7 +51,6 @@ class Text extends AbstractInputTypes implements InputTypeInterface
             'content' => ''
         ];
 
-
         return [
             'input' => $this->domExport($input_dom_array),
             'label' => $this->item['label'],

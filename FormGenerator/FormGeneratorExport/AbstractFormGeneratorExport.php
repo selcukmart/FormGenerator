@@ -5,12 +5,15 @@ namespace FormGenerator\FormGeneratorExport;
 
 
 use FormGenerator\FormGenerator;
+use FormGenerator\Render\RenderEngines\AbstractRenderEngines;
 use Helpers\Dom;
 use FormGenerator\Tools\DependencyManagerV1;
 use Helpers\Classes;
 
 abstract class AbstractFormGeneratorExport
 {
+    private static $instances = [];
+
     protected
         $formGenerator,
         $class_names,
@@ -29,6 +32,16 @@ abstract class AbstractFormGeneratorExport
         $this->class_names = [];
         $this->filter = $this->formGenerator->getFilter();
 
+    }
+
+    public static function getInstance(FormGenerator $formGenerator): AbstractFormGeneratorExport
+    {
+        $cls = static::class;
+        if (!isset(self::$instances[$cls])) {
+            self::$instances[$cls] = new static($formGenerator);
+        }
+
+        return self::$instances[$cls];
     }
 
     public function extract($items = null, $parent_group = null): void
@@ -79,9 +92,10 @@ abstract class AbstractFormGeneratorExport
         if(!class_exists($class)){
             $class = $this->formGenerator->getInputTypesNamespace() .'Generic';
         }
-        $this->run = new $class($this->formGenerator);
-        $this->input_parts = $this->run->prepare($item);
 
+        $run = $class::getInstance($this->formGenerator);
+
+        $this->input_parts = $run->prepare($item);
         $help_block = $this->getHelpBlock($item);
         if (!isset($this->input_parts['input_belove_desc'])) {
             $this->input_parts['input_belove_desc'] = '';

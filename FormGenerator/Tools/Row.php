@@ -35,7 +35,6 @@ class Row
         $this->formGenerator = $formGenerator;
     }
 
-
     public function setRow(): void
     {
         if ($this->isFrom()) {
@@ -57,11 +56,11 @@ class Row
     private function execute($from): void
     {
         $from = __NAMESPACE__ . '\FormDataProviders\\' . Classes::prepareFromString($from);
-        $class = new $from($this->formGenerator, $this->generator_array);
+        $class = $from::getInstance($this->formGenerator);
         if ($this->isMultipleLikeRadioCheckboxSelect()) {
-            $this->row = $class->execute4multiple();
+            $this->row = $class->execute4multiple($this->generator_array);
         } else {
-            $this->row = $class->execute();
+            $this->row = $class->execute($this->generator_array);
         }
 
     }

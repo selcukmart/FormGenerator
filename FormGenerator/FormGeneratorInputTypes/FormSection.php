@@ -17,9 +17,15 @@ class FormSection extends AbstractInputTypes implements InputTypeInterface
     public function prepare(array $item):array
     {
         $this->item = $item;
-        $this->item ['template'] = 'FORM_SECTION';
+        $this->item['attributes'] = [];
         $this->setLabel();
-        return $this->item;
+        //return $this->item;
+        return [
+            'input' => $this->domExport($this->item),
+            'label' => $this->item['label'],
+            'input_capsule_attributes' => '',
+            'label_attributes' => ''
+        ];
     }
 
 }

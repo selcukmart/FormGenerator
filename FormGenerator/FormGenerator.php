@@ -18,6 +18,7 @@ class FormGenerator
 {
     use ResultsTrait;
 
+    private static $instances = [];
     protected
         // twig, mustache, blade
         $generator_array = [],
@@ -42,7 +43,8 @@ class FormGenerator
         $db,
         $id,
         $id_column_name,
-        $input_types_namespace;
+        $input_types_namespace,
+        $render_class_name;
 
 
     public function __construct(array $generator_array, $scope)
@@ -90,19 +92,14 @@ class FormGenerator
             return;
         }
         $class = $this->getFormGeneratorExportClassName();
-
-
-        $run = new $class($this);
-
+        $run = $class::getInstance($this);
         $run->extract();
     }
 
     public function render(array $input_parts, $template = 'TEMPLATE', $return = false)
     {
-        $class = $this->namespace . '\Render\\Render';
-        $run = new $class($this);
+        $run = $this->getRenderInstance();
         $run->setInputParts($input_parts);
-
         return $run->render($template, $return);
     }
 
@@ -336,10 +333,7 @@ class FormGenerator
         return $this->render_object_by;
     }
 
-    public function __destruct()
-    {
 
-    }
 
     protected function setRenderObjectDetails(): void
     {
@@ -453,5 +447,42 @@ class FormGenerator
     public function isEdit()
     {
         return $this->scope === 'edit';
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 7.02.2022
+     * 17:11
+     */
+    protected function getRenderInstance()
+    {
+        if (isset(self::$instances['render'])) {
+            return self::$instances['render'];
+        }
+        $class = $this->getRenderClassName();
+        self::$instances['render'] = new $class($this);
+        return self::$instances['render'];
+    }
+
+
+    /**
+     * @return string
+     * @author selcukmart
+     * 7.02.2022
+     * 17:11
+     */
+    protected function getRenderClassName(): string
+    {
+        if (!is_null($this->render_class_name)) {
+            return $this->render_class_name;
+        }
+        $this->render_class_name = $this->namespace . '\Render\\Render';
+        return $this->render_class_name;
+    }
+
+    public function __destruct()
+    {
+
     }
 }

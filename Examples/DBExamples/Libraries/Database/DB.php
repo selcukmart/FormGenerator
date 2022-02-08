@@ -18,11 +18,15 @@ use PDO;
  */
 class DB implements DBInterface
 {
+    private static $instance;
 
     public static function getInstance()
     {
-        global $dbh;
-        return $dbh;
+        if(is_null(self::$instance)){
+            global $dbh;
+            self::$instance = $dbh;
+        }
+        return self::$instance;
     }
 
     public static function getRow($column,$id, $table): array
