@@ -10,11 +10,11 @@ namespace FormGenerator\FormGeneratorClassTraits;
 trait FormGeneratorClassExportOutputTrait
 {
     protected
-        $output = '',
+        $html_output = '',
         $export_format,
         $export_type;
 
-    public function extract(): void
+    public function createHtmlOutput(): void
     {
         if (!is_object($this->render_object)) {
             $this->setErrorMessage('Render Object not found');
@@ -22,7 +22,7 @@ trait FormGeneratorClassExportOutputTrait
         }
         $factory_class = $this->getFormGeneratorExportClassName();
         $factory = $factory_class::getInstance($this);
-        $factory->createOutput();
+        $factory->createHtmlOutput();
     }
 
     /**
@@ -33,8 +33,8 @@ trait FormGeneratorClassExportOutputTrait
      */
     private function getFormGeneratorExportClassName(): string
     {
-        if (isset($this->generator_array['export-object']['namespace']) && !empty($this->generator_array['export-object']['namespace'])) {
-            $namespace = $this->generator_array['export-object']['namespace'];
+        if ($this->hasUserDefinedHtmlExportObjects()) {
+            $namespace = $this->getUserDefinedExportNamespace();
         } else {
             $namespace = $this->namespace;
         }
@@ -49,17 +49,17 @@ trait FormGeneratorClassExportOutputTrait
     /**
      * @return string
      */
-    public function getOutput(): string
+    public function getHtmlOutput(): string
     {
-        return $this->output;
+        return $this->html_output;
     }
 
     /**
      * @param string $output
      */
-    public function setOutput(string $output): void
+    public function mergeOutputAsString(string $output): void
     {
-        $this->output .= $output;
+        $this->html_output .= $output;
     }
 
     /**
@@ -86,5 +86,27 @@ trait FormGeneratorClassExportOutputTrait
     public function setExportType(): void
     {
         $this->export_type = $this->generator_array['export']['type'];
+    }
+
+    /**
+     * @return bool
+     * @author selcukmart
+     * 8.02.2022
+     * 11:55
+     */
+    private function hasUserDefinedHtmlExportObjects(): bool
+    {
+        return isset($this->generator_array['export-object']['namespace']) && !empty($this->generator_array['export-object']['namespace']);
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 8.02.2022
+     * 11:56
+     */
+    private function getUserDefinedExportNamespace()
+    {
+        return $this->generator_array['export-object']['namespace'];
     }
 }

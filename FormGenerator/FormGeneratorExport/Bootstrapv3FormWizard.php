@@ -16,7 +16,7 @@ class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements Expor
         $tab_contents=[],
         $is_string_group;
 
-    public function createOutput($items = null, $parent_group = null):void
+    public function createHtmlOutput($items = null, $parent_group = null):void
     {
         if (is_null($items)) {
             $items = $this->formGenerator->getInputs();
@@ -40,16 +40,16 @@ class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements Expor
                 $this->sections[$group] = $group_label;
             }
 
-            $this->extractCore($item, $group);
+            $this->sendDataForRender($item, $group);
         }
     }
 
 
-    protected function extractCore($item, $group):void
+    protected function sendDataForRender($item, $group):void
     {
         if ($this->is_string_group) {
             unset($item['input-id']);
-            $this->extract($item, $group);
+            $this->createHtmlOutput($item, $group);
             return;
         }
 
@@ -58,13 +58,11 @@ class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements Expor
         }
 
         $this->prepareInputParts($item);
-        $this->prepareTemplate();
-
         if (!isset($this->tab_contents[$item['group']])) {
             $this->tab_contents[$item['group']] = [];
         }
 
-        $this->tab_contents[$item['group']][] = $this->formGenerator->render($this->input_parts, $this->template);
+        $this->tab_contents[$item['group']][] = $this->formGenerator->render($this->input_parts, 'TEMPLATE');
     }
 
 }

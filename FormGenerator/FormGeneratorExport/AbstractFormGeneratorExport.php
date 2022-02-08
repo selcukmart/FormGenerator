@@ -45,7 +45,7 @@ abstract class AbstractFormGeneratorExport
         return self::$instances[$class];
     }
 
-    public function createOutput($items = null, $parent_group = null): void
+    public function createHtmlOutput($items = null, $parent_group = null): void
     {
         if (is_null($items)) {
             $items = $this->formGenerator->getInputs();
@@ -64,7 +64,7 @@ abstract class AbstractFormGeneratorExport
             if ($will_filtered) {
                 continue;
             }
-            $this->extractCore($item, $group);
+            $this->sendDataForRender($item, $group);
         }
     }
 
@@ -88,29 +88,17 @@ abstract class AbstractFormGeneratorExport
         return $this->input_parts;
     }
 
-    protected function prepareTemplate(): string
-    {
-        if (isset($this->input_parts['template'])) {
-            $this->template = $this->input_parts['template'];
-        } else {
-            $this->template = 'TEMPLATE';
-        }
 
-        return $this->template;
-    }
-
-    protected function extractCore($item, $group): void
+    protected function sendDataForRender($item, $group): void
     {
         if (!is_numeric($group) && is_string($group)) {
             unset($item['input-id']);
-            $this->createOutput($item, $group);
+            $this->createHtmlOutput($item, $group);
             return;
         }
 
         $this->prepareInputParts($item);
-        $this->prepareTemplate();
-
-        $this->formGenerator->render($this->input_parts, $this->template);
+        $this->formGenerator->render($this->input_parts, 'TEMPLATE');
     }
 
     /**

@@ -12,7 +12,7 @@ class TwigExample extends AbstractRenderEngines implements RenderInterface
     /**
      * @desc This code does not run, it is an extendable example.
      */
-    public function render(string $template): string
+    public function createHtmlOutput(string $template): string
     {
         // This is your twig,blade,mustache etc object
         $renderObject = $this->formGenerator->getRenderobject();

@@ -9,6 +9,7 @@ namespace FormGenerator\Render;
 
 
 use FormGenerator\FormGenerator;
+use Helpers\Classes;
 use SmartyException;
 
 class Render
@@ -35,18 +36,18 @@ class Render
     /**
      * @throws SmartyException
      */
-    public function render($template = 'TEMPLATE', $return = false)
+    public function createHtmlOutput($template, $return = false)
     {
 
         if (empty($this->input_parts)) {
             $this->formGenerator->setErrorMessage('There is no input');
         } else {
-            $output = $this->embedTemplate($template);
+            $htmlOutput = $this->getHtmlOutput($template);
             if ($return) {
-                return $output;
+                return $htmlOutput;
             }
 
-            $this->formGenerator->setOutput($output);
+            $this->formGenerator->mergeOutputAsString($htmlOutput);
         }
     }
 
@@ -61,14 +62,14 @@ class Render
     /**
      * @throws SmartyException
      */
-    protected function embedTemplate($template)
+    protected function getHtmlOutput($template)
     {
-        $classname = $this->getFacoryClassname();
+        $factoryClassname = $this->getFactoryClassname();
 
-        $class = $classname::getInstance($this->formGenerator,$this);
-        $output = $class->render($template);
-        if (!$class->isResult()) {
-            $this->formGenerator->setErrorMessage($class->getErrorMessage());
+        $render_factory = $factoryClassname::getInstance($this->formGenerator,$this);
+        $output = $render_factory->createHtmlOutput($template);
+        if (!$render_factory->isResult()) {
+            $this->formGenerator->setErrorMessage($render_factory->getErrorMessage());
             return false;
         }
         return $output;
@@ -103,21 +104,20 @@ class Render
         return $this->formGenerator;
     }
 
-    public function __destruct()
-    {
-
-    }
-
     /**
      * @return string
      * @author selcukmart
      * 8.02.2022
      * 11:08
      */
-    protected function getFacoryClassname(): string
+    protected function getFactoryClassname(): string
     {
-        $render_class_name = ucfirst(strtolower($this->formGenerator->getRenderObjectBy()));
-        $classname = __NAMESPACE__ . '\RenderEngines\\' . $render_class_name;
-        return $classname;
+        $render_class_name =Classes::prepareFromString($this->formGenerator->getRenderObjectBy());
+        return __NAMESPACE__ . '\RenderEngines\\' . $render_class_name;
+    }
+
+    public function __destruct()
+    {
+
     }
 }

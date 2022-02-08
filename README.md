@@ -4,14 +4,15 @@ Form Generator
 composer require selcukmart/form-generator
 ```
 Form Generator can build form from array.
+
 ```php
 use FormGenerator\FormGenerator;
 /**
 * scopes: add or edit
   */
   $form_generator = new FormGenerator($form_generator_array, 'edit');
-  $form_generator->extract();
-  echo $form_generator->getOutput();
+  $form_generator->createHtmlOutput();
+  echo $form_generator->getHtmlOutput();
 ```
 Scopes
 ==

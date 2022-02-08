@@ -15,7 +15,7 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
     /**
      * @throws SmartyException
      */
-    public function render(string $template): string
+    public function createHtmlOutput(string $template): string
     {
         $renderObject = $this->formGenerator->getRenderobject();
         $template = $this->getTemplateFullPath($renderObject, $template);

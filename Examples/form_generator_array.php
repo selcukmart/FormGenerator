@@ -501,6 +501,6 @@ $form_generator_array = [
 ];
 
 $form_generator = new FormGenerator($form_generator_array, 'edit');
-$form_generator->extract();
-echo $form_generator->getOutput();
+$form_generator->createHtmlOutput();
+echo $form_generator->getHtmlOutput();
 

@@ -12,5 +12,5 @@ interface RenderInterface
 {
     public function __construct(FormGenerator $formGenerator,Render $templateObject);
 
-    public function render(string $template):string;
+    public function createHtmlOutput(string $template):string;
 }
