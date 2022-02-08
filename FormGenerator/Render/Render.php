@@ -45,6 +45,7 @@ class Render
             if ($return) {
                 return $output;
             }
+
             $this->formGenerator->setOutput($output);
         }
     }
@@ -64,8 +65,8 @@ class Render
     {
         $render_class_name = ucfirst(strtolower($this->formGenerator->getRenderObjectBy()));
         $classname = __NAMESPACE__.'\RenderEngines\\'.$render_class_name;
-        $class = $classname::getInstance($this->formGenerator,$this);
 
+        $class = $classname::getInstance($this->formGenerator,$this);
         $output = $class->render($template);
         if (!$class->isResult()) {
             $this->formGenerator->setErrorMessage($class->getErrorMessage());

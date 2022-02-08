@@ -27,6 +27,7 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
         }
         $template = $template_path . '/' . $template . '.tpl';
         $template_full_path = $renderObject->getTemplateDir()[0] . $template;
+
         if (is_file($template_full_path)) {
             $renderObject->clearAllAssign();
             $input_parts = defaults_form_generator($this->render->getInputParts(), $this->render->getInputVariables());
