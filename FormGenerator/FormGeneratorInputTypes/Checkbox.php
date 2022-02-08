@@ -37,7 +37,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
         $field;
 
 
-    public function prepare(array $item): array
+    public function createInput(array $item): array
     {
         $this->item = $item;
         $this->row_data = $this->item['options'];

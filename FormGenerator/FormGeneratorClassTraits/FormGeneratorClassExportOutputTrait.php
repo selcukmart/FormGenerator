@@ -20,9 +20,9 @@ trait FormGeneratorClassExportOutputTrait
             $this->setErrorMessage('Render Object not found');
             return;
         }
-        $class = $this->getFormGeneratorExportClassName();
-        $run = $class::getInstance($this);
-        $run->createOutput();
+        $factory_class = $this->getFormGeneratorExportClassName();
+        $factory = $factory_class::getInstance($this);
+        $factory->createOutput();
     }
 
     /**

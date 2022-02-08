@@ -14,7 +14,7 @@ interface InputTypeInterface
 {
     public function __construct(FormGenerator $formGenerator);
 
-    public function prepare(array $item):array;
+    public function createInput(array $item):array;
 
     public function __destruct();
 }

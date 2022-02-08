@@ -35,12 +35,12 @@ abstract class AbstractFormGeneratorExport
 
     public static function getInstance(FormGenerator $formGenerator): AbstractFormGeneratorExport
     {
-        $cls = static::class;
-        if (!isset(self::$instances[$cls])) {
-            self::$instances[$cls] = new static($formGenerator);
+        $class = static::class;
+        if (!isset(self::$instances[$class])) {
+            self::$instances[$class] = new static($formGenerator);
         }
 
-        return self::$instances[$cls];
+        return self::$instances[$class];
     }
 
     public function createOutput($items = null, $parent_group = null): void
@@ -86,15 +86,15 @@ abstract class AbstractFormGeneratorExport
             $this->class_names[$item['type']] = $class_name;
         }
 
-        $class = $this->formGenerator->getInputTypesNamespace() . $class_name;
+        $input_factory_class = $this->formGenerator->getInputTypesNamespace() . $class_name;
 
-        if(!class_exists($class)){
-            $class = $this->formGenerator->getInputTypesNamespace() .'Generic';
+        if(!class_exists($input_factory_class)){
+            $input_factory_class = $this->formGenerator->getInputTypesNamespace() .'Generic';
         }
 
-        $run = $class::getInstance($this->formGenerator);
+        $input_factory = $input_factory_class::getInstance($this->formGenerator);
 
-        $this->input_parts = $run->prepare($item);
+        $this->input_parts = $input_factory->createInput($item);
         $help_block = $this->getHelpBlock($item);
         if (!isset($this->input_parts['input_belove_desc'])) {
             $this->input_parts['input_belove_desc'] = '';

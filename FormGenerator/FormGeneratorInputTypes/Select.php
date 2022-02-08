@@ -38,7 +38,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
         $option_settings;
 
 
-    public function prepare(array $item): array
+    public function createInput(array $item): array
     {
 
         $this->item = $item;

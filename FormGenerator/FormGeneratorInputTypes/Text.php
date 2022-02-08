@@ -24,7 +24,7 @@ class Text extends AbstractInputTypes implements InputTypeInterface
     ];
 
 
-    public function prepare(array $item): array
+    public function createInput(array $item): array
     {
         $this->item = $item;
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);

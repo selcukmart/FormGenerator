@@ -51,11 +51,6 @@ abstract class AbstractInputTypes
         return $result;
     }
 
-    public function getUnitParts(): array
-    {
-        return $this->unit_parts;
-    }
-
     /**
      * @return bool
      * @author selcukmart

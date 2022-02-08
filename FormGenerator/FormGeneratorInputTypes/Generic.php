@@ -23,7 +23,7 @@ class Generic extends AbstractInputTypes implements InputTypeInterface
     ];
 
 
-    public function prepare(array $item): array
+    public function createInput(array $item): array
     {
 
         $this->item = $item;

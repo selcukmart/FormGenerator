@@ -39,7 +39,7 @@ class Radio extends AbstractInputTypes implements InputTypeInterface
         $value;
 
 
-    public function prepare(array $item): array
+    public function createInput(array $item): array
     {
         $this->item = $item;
         $this->row_data = $this->item['options'];
