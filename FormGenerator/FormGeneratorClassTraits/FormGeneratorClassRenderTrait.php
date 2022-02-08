@@ -18,8 +18,8 @@ trait FormGeneratorClassRenderTrait
 
     protected function setRenderObjectDetails(): void
     {
-        if (isset($this->generator_array['export']['render']['by'], $this->generator_array[$this->generator_array['export']['render']['by']]) && is_string($this->generator_array['export']['render']['by']) && !empty($this->generator_array['export']['render']['by']) && is_object($this->generator_array[$this->generator_array['export']['render']['by']])) {
-            $this->setRenderObject($this->generator_array[$this->generator_array['export']['render']['by']]);
+        if ($this->hasProvidedByUser()) {
+            $this->setRenderObject($this->getSmartyByUserDefined());
         } else {
             $smarty = new Smarty();
             $smarty->setTemplateDir($this->getBaseDir() . '/../SMARTY_TPL_FILES');
@@ -90,5 +90,27 @@ trait FormGeneratorClassRenderTrait
     public function getRenderObjectBy()
     {
         return $this->render_object_by;
+    }
+
+    /**
+     * @return bool
+     * @author selcukmart
+     * 8.02.2022
+     * 11:22
+     */
+    protected function hasProvidedByUser(): bool
+    {
+        return isset($this->generator_array['export']['render']['by']) && $this->getSmartyByUserDefined() !== null && is_string($this->generator_array['export']['render']['by']) && !empty($this->generator_array['export']['render']['by']) && is_object($this->getSmartyByUserDefined());
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 8.02.2022
+     * 11:23
+     */
+    protected function getSmartyByUserDefined()
+    {
+        return $this->generator_array[$this->generator_array['export']['render']['by']] ?? null;
     }
 }

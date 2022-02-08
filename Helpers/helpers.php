@@ -226,11 +226,6 @@ if (!function_exists('mb_ucfirst')) {
     }
 }
 
-function ___($str)
-{
-    return $str;
-}
-
 function defaults_form_generator(array $conf, $defaults)
 {
     return set_defaults_form_generator($conf, $defaults);

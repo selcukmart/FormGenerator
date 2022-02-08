@@ -1,5 +1,7 @@
 <?php
+
 namespace FormGenerator\Render\RenderEngines;
+
 use FormGenerator\FormGenerator;
 use FormGenerator\Render\Render;
 use GlobalTraits\ErrorMessagesWithResultTrait;
@@ -13,7 +15,11 @@ use GlobalTraits\ErrorMessagesWithResultTrait;
 abstract class AbstractRenderEngines
 {
     use ErrorMessagesWithResultTrait;
-    private static $instances = [];
+
+    private static
+        $instances = [];
+    protected static
+        $templates;
     protected
         $formGenerator,
         $render;
@@ -24,11 +30,11 @@ abstract class AbstractRenderEngines
         $this->render = $templateObject;
     }
 
-    public static function getInstance(FormGenerator $formGenerator,$templateObject): AbstractRenderEngines
+    public static function getInstance(FormGenerator $formGenerator, $templateObject): AbstractRenderEngines
     {
         $cls = static::class;
         if (!isset(self::$instances[$cls])) {
-            self::$instances[$cls] = new static($formGenerator,$templateObject);
+            self::$instances[$cls] = new static($formGenerator, $templateObject);
         }
 
         return self::$instances[$cls];

@@ -93,25 +93,11 @@ class Label
     {
         $return = '';
         if ($this->isFoundLabel()) {
-            if ($this->translate) {
-                $return = ___($this->label);
-            } else {
-                $return = $this->label;
-            }
-
+            $return = $this->label;
         } elseif (isset($this->label_conf['attributes']['name'])) {
-            if ($this->translate) {
-                $return = ___($this->label_conf['attributes']['name']);
-            } else {
-                $return = $this->label_conf['attributes']['name'];
-            }
-
+            $return = $this->label_conf['attributes']['name'];
         } elseif ($this->already_set_label) {
-            if ($this->translate) {
-                $return = ___('Untitled');
-            } else {
-                $return = 'Untitled';
-            }
+            $return = 'Untitled';
         }
 
         $this->label_without_help = $return;

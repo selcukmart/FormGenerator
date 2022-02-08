@@ -18,17 +18,9 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
     public function render(string $template): string
     {
         $renderObject = $this->formGenerator->getRenderobject();
-        $template_dir = $renderObject->getTemplateDir()[0] . $this->formGenerator->getExportFormat();
+        $template = $this->getTemplateFullPath($renderObject, $template);
 
-        if (!is_dir($template_dir)) {
-            $template_path =  'Generic';
-        }else{
-            $template_path = $this->formGenerator->getExportFormat();
-        }
-        $template = $template_path . '/' . $template . '.tpl';
-        $template_full_path = $renderObject->getTemplateDir()[0] . $template;
-
-        if (is_file($template_full_path)) {
+        if ($template) {
             $renderObject->clearAllAssign();
             $input_parts = defaults_form_generator($this->render->getInputParts(), $this->render->getInputVariables());
             foreach ($input_parts as $index => $input_part) {
@@ -37,9 +29,41 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
             $this->setResult(true);
             return $renderObject->fetch($template);
         }
-        $this->setErrorMessage('There is no tpl file for this template ' . $template);
-        return '';
 
+        return '';
+    }
+
+    /**
+     * @param \Smarty $renderObject
+     * @param string $template
+     * @return false|mixed|string
+     * @author selcukmart
+     * 8.02.2022
+     * 11:14
+     */
+    protected function getTemplateFullPath(\Smarty $renderObject, string $template)
+    {
+        if (isset(self::$templates[$template])) {
+            return self::$templates[$template];
+        }
+        $template_dir = $renderObject->getTemplateDir()[0] . $this->formGenerator->getExportFormat();
+
+        if (!is_dir($template_dir)) {
+            $template_path = 'Generic';
+        } else {
+            $template_path = $this->formGenerator->getExportFormat();
+        }
+        $template_with_path = $template_path . '/' . $template . '.tpl';
+
+        $template_full_path = $renderObject->getTemplateDir()[0] . $template_with_path;
+
+        if (!is_file($template_full_path)) {
+            self::$templates[$template] = false;
+            $this->setErrorMessage('There is no tpl file for this template ' . $template_with_path);
+            return false;
+        }
+        self::$templates[$template] = $template_with_path;
+        return $template_with_path;
     }
 
 }

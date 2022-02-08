@@ -72,7 +72,6 @@ abstract class AbstractFormGeneratorExport
     {
         $str = '';
         if (isset($item['help_block']) && !empty($item['help_block']) && !in_array($item['type'], $this->without_help_block, true)) {
-            $item['help_block'] = ___($item['help_block']);
             $str = $this->formGenerator->render($item, 'HELP_BLOCK', true);
         }
         return $str;
@@ -86,9 +85,6 @@ abstract class AbstractFormGeneratorExport
         $this->input_parts = $input_factory->createInput($item);
         $this->addHelpBlockToInputparts($item);
         $this->addInputCapsuleAttributes2InputParts($item);
-
-
-
         return $this->input_parts;
     }
 
@@ -115,11 +111,6 @@ abstract class AbstractFormGeneratorExport
         $this->prepareTemplate();
 
         $this->formGenerator->render($this->input_parts, $this->template);
-    }
-
-    public function __destruct()
-    {
-
     }
 
     /**
@@ -198,5 +189,10 @@ abstract class AbstractFormGeneratorExport
     protected function isExceptionalSituation($item): bool
     {
         return isset($item['type'], $item['label']) && $item['type'] === 'form_section' && empty($item['label']);
+    }
+
+    public function __destruct()
+    {
+
     }
 }

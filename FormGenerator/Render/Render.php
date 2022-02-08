@@ -63,8 +63,7 @@ class Render
      */
     protected function embedTemplate($template)
     {
-        $render_class_name = ucfirst(strtolower($this->formGenerator->getRenderObjectBy()));
-        $classname = __NAMESPACE__.'\RenderEngines\\'.$render_class_name;
+        $classname = $this->getFacoryClassname();
 
         $class = $classname::getInstance($this->formGenerator,$this);
         $output = $class->render($template);
@@ -107,5 +106,18 @@ class Render
     public function __destruct()
     {
 
+    }
+
+    /**
+     * @return string
+     * @author selcukmart
+     * 8.02.2022
+     * 11:08
+     */
+    protected function getFacoryClassname(): string
+    {
+        $render_class_name = ucfirst(strtolower($this->formGenerator->getRenderObjectBy()));
+        $classname = __NAMESPACE__ . '\RenderEngines\\' . $render_class_name;
+        return $classname;
     }
 }

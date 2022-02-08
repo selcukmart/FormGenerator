@@ -114,9 +114,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
             } else {
                 $option_label = $option_row[$this->label];
             }
-            if ($this->translate_option) {
-                $option_label = ___($option_label);
-            }
+
             $arr = [
                 'element' => 'option',
                 'attributes' => $attr,
