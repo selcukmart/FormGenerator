@@ -109,6 +109,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
             $this->units_output .= $this->toHtml($arr);
         }
         //exit;
+
         return $this->units_output;
     }
 

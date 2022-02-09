@@ -25,7 +25,7 @@ trait FormGeneratorClassHtmlBuilderTrait
         $builder = $builderClassName::getInstance($this);
         $builder->buildHtmlOutput();
 
-        if (isset($this->generator_array['form'])) {
+        if (isset($this->generator_array['form']) && !empty($this->generator_array['form'])) {
             $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput('inputs');
             $this->generator_array['form']['attributes']['buttons'] = $this->getHtmlOutput('buttons');
             $this->removeOutput('inputs');
@@ -100,7 +100,7 @@ trait FormGeneratorClassHtmlBuilderTrait
 
     public function setBuildFormat(): void
     {
-        $this->build_format = $this->generator_array['build']['format'];
+        $this->build_format = $this->generator_array['build']['format'] ?? 'generic';
     }
 
     public function setBuildType(): void
@@ -143,7 +143,12 @@ trait FormGeneratorClassHtmlBuilderTrait
         if (isset($this->imploded_output[$type])) {
             return $this->imploded_output[$type];
         }
-
+        if (!isset($this->html_output[$type])) {
+            $type = 'inputs';
+        }
+        if (!isset($this->html_output[$type])) {
+            return '';
+        }
         $this->imploded_output[$type] = implode('', $this->html_output[$type]);
         return $this->imploded_output[$type];
     }

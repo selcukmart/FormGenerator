@@ -62,7 +62,6 @@ class Row
         } else {
             $this->row = $class->execute($this->generator_array);
         }
-
     }
 
     public function getOptionsSettings()

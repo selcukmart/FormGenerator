@@ -112,14 +112,8 @@ abstract class AbstractFormGeneratorBuilder
             $this->buildHtmlOutput($input, $group);
             return;
         }
-
         $this->prepareInputParts($input);
-        $input_capsule = $this->getInputCapsule();
-
-        if ($this->isForm($input['type'])) {
-            $input_capsule = $this->getFormCapsule();
-        }
-
+        $input_capsule = $this->detectInputCapsule($input);
         $this->formGeneratorDirector->renderToHtml($this->input_parts, $input_capsule);
     }
 
@@ -243,5 +237,26 @@ abstract class AbstractFormGeneratorBuilder
     protected function isForm($type): bool
     {
         return $type === 'form';
+    }
+
+    /**
+     * @param $input
+     * @return mixed|string
+     * @author selcukmart
+     * 9.02.2022
+     * 11:13
+     */
+    protected function detectInputCapsule($input)
+    {
+        if (isset($input['capsule_template'])) {
+            $input_capsule = $input['capsule_template'];
+        } else {
+            $input_capsule = $this->getInputCapsule();
+
+            if ($this->isForm($input['type'])) {
+                $input_capsule = $this->getFormCapsule();
+            }
+        }
+        return $input_capsule;
     }
 }
