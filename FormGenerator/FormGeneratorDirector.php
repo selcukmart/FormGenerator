@@ -16,7 +16,7 @@ use FormGenerator\FormGeneratorClassTraits\FormGeneratorInputTrait;
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorMessagesTrait;
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorScopeTrait;
 
-class FormGenerator
+class FormGeneratorDirector
 {
     use
         FormGeneratorClassRenderTrait,

@@ -1,6 +1,6 @@
 <?php
 namespace FormGenerator\Render\RenderEngines;
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 use FormGenerator\Render\Render;
 
 /**
@@ -10,7 +10,7 @@ use FormGenerator\Render\Render;
  */
 interface RenderInterface
 {
-    public function __construct(FormGenerator $formGenerator,Render $templateObject);
+    public function __construct(FormGeneratorDirector $formGenerator, Render $templateObject);
 
     public function createHtmlOutput(string $template):string;
 }

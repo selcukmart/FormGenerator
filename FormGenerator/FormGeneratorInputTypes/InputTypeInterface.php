@@ -8,11 +8,11 @@
 namespace FormGenerator\FormGeneratorInputTypes;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 interface InputTypeInterface
 {
-    public function __construct(FormGenerator $formGenerator);
+    public function __construct(FormGeneratorDirector $formGenerator);
 
     public function createInput(array $item):array;
 

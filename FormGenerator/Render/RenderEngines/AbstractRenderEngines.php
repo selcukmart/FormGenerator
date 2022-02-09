@@ -2,7 +2,7 @@
 
 namespace FormGenerator\Render\RenderEngines;
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 use FormGenerator\Render\Render;
 use GlobalTraits\ErrorMessagesWithResultTrait;
 
@@ -24,13 +24,13 @@ abstract class AbstractRenderEngines
         $formGenerator,
         $render;
 
-    public function __construct(FormGenerator $formGenerator, Render $templateObject)
+    public function __construct(FormGeneratorDirector $formGenerator, Render $templateObject)
     {
         $this->formGenerator = $formGenerator;
         $this->render = $templateObject;
     }
 
-    public static function getInstance(FormGenerator $formGenerator, $templateObject): AbstractRenderEngines
+    public static function getInstance(FormGeneratorDirector $formGenerator, $templateObject): AbstractRenderEngines
     {
         $class = static::class;
         if (!isset(self::$instances[$class])) {

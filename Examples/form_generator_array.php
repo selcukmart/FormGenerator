@@ -6,7 +6,7 @@
  */
 
 use Examples\DBExamples\Libraries\Database\DB;
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 include __DIR__ . '/../Examples/DBExamples/config.php';
 include __DIR__ . '/../Examples/DBExamples/Libraries/Database/DB.php';
@@ -80,7 +80,7 @@ $form_generator_array = [
     'build' => [
         /**
          * Optional
-         * Default runs Generic
+         * Default runs GenericBuilder
          */
         //'format' => 'Bootstrapv3FormWizard',
         'format' => $format,
@@ -518,7 +518,7 @@ $form_generator_array = [
     ]
 ];
 
-$form_generator = new FormGenerator($form_generator_array, 'edit');
-$form_generator->createHtmlOutput();
+$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+$form_generator->buildHtmlOutput();
 echo $form_generator->getHtmlOutput();
 

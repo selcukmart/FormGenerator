@@ -16,13 +16,13 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
         $tab_contents=[],
         $is_string_group;
 
-    public function createHtmlOutput($items = null, $parent_group = null):void
+    public function createHtmlOutput($inputs = null, $parent_group = null):void
     {
-        if (is_null($items)) {
-            $items = $this->formGenerator->getInputs();
+        if (is_null($inputs)) {
+            $inputs = $this->formGenerator->getInputs();
         }
 
-        foreach ($items as $group => $item) {
+        foreach ($inputs as $group => $item) {
             if (!is_null($parent_group)) {
                 $item['group'] = $parent_group;
             }

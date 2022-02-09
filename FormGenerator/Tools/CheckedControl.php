@@ -8,7 +8,7 @@
 namespace FormGenerator\Tools;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 class CheckedControl
 {
@@ -21,7 +21,7 @@ class CheckedControl
         $field,
         $formGenerator;
 
-    public function __construct(FormGenerator $formGenerator, array $control_array, $field, $row = null)
+    public function __construct(FormGeneratorDirector $formGenerator, array $control_array, $field, $row = null)
     {
         $this->formGenerator = $formGenerator;
         $this->row = $row;

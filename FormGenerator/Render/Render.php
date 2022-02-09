@@ -8,7 +8,7 @@
 namespace FormGenerator\Render;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 use Helpers\Classes;
 use SmartyException;
 
@@ -28,7 +28,7 @@ class Render
         'input_attr' => ''
     ];
 
-    public function __construct(FormGenerator $formGenerator)
+    public function __construct(FormGeneratorDirector $formGenerator)
     {
         $this->formGenerator = $formGenerator;
     }
@@ -97,9 +97,9 @@ class Render
     }
 
     /**
-     * @return FormGenerator
+     * @return FormGeneratorDirector
      */
-    public function getFormGenerator(): FormGenerator
+    public function getFormGenerator(): FormGeneratorDirector
     {
         return $this->formGenerator;
     }

@@ -8,7 +8,7 @@
 namespace FormGenerator\Tools;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 class DefaultValue
 {
@@ -16,7 +16,7 @@ class DefaultValue
         $all_field_options = [],
         $field = '';
 
-    public function __construct(FormGenerator $formGenerator, string $field)
+    public function __construct(FormGeneratorDirector $formGenerator, string $field)
     {
         if (is_object($formGenerator->getDb())) {
             $table = $formGenerator->getTable();

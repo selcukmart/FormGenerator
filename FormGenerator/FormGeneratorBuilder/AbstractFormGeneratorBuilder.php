@@ -4,7 +4,7 @@
 namespace FormGenerator\FormGeneratorBuilder;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 use Helpers\Dom;
 use FormGenerator\Tools\DependencyManagerV1;
 use Helpers\Classes;
@@ -27,7 +27,7 @@ abstract class AbstractFormGeneratorBuilder
         'file'
     ];
 
-    public function __construct(FormGenerator $formGenerator)
+    public function __construct(FormGeneratorDirector $formGenerator)
     {
         $this->formGenerator = $formGenerator;
         $this->class_names = [];
@@ -35,7 +35,7 @@ abstract class AbstractFormGeneratorBuilder
 
     }
 
-    public static function getInstance(FormGenerator $formGenerator): AbstractFormGeneratorBuilder
+    public static function getInstance(FormGeneratorDirector $formGenerator): AbstractFormGeneratorBuilder
     {
         $class = static::class;
         if (!isset(self::$instances[$class])) {
@@ -45,27 +45,27 @@ abstract class AbstractFormGeneratorBuilder
         return self::$instances[$class];
     }
 
-    public function createHtmlOutput($items = null, $parent_group = null): void
+    public function createHtmlOutput($inputs = null, $parent_group = null): void
     {
-        if (is_null($items)) {
-            $items = $this->formGenerator->getInputs();
+        if (is_null($inputs)) {
+            $inputs = $this->formGenerator->getInputs();
         }
 
-        foreach ($items as $group => $item) {
+        foreach ($inputs as $group => $input) {
             if (!is_null($parent_group)) {
-                $item['group'] = $parent_group;
+                $input['group'] = $parent_group;
             }
 
-            if ($this->isExceptionalSituation($item)) {
+            if ($this->isExceptionalSituation($input)) {
                 continue;
             }
 
-            $item['input-id'] = $this->formGenerator->inputID($item);
-            $will_filtered = $this->filter->willFiltered($item, $group);
+            $input['input-id'] = $this->formGenerator->inputID($input);
+            $will_filtered = $this->filter->willFiltered($input, $group);
             if ($will_filtered) {
                 continue;
             }
-            $this->sendDataForRender($item, $group);
+            $this->sendDataForRender($input, $group);
         }
     }
 

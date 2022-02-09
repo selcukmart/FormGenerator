@@ -7,11 +7,11 @@
 
 namespace FormGenerator\FormGeneratorBuilder;
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 interface BuilderInterface
 {
-    public function __construct(FormGenerator $formGenerator);
+    public function __construct(FormGeneratorDirector $formGenerator);
 
     public function createHtmlOutput($items = null, $parent_group = null):void;
 

@@ -6,8 +6,10 @@
  */
 
 namespace Examples\DBExamples\Libraries\Database;
+
 use FormGenerator\Tools\DB\DBInterface;
 use PDO;
+
 /**
  * Class DBExample
  * @package FormGenerator\Tools\DB
@@ -22,14 +24,13 @@ class DB implements DBInterface
 
     public static function getInstance()
     {
-        if(is_null(self::$instance)){
-            global $dbh;
-            self::$instance = $dbh;
+        if (is_null(self::$instance)) {
+            self::$instance = DBConnect::connect();
         }
         return self::$instance;
     }
 
-    public static function getRow($column,$id, $table): array
+    public static function getRow($column, $id, $table): array
     {
         $dbh = self::getInstance();
         $sql = "SELECT * FROM $table WHERE $column='$id' LIMIT 1";

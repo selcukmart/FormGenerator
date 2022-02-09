@@ -6,7 +6,7 @@
  */
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 require(__DIR__ . '/../vendor/autoload.php');
 $format = 'Bootstrapv3Form';

@@ -8,7 +8,7 @@
 
 namespace FormGenerator\FormGeneratorInputTypes;
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 use FormGenerator\Tools\DefaultValue;
 use FormGenerator\Tools\Label;
 use Helpers\Dom;
@@ -25,12 +25,12 @@ abstract class AbstractInputTypes
         'label'
     ];
 
-    public function __construct(FormGenerator $formGenerator)
+    public function __construct(FormGeneratorDirector $formGenerator)
     {
         $this->formGenerator = $formGenerator;
     }
 
-    public static function getInstance(FormGenerator $formGenerator): AbstractInputTypes
+    public static function getInstance(FormGeneratorDirector $formGenerator): AbstractInputTypes
     {
         $class = static::class;
         if (!isset(self::$instances[$class])) {

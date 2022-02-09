@@ -8,13 +8,13 @@
 namespace FormGenerator\Tools;
 
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 class Filter
 {
     private $formGenerator;
 
-    public function __construct(FormGenerator $formGenerator)
+    public function __construct(FormGeneratorDirector $formGenerator)
     {
         $this->formGenerator = $formGenerator;
     }

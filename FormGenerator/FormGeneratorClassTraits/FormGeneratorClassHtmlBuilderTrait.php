@@ -14,7 +14,7 @@ trait FormGeneratorClassHtmlBuilderTrait
         $build_format,
         $build_type;
 
-    public function createHtmlOutput(): void
+    public function buildHtmlOutput(): void
     {
         if (!is_object($this->render_object)) {
             $this->setErrorMessage('Render Object not found');
@@ -47,9 +47,9 @@ trait FormGeneratorClassHtmlBuilderTrait
             $namespace = $this->namespace;
         }
 
-        $class = $namespace . '\FormGeneratorBuilder\\' . $this->build_format;
+        $class = $namespace . '\FormGeneratorBuilder\\' . $this->build_format . 'Builder';
         if (!class_exists($class)) {
-            $class = $namespace . '\FormGeneratorBuilder\\GenericBuilder';
+            $class = $namespace . '\FormGeneratorBuilder\GenericBuilder';
         }
         return $class;
     }

@@ -8,7 +8,7 @@
 
 namespace FormGenerator\Tools\FormDataProviders;
 
-use FormGenerator\FormGenerator;
+use FormGenerator\FormGeneratorDirector;
 
 abstract class AbstractFormDataProviders
 {
@@ -25,7 +25,7 @@ abstract class AbstractFormDataProviders
         $formGenerator,
         $data;
 
-    public function __construct(FormGenerator $formGenerator)
+    public function __construct(FormGeneratorDirector $formGenerator)
     {
         $this->formGenerator = $formGenerator;
 
@@ -37,7 +37,7 @@ abstract class AbstractFormDataProviders
         $this->data = $this->generator_array['data'];
     }
 
-    public static function getInstance(FormGenerator $formGenerator): AbstractFormDataProviders
+    public static function getInstance(FormGeneratorDirector $formGenerator): AbstractFormDataProviders
     {
         $cls = static::class;
         if (!isset(self::$instances[$cls])) {
