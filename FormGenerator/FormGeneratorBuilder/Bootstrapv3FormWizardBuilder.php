@@ -16,7 +16,7 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
         $tab_contents=[],
         $is_string_group;
 
-    public function createHtmlOutput($inputs = null, $parent_group = null):void
+    public function buildHtmlOutput($inputs = null, $parent_group = null):void
     {
         if (is_null($inputs)) {
             $inputs = $this->formGenerator->getInputs();
@@ -49,7 +49,7 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
     {
         if ($this->is_string_group) {
             unset($item['input-id']);
-            $this->createHtmlOutput($item, $group);
+            $this->buildHtmlOutput($item, $group);
             return;
         }
 

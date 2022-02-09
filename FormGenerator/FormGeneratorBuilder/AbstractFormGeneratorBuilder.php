@@ -45,7 +45,7 @@ abstract class AbstractFormGeneratorBuilder
         return self::$instances[$class];
     }
 
-    public function createHtmlOutput($inputs = null, $parent_group = null): void
+    public function buildHtmlOutput($inputs = null, $parent_group = null): void
     {
         if (is_null($inputs)) {
             $inputs = $this->formGenerator->getInputs();
@@ -56,7 +56,7 @@ abstract class AbstractFormGeneratorBuilder
                 $input['group'] = $parent_group;
             }
 
-            if ($this->isExceptionalSituation($input)) {
+            if ($this->isItExceptionalSituation($input)) {
                 continue;
             }
 
@@ -102,7 +102,7 @@ abstract class AbstractFormGeneratorBuilder
     {
         if (!empty($group) && !is_numeric($group) && is_string($group)) {
             unset($item['input-id']);
-            $this->createHtmlOutput($item, $group);
+            $this->buildHtmlOutput($item, $group);
             return;
         }
 
@@ -188,7 +188,7 @@ abstract class AbstractFormGeneratorBuilder
      * 8.02.2022
      * 11:02
      */
-    protected function isExceptionalSituation($item): bool
+    protected function isItExceptionalSituation($item): bool
     {
         return isset($item['type'], $item['label']) && $item['type'] === 'form_section' && empty($item['label']);
     }

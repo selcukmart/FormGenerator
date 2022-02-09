@@ -152,7 +152,7 @@ abstract class AbstractInputTypes
      */
     protected function detectInputType($export_type)
     {
-        return is_null($export_type) ? strtoupper($this->item['type']) : $export_type;
+        return $this->item['template'] ?? (is_null($export_type) ? strtoupper($this->item['type']) : $export_type);
     }
 
     public function __destruct()

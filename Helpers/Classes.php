@@ -12,7 +12,7 @@ class Classes
 
     public static function prepareFromString($str): string
     {
-        $str = str_replace('/', '_', $str);
+        $str = str_replace(['/', '-'], '_', $str);
         $parsed_words = explode('_', mb_strtolower($str));
         $new_str = '';
         foreach ($parsed_words as $word) {

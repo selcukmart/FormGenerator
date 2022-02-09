@@ -27,8 +27,9 @@ class Button extends AbstractInputTypes implements InputTypeInterface
     {
 
         $this->item = $item;
+
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);
-        $this->item['attributes']['type'] =  $this->item['attributes']['type']??$this->item['type'];
+        $this->item['attributes']['type'] = $this->item['attributes']['type'] ?? $this->item['type'];
         $this->item['attributes']['name'] = $this->item['attributes']['name'] ?? $this->item['attributes']['type'];
         $field = $this->item['attributes']['name'];
         $this->cleanIDInAttributesIfNecessary();
@@ -44,9 +45,10 @@ class Button extends AbstractInputTypes implements InputTypeInterface
         if (empty($this->item['attributes']['placeholder'])) {
             $this->item['attributes']['placeholder'] = $this->label->getLabelWithoutHelp();
         }
+        $this->item['attributes']['label'] = $this->item['label'];
 
         $input_dom_array = [
-            'element' => 'input',
+            'element' => 'button',
             'attributes' => $this->item['attributes'],
             'content' => ''
         ];
@@ -55,7 +57,7 @@ class Button extends AbstractInputTypes implements InputTypeInterface
          * For encapsulation div or etc...
          */
         return [
-            'input' => $this->toHtml($input_dom_array),
+            'input' => $this->toHtml($input_dom_array,'BUTTON'),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''

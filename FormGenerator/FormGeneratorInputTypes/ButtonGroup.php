@@ -10,38 +10,32 @@ namespace FormGenerator\FormGeneratorInputTypes;
 
 class ButtonGroup extends AbstractInputTypes implements InputTypeInterface
 {
-    private
-        $default_generator_arr = [
-        'default_value' => '',
-        'attributes' => [
-            'value' => '',
-            'class' => '',
-            'placeholder' => ''
-        ],
-        'dont_set_id' => false,
-        'value_callback' => ''
-    ];
+    const DEFAULT_TEMPLATE = 'BUTTON_GROUP_CAPSULE';
 
 
     public function createInput(array $items): array
     {
         $inputs = '';
-        foreach ($items as $item) {
+        foreach ($items['buttons'] as $item) {
             $button = Button::getInstance($this->formGenerator);
-            $inputs .= $button->createInput($item);
+            $result = $button->createInput($item);
+            $inputs .= $result['input'];
         }
+        unset($items['buttons']);
+        $items['attributes']['input'] = $inputs;
         $input_dom_array = [
-            'element' => 'input',
-            'attributes' => $items['attributes'],
-            'content' => $inputs
+
+            'attributes' => $items['attributes']
         ];
+
+        $default_template = $items['template'] ?? self::DEFAULT_TEMPLATE;
 
         /**
          * For encapsulation div or etc...
          */
         return [
-            'input' => $this->toHtml($input_dom_array),
-            'label' => $items['label'],
+            'input' => $this->toHtml($input_dom_array, $default_template),
+            'label' => '',
             'input_capsule_attributes' => '',
             'label_attributes' => ''
         ];

@@ -22,7 +22,7 @@ trait FormGeneratorClassHtmlBuilderTrait
         }
         $builderClassName = $this->getFormGeneratorBuilderClassName();
         $builder = $builderClassName::getInstance($this);
-        $builder->createHtmlOutput();
+        $builder->buildHtmlOutput();
 
         if (isset($this->generator_array['form'])) {
             $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput();

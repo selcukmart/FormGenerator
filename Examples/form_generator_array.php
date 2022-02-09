@@ -140,6 +140,7 @@ $form_generator_array = [
             // this is a form input row
             [
                 'type' => 'text',
+                'template' => 'TEXT_X',
                 'help_block' => 'test help block',
                 'attributes' => [
                     'name' => 'address_identification',
@@ -486,6 +487,7 @@ $form_generator_array = [
         'save' => [
             [
                 'type' => 'button-group',
+                'template' => 'FORM_FOOTER',
                 'buttons' => [
                     [
                         'type' => 'button',
