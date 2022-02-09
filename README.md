@@ -89,7 +89,7 @@ $form_generator_array = [
         'table' => 'address',
         /// Data Structure Finish
     ],
-    'export' => [
+    'build' => [
         /**
          * Optional
          * Default runs Generic
@@ -119,10 +119,10 @@ $form_generator_array = [
         /**
          * optional
          */
-        'export-object' => [
-            // default: FormGenerator_namespace\FormGeneratorExport
-            // if you set your namespace the system will run your FormGeneratorExport folder
-            // only name space your folder name must be FormGeneratorExport
+        'build-object' => [
+            // default: FormGenerator_namespace\FormGeneratorBuilder
+            // if you set your namespace the system will run your FormGeneratorBuilder folder
+            // only name space your folder name must be FormGeneratorBuilder
             'namespace' => ''
         ],
     ],

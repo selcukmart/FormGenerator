@@ -100,7 +100,7 @@ trait FormGeneratorClassRenderTrait
      */
     protected function hasProvidedByUser(): bool
     {
-        return isset($this->generator_array['export']['render']['by']) && $this->getSmartyByUserDefined() !== null && is_string($this->generator_array['export']['render']['by']) && !empty($this->generator_array['export']['render']['by']) && is_object($this->getSmartyByUserDefined());
+        return isset($this->generator_array['build']['render']['by']) && $this->getSmartyByUserDefined() !== null && is_string($this->generator_array['build']['render']['by']) && !empty($this->generator_array['build']['render']['by']) && is_object($this->getSmartyByUserDefined());
     }
 
     /**
@@ -111,6 +111,6 @@ trait FormGeneratorClassRenderTrait
      */
     protected function getSmartyByUserDefined()
     {
-        return $this->generator_array[$this->generator_array['export']['render']['by']] ?? null;
+        return $this->generator_array[$this->generator_array['build']['render']['by']] ?? null;
     }
 }

@@ -8,7 +8,7 @@
 namespace FormGenerator\FormGeneratorInputTypes;
 
 
-class Generic extends AbstractInputTypes implements InputTypeInterface
+class Button extends AbstractInputTypes implements InputTypeInterface
 {
     private
         $default_generator_arr = [

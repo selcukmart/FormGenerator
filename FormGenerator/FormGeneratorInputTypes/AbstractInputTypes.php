@@ -32,23 +32,23 @@ abstract class AbstractInputTypes
 
     public static function getInstance(FormGenerator $formGenerator): AbstractInputTypes
     {
-        $cls = static::class;
-        if (!isset(self::$instances[$cls])) {
-            self::$instances[$cls] = new static($formGenerator);
+        $class = static::class;
+        if (!isset(self::$instances[$class])) {
+            self::$instances[$class] = new static($formGenerator);
         }
 
-        return self::$instances[$cls];
+        return self::$instances[$class];
     }
 
-    protected function toHtml($input_dom_array, $export_type = null)
+    protected function toHtml($input_dom_array, $inputType = null): string
     {
-        $export_type = is_null($export_type) ? strtoupper($this->item['type']) : $export_type;
-        $result = $this->formGenerator->renderToHtml($input_dom_array['attributes'], $export_type, true);
-        if (!$result) {
+        $inputType = $this->detectInputType($inputType);
+        $html_content = $this->formGenerator->renderToHtml($input_dom_array['attributes'], $inputType, true);
+        if (!$html_content) {
             $input_dom_array = $this->clearUnnecessaryAttributes($input_dom_array);
-            $result = Dom::htmlGenerator($input_dom_array);
+            $html_content = Dom::htmlGenerator($input_dom_array);
         }
-        return $result;
+        return $html_content;
     }
 
     /**
@@ -143,9 +143,20 @@ abstract class AbstractInputTypes
         }
     }
 
+    /**
+     * @param $export_type
+     * @return mixed|string
+     * @author selcukmart
+     * 9.02.2022
+     * 07:33
+     */
+    protected function detectInputType($export_type)
+    {
+        return is_null($export_type) ? strtoupper($this->item['type']) : $export_type;
+    }
+
     public function __destruct()
     {
 
     }
-
 }

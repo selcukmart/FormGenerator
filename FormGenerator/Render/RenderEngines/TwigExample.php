@@ -17,7 +17,7 @@ class TwigExample extends AbstractRenderEngines implements RenderInterface
         // This is your twig,blade,mustache etc object
         $renderObject = $this->formGenerator->getRenderobject();
         // this is place of the templte
-        $template = $this->formGenerator->getExportFormat() . '/' . $template . '.html.twig';
+        $template = $this->formGenerator->getBuildFormat() . '/' . $template . '.html.twig';
         $template_full_path = $renderObject->getTemplateDir() . $template;
         // If not exists the system will use its own dom output.
         if (is_file($template_full_path)) {

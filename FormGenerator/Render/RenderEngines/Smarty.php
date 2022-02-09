@@ -46,12 +46,12 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
         if (isset(self::$templates[$template])) {
             return self::$templates[$template];
         }
-        $template_dir = $renderObject->getTemplateDir()[0] . $this->formGenerator->getExportFormat();
+        $template_dir = $renderObject->getTemplateDir()[0] . $this->formGenerator->getBuildFormat();
 
         if (!is_dir($template_dir)) {
             $template_path = 'Generic';
         } else {
-            $template_path = $this->formGenerator->getExportFormat();
+            $template_path = $this->formGenerator->getBuildFormat();
         }
         $template_with_path = $template_path . '/' . $template . '.tpl';
 

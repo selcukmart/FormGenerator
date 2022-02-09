@@ -5,11 +5,11 @@
  * 11:18
  */
 
-namespace FormGenerator\FormGeneratorExport;
+namespace FormGenerator\FormGeneratorBuilder;
 
 use FormGenerator\FormGenerator;
 
-interface ExportInterface
+interface BuilderInterface
 {
     public function __construct(FormGenerator $formGenerator);
 

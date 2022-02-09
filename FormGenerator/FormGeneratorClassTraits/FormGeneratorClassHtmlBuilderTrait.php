@@ -7,12 +7,12 @@
 
 namespace FormGenerator\FormGeneratorClassTraits;
 
-trait FormGeneratorClassExportOutputTrait
+trait FormGeneratorClassHtmlBuilderTrait
 {
     protected
         $html_output = '',
-        $export_format,
-        $export_type;
+        $build_format,
+        $build_type;
 
     public function createHtmlOutput(): void
     {
@@ -20,16 +20,16 @@ trait FormGeneratorClassExportOutputTrait
             $this->setErrorMessage('Render Object not found');
             return;
         }
-        $factory_class = $this->getFormGeneratorExportClassName();
-        $factory = $factory_class::getInstance($this);
-        $factory->createHtmlOutput();
+        $builderClassName = $this->getFormGeneratorBuilderClassName();
+        $builder = $builderClassName::getInstance($this);
+        $builder->createHtmlOutput();
 
         if (isset($this->generator_array['form'])) {
             $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput();
             $this->removeOutput();
             $this->generator_array['form']['type'] = 'form';
             $this->generator_array['form']['input-id'] = $this->generator_array['form']['id'] ?? '';
-            $factory->createForm($this->generator_array['form']);
+            $builder->createForm($this->generator_array['form']);
         }
     }
 
@@ -39,17 +39,17 @@ trait FormGeneratorClassExportOutputTrait
      * 3.02.2022
      * 13:38
      */
-    private function getFormGeneratorExportClassName(): string
+    private function getFormGeneratorBuilderClassName(): string
     {
-        if ($this->hasUserDefinedHtmlExportObjects()) {
-            $namespace = $this->getUserDefinedExportNamespace();
+        if ($this->hasUserDefinedFormGeneratorBuilderObjects()) {
+            $namespace = $this->getUserDefinedFormGeneratorBuilderNamespace();
         } else {
             $namespace = $this->namespace;
         }
 
-        $class = $namespace . '\FormGeneratorExport\\' . $this->export_format;
+        $class = $namespace . '\FormGeneratorBuilder\\' . $this->build_format;
         if (!class_exists($class)) {
-            $class = $namespace . '\FormGeneratorExport\\Generic';
+            $class = $namespace . '\FormGeneratorBuilder\\GenericBuilder';
         }
         return $class;
     }
@@ -71,7 +71,7 @@ trait FormGeneratorClassExportOutputTrait
 
     }
 
-    public function removeOutput()
+    public function removeOutput(): void
     {
         $this->html_output = '';
     }
@@ -79,27 +79,28 @@ trait FormGeneratorClassExportOutputTrait
     /**
      * @return mixed|string
      */
-    public function getExportFormat(): string
+    public function getBuildFormat(): string
     {
-        return $this->export_format;
+        return $this->build_format;
     }
 
     /**
      * @return mixed
      */
-    public function getExportType()
+    public function getBuildType()
     {
-        return $this->export_type;
+        return $this->build_type;
     }
 
-    public function setExportFormat(): void
+    public function setBuildFormat(): void
     {
-        $this->export_format = $this->generator_array['export']['format'];
+        $this->build_format = $this->generator_array['build']['format'];
     }
 
-    public function setExportType(): void
+    public function setBuildType(): void
     {
-        $this->export_type = $this->generator_array['export']['type'];
+        $this->generator_array['build']['type'] = $this->generator_array['build']['type'] ?? 'html';
+        $this->build_type = $this->generator_array['build']['type'];
     }
 
     /**
@@ -108,9 +109,9 @@ trait FormGeneratorClassExportOutputTrait
      * 8.02.2022
      * 11:55
      */
-    private function hasUserDefinedHtmlExportObjects(): bool
+    private function hasUserDefinedFormGeneratorBuilderObjects(): bool
     {
-        return isset($this->generator_array['export-object']['namespace']) && !empty($this->generator_array['export-object']['namespace']);
+        return isset($this->generator_array['build-object']['namespace']) && !empty($this->generator_array['build-object']['namespace']);
     }
 
     /**
@@ -119,8 +120,8 @@ trait FormGeneratorClassExportOutputTrait
      * 8.02.2022
      * 11:56
      */
-    private function getUserDefinedExportNamespace()
+    private function getUserDefinedFormGeneratorBuilderNamespace()
     {
-        return $this->generator_array['export-object']['namespace'];
+        return $this->generator_array['build-object']['namespace'];
     }
 }

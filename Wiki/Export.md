@@ -9,7 +9,7 @@ Exports the specified Bootstrap version. And specifies how the form is structure
 If you want the form to be advanced in a wizard way, it is set as Bootstrapv3FormWizard in the format section.
 At the same time, when &export_format=form-wizard is added to the url part, the flat form becomes a wizard structure.
 ```
- 'export' => [
+ 'build' => [
         'format' => 'Bootstrapv3FormWizard',
               ],
 ```
@@ -23,7 +23,7 @@ At the same time, when &export_format=form is added to the url part, the form wi
 
 
 ```
-    'export' => [
+    'build' => [
             'format' => 'Bootstrapv3Form'
                 ],
 ```

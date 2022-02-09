@@ -25,7 +25,7 @@ class Output extends AbstractInputTypes implements InputTypeInterface
         $this->item = $item;
         $this->item = defaults_form_generator($this->item, $this->default_generator_arr);
         $this->setLabel();
-        $export_type = strtoupper($this->formGenerator->getExportType());
+        $export_type = strtoupper($this->formGenerator->getBuildType());
         $result = $this->formGenerator->renderToHtml($this->item, $export_type, true);
         $this->item['output'] = $result ?: $this->item['output'];
         return [

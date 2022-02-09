@@ -43,10 +43,6 @@ $row = [
     'is_e_invoice_user' => '2',
 ];
 $form_generator_array = [
-    /**
-     * json,XML,HTML
-     * json and xml are not coded yet
-     */
     'data' => [
         'from' => 'row',
         'row' => $row,
@@ -81,14 +77,13 @@ $form_generator_array = [
         'table' => 'address',
         /// Data Structure Finish
     ],
-    'export' => [
+    'build' => [
         /**
          * Optional
          * Default runs Generic
          */
         //'format' => 'Bootstrapv3FormWizard',
         'format' => $format,
-        'type' => 'html',
         /**
          * Default Smarty
          * optional
@@ -111,10 +106,10 @@ $form_generator_array = [
         /**
          * optional
          */
-        'export-object' => [
-            // default: FormGenerator_namespace\FormGeneratorExport
-            // if you set your namespace the system will run your FormGeneratorExport folder
-            // only name space your folder name must be FormGeneratorExport
+        'build-object' => [
+            // default: FormGenerator_namespace\FormGeneratorBuilder
+            // if you set your namespace the system will run your FormGeneratorBuilder folder
+            // only name space your folder name must be FormGeneratorBuilder
             'namespace' => ''
         ],
     ],
@@ -490,14 +485,35 @@ $form_generator_array = [
         ],
         'save' => [
             [
-                'type' => 'button',
+                'type' => 'button-group',
+                'buttons' => [
+                    [
+                        'type' => 'button',
+                        'label' => 'Button',
+                        'attributes' => [
+                            'class' => 'btn btn-success',
+                            'name' => 'btn1'
+                        ]
+                    ],
+                    [
+                        'type' => 'reset',
+                        'label' => 'Reset',
+                        'attributes' => [
+                            'class' => 'btn btn-success',
+                            'name' => 'btn2'
+                        ]
+                    ],
+                    [
+                        'type' => 'submit',
+                        'label' => 'Submit',
+                        'attributes' => [
+                            'class' => 'btn btn-success',
+                            'name' => 'btn3'
+                        ]
+                    ]
+                ]
             ],
-            [
-                'type' => 'reset',
-            ],
-            [
-                'type' => 'submit',
-            ]
+
         ]
     ]
 ];

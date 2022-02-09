@@ -1,7 +1,7 @@
 <?php
 
 
-namespace FormGenerator\FormGeneratorExport;
+namespace FormGenerator\FormGeneratorBuilder;
 
 
 use FormGenerator\FormGenerator;
@@ -9,7 +9,7 @@ use Helpers\Dom;
 use FormGenerator\Tools\DependencyManagerV1;
 use Helpers\Classes;
 
-abstract class AbstractFormGeneratorExport
+abstract class AbstractFormGeneratorBuilder
 {
     private static
         $instances = [],
@@ -35,7 +35,7 @@ abstract class AbstractFormGeneratorExport
 
     }
 
-    public static function getInstance(FormGenerator $formGenerator): AbstractFormGeneratorExport
+    public static function getInstance(FormGenerator $formGenerator): AbstractFormGeneratorBuilder
     {
         $class = static::class;
         if (!isset(self::$instances[$class])) {

@@ -25,8 +25,7 @@ class DBExample implements DBInterface
     public static function getInstance()
     {
         if(is_null(self::$instance)){
-            global $dbh;
-            self::$instance = $dbh;
+            self::$instance = DBConnectExample::connect();
         }
         return self::$instance;
     }

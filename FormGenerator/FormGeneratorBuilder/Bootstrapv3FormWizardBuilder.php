@@ -5,10 +5,10 @@
  * 17:33
  */
 
-namespace FormGenerator\FormGeneratorExport;
+namespace FormGenerator\FormGeneratorBuilder;
 
 
-class Bootstrapv3FormWizard extends AbstractFormGeneratorExport implements ExportInterface
+class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implements BuilderInterface
 {
 
     private

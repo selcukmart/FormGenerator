@@ -9,7 +9,7 @@ namespace FormGenerator;
 
 
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorClassDataPrepareTrait;
-use FormGenerator\FormGeneratorClassTraits\FormGeneratorClassExportOutputTrait;
+use FormGenerator\FormGeneratorClassTraits\FormGeneratorClassHtmlBuilderTrait;
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorClassFilterTrait;
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorClassRenderTrait;
 use FormGenerator\FormGeneratorClassTraits\FormGeneratorInputTrait;
@@ -21,7 +21,7 @@ class FormGenerator
     use
         FormGeneratorClassRenderTrait,
         FormGeneratorClassDataPrepareTrait,
-        FormGeneratorClassExportOutputTrait,
+        FormGeneratorClassHtmlBuilderTrait,
         FormGeneratorClassFilterTrait,
         FormGeneratorScopeTrait,
         FormGeneratorInputTrait,
@@ -40,8 +40,8 @@ class FormGenerator
         $this->setGeneratorArray($generator_array);
         $this->setInputs();
         $this->setRenderObjectDetails();
-        $this->setExportFormat();
-        $this->setExportType();
+        $this->setBuildFormat();
+        $this->setBuildType();
         $this->filterTask();
         $this->setNamespace();
         $this->setInputTypesFolderNamespace();
