@@ -8,26 +8,24 @@
 namespace FormGenerator\FormGeneratorInputTypes;
 
 
-
 class Form extends AbstractInputTypes implements InputTypeInterface
 {
 
-    public function createInput(array $item):array
+    public function createInput(array $item): array
     {
         $this->item = $item;
-        $this->setLabel();
         $input_dom_array = [
             'element' => 'form',
             'attributes' => $this->item['attributes'],
             'content' => ''
         ];
-
+        $this->html_output_type = 'form';
         return [
             'input' => $this->toHtml($input_dom_array),
-            'label' => $this->item['label'],
+            'label' => '',
             'input_capsule_attributes' => '',
             'label_attributes' => ''
         ];
     }
-    
+
 }

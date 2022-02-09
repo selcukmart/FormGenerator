@@ -33,7 +33,7 @@ class Button extends AbstractInputTypes implements InputTypeInterface
         $this->item['attributes']['name'] = $this->item['attributes']['name'] ?? $this->item['attributes']['type'];
         $field = $this->item['attributes']['name'];
         $this->cleanIDInAttributesIfNecessary();
-        $row_table = $this->formGenerator->getRow();
+        $row_table = $this->formGeneratorDirector->getRow();
 
 
         $this->valueCallback($row_table, $field);
@@ -42,9 +42,6 @@ class Button extends AbstractInputTypes implements InputTypeInterface
         $this->setDBDefaultValue($field);
         $this->setLabel();
 
-        if (empty($this->item['attributes']['placeholder'])) {
-            $this->item['attributes']['placeholder'] = $this->label->getLabelWithoutHelp();
-        }
         $this->item['attributes']['label'] = $this->item['label'];
 
         $input_dom_array = [

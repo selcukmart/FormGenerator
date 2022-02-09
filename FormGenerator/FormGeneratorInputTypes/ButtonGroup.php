@@ -17,7 +17,7 @@ class ButtonGroup extends AbstractInputTypes implements InputTypeInterface
     {
         $inputs = '';
         foreach ($items['buttons'] as $item) {
-            $button = Button::getInstance($this->formGenerator);
+            $button = Button::getInstance($this->formGeneratorDirector);
             $result = $button->createInput($item);
             $inputs .= $result['input'];
         }
@@ -29,7 +29,7 @@ class ButtonGroup extends AbstractInputTypes implements InputTypeInterface
         ];
 
         $default_template = $items['template'] ?? self::DEFAULT_TEMPLATE;
-
+        $this->html_output_type = 'buttons';
         /**
          * For encapsulation div or etc...
          */

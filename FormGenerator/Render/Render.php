@@ -15,7 +15,7 @@ use SmartyException;
 class Render
 {
     protected
-        $formGenerator,
+        $formGeneratorDirector,
         $input_parts = [],
         $input_variables = [
         'form_group_class' => '',
@@ -28,26 +28,25 @@ class Render
         'input_attr' => ''
     ];
 
-    public function __construct(FormGeneratorDirector $formGenerator)
+    public function __construct(FormGeneratorDirector $formGeneratorDirector)
     {
-        $this->formGenerator = $formGenerator;
+        $this->formGeneratorDirector = $formGeneratorDirector;
     }
 
     /**
      * @throws SmartyException
      */
-    public function createHtmlOutput($template, $return = false)
+    public function createHtmlOutput($template, $return, $html_output_type)
     {
 
         if (empty($this->input_parts)) {
-            $this->formGenerator->setErrorMessage('There is no input');
+            $this->formGeneratorDirector->setErrorMessage('There is no input');
         } else {
             $htmlOutput = $this->getHtmlOutput($template);
             if ($return) {
                 return $htmlOutput;
             }
-
-            $this->formGenerator->mergeOutputAsString($htmlOutput);
+            $this->formGeneratorDirector->mergeOutputAsString($htmlOutput, $html_output_type);
         }
     }
 
@@ -66,10 +65,11 @@ class Render
     {
         $factoryClassname = $this->getFactoryClassname();
 
-        $render_factory = $factoryClassname::getInstance($this->formGenerator,$this);
+        $render_factory = $factoryClassname::getInstance($this->formGeneratorDirector, $this);
+
         $output = $render_factory->createHtmlOutput($template);
         if (!$render_factory->isResult()) {
-            $this->formGenerator->setErrorMessage($render_factory->getErrorMessage());
+            $this->formGeneratorDirector->setErrorMessage($render_factory->getErrorMessage());
             return false;
         }
         return $output;
@@ -99,9 +99,9 @@ class Render
     /**
      * @return FormGeneratorDirector
      */
-    public function getFormGenerator(): FormGeneratorDirector
+    public function getFormGeneratorDirector(): FormGeneratorDirector
     {
-        return $this->formGenerator;
+        return $this->formGeneratorDirector;
     }
 
     /**
@@ -112,7 +112,7 @@ class Render
      */
     protected function getFactoryClassname(): string
     {
-        $render_class_name =Classes::prepareFromString($this->formGenerator->getRenderObjectBy());
+        $render_class_name = Classes::prepareFromString($this->formGeneratorDirector->getRenderObjectBy());
         return __NAMESPACE__ . '\RenderEngines\\' . $render_class_name;
     }
 

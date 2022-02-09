@@ -19,14 +19,14 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
     public function buildHtmlOutput($inputs = null, $parent_group = null):void
     {
         if (is_null($inputs)) {
-            $inputs = $this->formGenerator->getInputs();
+            $inputs = $this->formGeneratorDirector->getInputs();
         }
 
         foreach ($inputs as $group => $item) {
             if (!is_null($parent_group)) {
                 $item['group'] = $parent_group;
             }
-            $item['input-id'] = $this->formGenerator->inputID($item);
+            $item['input-id'] = $this->formGeneratorDirector->inputID($item);
             $will_filtered = $this->filter->willFiltered($item, $group);
             if ($will_filtered) {
                 continue;
@@ -45,24 +45,24 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
     }
 
 
-    protected function sendDataForRender($item, $group):void
+    protected function sendDataForRender($input, $group):void
     {
         if ($this->is_string_group) {
-            unset($item['input-id']);
-            $this->buildHtmlOutput($item, $group);
+            unset($input['input-id']);
+            $this->buildHtmlOutput($input, $group);
             return;
         }
 
-        if ($item['type'] === 'form_section') {
+        if ($input['type'] === 'form_section') {
             return;
         }
 
-        $this->prepareInputParts($item);
-        if (!isset($this->tab_contents[$item['group']])) {
-            $this->tab_contents[$item['group']] = [];
+        $this->prepareInputParts($input);
+        if (!isset($this->tab_contents[$input['group']])) {
+            $this->tab_contents[$input['group']] = [];
         }
 
-        $this->tab_contents[$item['group']][] = $this->formGenerator->renderToHtml($this->input_parts, 'TEMPLATE');
+        $this->tab_contents[$input['group']][] = $this->formGeneratorDirector->renderToHtml($this->input_parts, 'TEMPLATE');
     }
 
 }

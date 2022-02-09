@@ -51,7 +51,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
 
         $this->cleanIDInAttributesIfNecessary();
 
-        $this->row_table = $this->formGenerator->getRow();
+        $this->row_table = $this->formGeneratorDirector->getRow();
 
         if (isset($this->row_table[$this->field])) {
             $this->item['attributes']['value'] = $this->row_table[$this->field];
@@ -84,7 +84,7 @@ class Select extends AbstractInputTypes implements InputTypeInterface
 
     private function optionGenerate()
     {
-        $row = new Row($this->formGenerator,$this->options_data);
+        $row = new Row($this->formGeneratorDirector,$this->options_data);
         $row->setMultipleLikeRadioCheckboxSelect(true);
         $row->setRow();
         $this->option_settings = $row->getOptionsSettings() ?? $this->option_settings;

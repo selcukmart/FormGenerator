@@ -10,7 +10,8 @@ namespace FormGenerator\FormGeneratorClassTraits;
 trait FormGeneratorClassHtmlBuilderTrait
 {
     protected
-        $html_output = '',
+        $imploded_output = [],
+        $html_output = [],
         $build_format,
         $build_type;
 
@@ -25,8 +26,10 @@ trait FormGeneratorClassHtmlBuilderTrait
         $builder->buildHtmlOutput();
 
         if (isset($this->generator_array['form'])) {
-            $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput();
-            $this->removeOutput();
+            $this->generator_array['form']['attributes']['inputs'] = $this->getHtmlOutput('inputs');
+            $this->generator_array['form']['attributes']['buttons'] = $this->getHtmlOutput('buttons');
+            $this->removeOutput('inputs');
+            $this->removeOutput('buttons');
             $this->generator_array['form']['type'] = 'form';
             $this->generator_array['form']['input-id'] = $this->generator_array['form']['id'] ?? '';
             $builder->createForm($this->generator_array['form']);
@@ -57,23 +60,26 @@ trait FormGeneratorClassHtmlBuilderTrait
     /**
      * @return string
      */
-    public function getHtmlOutput(): string
+    public function getHtmlOutput($type = 'form'): string
     {
-        return $this->html_output;
+        return $this->getImplodedOutput($type);
     }
 
     /**
      * @param string $output
      */
-    public function mergeOutputAsString(string $output): void
+    public function mergeOutputAsString(string $output, $type): void
     {
-        $this->html_output .= $output;
+        if (!isset($this->html_output[$type])) {
+            $this->html_output[$type] = [];
+        }
+        $this->html_output[$type][] = $output;
 
     }
 
-    public function removeOutput(): void
+    public function removeOutput($type): void
     {
-        $this->html_output = '';
+        unset($this->html_output[$type]);
     }
 
     /**
@@ -123,5 +129,22 @@ trait FormGeneratorClassHtmlBuilderTrait
     private function getUserDefinedFormGeneratorBuilderNamespace()
     {
         return $this->generator_array['build-object']['namespace'];
+    }
+
+    /**
+     * @param $type
+     * @return string
+     * @author selcukmart
+     * 9.02.2022
+     * 09:28
+     */
+    protected function getImplodedOutput($type): string
+    {
+        if (isset($this->imploded_output[$type])) {
+            return $this->imploded_output[$type];
+        }
+
+        $this->imploded_output[$type] = implode('', $this->html_output[$type]);
+        return $this->imploded_output[$type];
     }
 }

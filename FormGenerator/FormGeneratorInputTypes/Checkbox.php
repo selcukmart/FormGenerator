@@ -47,7 +47,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
 
         $this->cleanIDInAttributesIfNecessary();
 
-        $this->row_table = $this->formGenerator->getRow();
+        $this->row_table = $this->formGeneratorDirector->getRow();
 
         if (isset($this->row_table[$this->field])) {
             $this->item['attributes']['value'] = $this->row_table[$this->field];
@@ -68,7 +68,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
     private function checkboxGenerate(): string
     {
 
-        $row = new Row($this->formGenerator, $this->row_data);
+        $row = new Row($this->formGeneratorDirector, $this->row_data);
         $row->setRow();
 
         $this->row = $row->getRow();
@@ -120,7 +120,7 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
      */
     private function checkedControl()
     {
-        return isset($this->item['options']['control']) && is_array($this->item['options']['control']) ? new CheckedControl($this->formGenerator, $this->item['options']['control'], $this->field, $this->row_table) : false;
+        return isset($this->item['options']['control']) && is_array($this->item['options']['control']) ? new CheckedControl($this->formGeneratorDirector, $this->item['options']['control'], $this->field, $this->row_table) : false;
     }
 
 

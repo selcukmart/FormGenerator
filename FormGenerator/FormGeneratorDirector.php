@@ -29,6 +29,7 @@ class FormGeneratorDirector
 
     private static $instances = [];
     protected
+        $html_output_type = 'inputs',
         $base_dir,
         $generator_array = [],
         $namespace;
@@ -85,6 +86,30 @@ class FormGeneratorDirector
     public function getBaseDir()
     {
         return $this->base_dir;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGeneratorArray(): array
+    {
+        return $this->generator_array;
+    }
+
+    /**
+     * @param string $html_output_type
+     */
+    public function setHtmlOutputType(string $html_output_type): void
+    {
+        $this->html_output_type = $html_output_type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlOutputType(): string
+    {
+        return $this->html_output_type;
     }
 
     public function __destruct()

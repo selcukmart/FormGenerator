@@ -17,17 +17,18 @@ abstract class AbstractInputTypes
 {
     private static $instances = [];
     protected
+        $html_output_type = 'inputs',
         $item,
         $label,
-        $formGenerator,
+        $formGeneratorDirector,
         $unnecessary_attributes = [
         'content',
         'label'
     ];
 
-    public function __construct(FormGeneratorDirector $formGenerator)
+    public function __construct(FormGeneratorDirector $formGeneratorDirector)
     {
-        $this->formGenerator = $formGenerator;
+        $this->formGeneratorDirector = $formGeneratorDirector;
     }
 
     public static function getInstance(FormGeneratorDirector $formGenerator): AbstractInputTypes
@@ -43,7 +44,8 @@ abstract class AbstractInputTypes
     protected function toHtml($input_dom_array, $inputType = null): string
     {
         $inputType = $this->detectInputType($inputType);
-        $html_content = $this->formGenerator->renderToHtml($input_dom_array['attributes'], $inputType, true);
+        $this->formGeneratorDirector->setHtmlOutputType($this->html_output_type);
+        $html_content = $this->formGeneratorDirector->renderToHtml($input_dom_array['attributes'], $inputType, true);
         if (!$html_content) {
             $input_dom_array = $this->clearUnnecessaryAttributes($input_dom_array);
             $html_content = Dom::htmlGenerator($input_dom_array);
@@ -90,7 +92,7 @@ abstract class AbstractInputTypes
     protected function setDBDefaultValue($field): void
     {
         if (empty($this->item['attributes']['value'])) {
-            $default_value = new DefaultValue($this->formGenerator, $field);
+            $default_value = new DefaultValue($this->formGeneratorDirector, $field);
             $this->item['attributes']['value'] = $default_value->get();
         }
     }

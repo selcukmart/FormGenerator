@@ -13,5 +13,10 @@
     {$enctype = 'multipart/form-data'}
 {/if}
 <form action="{$editFormAction}" method="{$method}" enctype="{$enctype}" name="{$name}" id="{$id}">
-    {$inputs}
+    <div class="form-body">
+        {$inputs}
+    </div>
+    <div class="form-actions">
+        {$buttons}
+    </div>
 </form>

@@ -36,7 +36,7 @@ class Textarea extends AbstractInputTypes implements InputTypeInterface
         $field = $this->field = $this->item['attributes']['name'];
 
         $this->cleanIDInAttributesIfNecessary();
-        $row_table = $this->formGenerator->getRow();
+        $row_table = $this->formGeneratorDirector->getRow();
 
 
         $this->valueCallback($row_table, $field);

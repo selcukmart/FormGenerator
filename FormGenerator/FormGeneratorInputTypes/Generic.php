@@ -32,7 +32,7 @@ class Generic extends AbstractInputTypes implements InputTypeInterface
         $this->item['attributes']['name'] = $this->item['attributes']['name'] ?? $this->item['attributes']['type'];
         $field = $this->item['attributes']['name'];
         $this->cleanIDInAttributesIfNecessary();
-        $row_table = $this->formGenerator->getRow();
+        $row_table = $this->formGeneratorDirector->getRow();
 
 
         $this->valueCallback($row_table, $field);

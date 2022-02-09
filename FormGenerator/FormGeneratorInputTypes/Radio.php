@@ -49,7 +49,7 @@ class Radio extends AbstractInputTypes implements InputTypeInterface
 
         $this->cleanIDInAttributesIfNecessary();
 
-        $this->row_table = $this->formGenerator->getRow();
+        $this->row_table = $this->formGeneratorDirector->getRow();
 
         if (isset($this->row_table[$this->field])) {
             $this->item['attributes']['value'] = $this->row_table[$this->field];
@@ -71,7 +71,7 @@ class Radio extends AbstractInputTypes implements InputTypeInterface
 
     private function radioGenerate(): string
     {
-        $row = new Row($this->formGenerator, $this->row_data);
+        $row = new Row($this->formGeneratorDirector, $this->row_data);
         $row->setMultipleLikeRadioCheckboxSelect(true);
         $row->setRow();
         $this->row = $row->getRow();
