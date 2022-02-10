@@ -38,16 +38,11 @@ class Render
      */
     public function createHtmlOutput($template, $return, $html_output_type)
     {
-
-        if (empty($this->input_parts)) {
-            $this->formGeneratorDirector->setErrorMessage('There is no input');
-        } else {
-            $htmlOutput = $this->getHtmlOutput($template);
-            if ($return) {
-                return $htmlOutput;
-            }
-            $this->formGeneratorDirector->mergeOutputAsString($htmlOutput, $html_output_type);
+        $htmlOutput = $this->getHtmlOutput($template);
+        if ($return) {
+            return $htmlOutput;
         }
+        $this->formGeneratorDirector->mergeOutputAsString($htmlOutput, $html_output_type);
     }
 
     /**

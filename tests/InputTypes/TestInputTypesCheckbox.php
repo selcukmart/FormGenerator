@@ -48,7 +48,7 @@ class TestInputTypesCheckbox extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >United Kingdom</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> United Kingdom</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -98,7 +98,7 @@ class TestInputTypesCheckbox extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $expected = '<input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -137,7 +137,7 @@ class TestInputTypesCheckbox extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
     public function testSQL()
@@ -190,7 +190,7 @@ class TestInputTypesCheckbox extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 }

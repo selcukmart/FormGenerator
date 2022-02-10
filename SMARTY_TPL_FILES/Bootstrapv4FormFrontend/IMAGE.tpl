@@ -8,6 +8,6 @@
             <input type="hidden">
             <input name="{$name}" id="{$name}" type="file"  {$input_attr}>
         </span>
-        <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Sil </a> </div>
+        <a href="javascript:;" class="btn red fileinput-exists" data-dismiss="fileinput"> Delete </a> </div>
 </div>
 <div class="clearfix margin-top-10"><span class="label label-danger">Not!</span> IE10+, FF3.6+, Safari6.0+, Chrome6.0+ and Opera11.1+ </div>

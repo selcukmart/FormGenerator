@@ -180,6 +180,11 @@ $form_generator_array = [
                 ]
             ],
             [
+                'type' => 'output',
+                'output' => '<div class="abc">Any Data, Input to here etc</div>',
+                'label' => 'Any Data'
+            ],
+            [
                 'type' => 'text',
                 'attributes' => [
                     'name' => 'surname',

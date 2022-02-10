@@ -155,6 +155,11 @@ class Label
         $this->already_set_label = $already_set_label;
     }
 
+    public function __toString(): string
+    {
+        return $this->getLabel();
+    }
+
     public function __destruct()
     {
 

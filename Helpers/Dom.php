@@ -17,10 +17,15 @@ class Dom
         $attr_defaults = [
         'prefix' => '',
         'cache' => true
+    ],
+        $self_closed_elements = [
+        'link',
+        'meta',
+        'input'
     ];
 
     private const ELEMENT = '<{{ELEMENT}} {{ATTRIBUTES}}>{{CONTENT}}</{{ELEMENT}}>';
-
+    private const SELF_CLOSED_ELEMENT = '<{{ELEMENT}} {{ATTRIBUTES}}>';
 
     public function __construct()
     {
@@ -77,7 +82,12 @@ class Dom
     private static function element(array $data): string
     {
         $data = set_defaults_form_generator($data, self::$defaults);
-        return Template::embed($data, self::ELEMENT, [
+        if (in_array($data['element'], self::$self_closed_elements)) {
+            $template = self::SELF_CLOSED_ELEMENT;
+        } else {
+            $template = self::ELEMENT;
+        }
+        return Template::embed($data, $template, [
             'use' => 'd'
         ]);
     }

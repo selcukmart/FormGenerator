@@ -44,6 +44,7 @@ abstract class AbstractInputTypes
     protected function toHtml($input_dom_array, $inputType = null): string
     {
         $inputType = $this->detectInputType($inputType);
+
         $this->formGeneratorDirector->setHtmlOutputType($this->html_output_type);
         $html_content = $this->formGeneratorDirector->renderToHtml($input_dom_array['attributes'], $inputType, true);
         if (!$html_content) {
@@ -108,6 +109,7 @@ abstract class AbstractInputTypes
     {
         $this->label = new Label($this->item);
         $this->item['label'] = $this->label->getLabel();
+        $this->item['attributes']['label'] = $this->item['label'] ?? '';
     }
 
     protected function cleanIDInAttributesIfNecessary(): void

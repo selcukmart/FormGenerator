@@ -23,7 +23,7 @@ class File extends AbstractInputTypes implements InputTypeInterface
             $this->item['attributes']['id'] = $name;
         }
 
-        $this->label = new Label($this->item);
+        $this->setLabel();
 
         if (isset($this->row_table[$name])) {
             $previous_file = $this->row_table[$name];

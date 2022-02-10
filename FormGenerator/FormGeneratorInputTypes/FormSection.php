@@ -14,11 +14,12 @@ class FormSection extends AbstractInputTypes implements InputTypeInterface
 {
 
 
-    public function createInput(array $item):array
+    public function createInput(array $item): array
     {
         $this->item = $item;
         $this->item['attributes'] = [];
         $this->setLabel();
+
         //return $this->item;
         return [
             'input' => $this->toHtml($this->item),

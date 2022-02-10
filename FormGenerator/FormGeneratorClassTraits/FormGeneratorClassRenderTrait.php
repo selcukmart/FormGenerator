@@ -33,6 +33,7 @@ trait FormGeneratorClassRenderTrait
     {
         $renderFactory = $this->getRenderInstance();
         $renderFactory->setInputParts($input_parts);
+
         return $renderFactory->createHtmlOutput($template, $return,$this->getHtmlOutputType());
     }
 
