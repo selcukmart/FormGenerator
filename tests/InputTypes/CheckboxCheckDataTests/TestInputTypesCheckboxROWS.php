@@ -13,7 +13,7 @@ use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 require_once __DIR__ . '/../../../Examples/DBExamples/Config/Db.php';
-class TestInputTypesCheckboxKeyValueArray extends TestCase
+class TestInputTypesCheckboxROWS extends TestCase
 {
     public function testSql()
     {
@@ -50,11 +50,23 @@ class TestInputTypesCheckboxKeyValueArray extends TestCase
                         'label' => 'Nationalities',
                         'options' => [
                             'data' => [
-                                'from' => 'key_label_array',
-                                'key_label_array' => [
-                                    'us' => 'USA',
-                                    'gb' => 'United Kingdom',
-                                    'de' => 'Germany'
+                                'rows' => [
+                                    [
+                                        'iso' => 'us',
+                                        'name' => 'USA'
+                                    ],
+                                    [
+                                        'iso' => 'gb',
+                                        'name' => 'UK'
+                                    ],
+                                    [
+                                        'iso' => 'de',
+                                        'name' => 'Germany'
+                                    ]
+                                ],
+                                'settings' => [
+                                    'key' => 'iso',
+                                    'label' => 'name',
                                 ],
                             ],
                             'control' => [
@@ -80,9 +92,10 @@ class TestInputTypesCheckboxKeyValueArray extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us" checked="checked"><label for="iso-us"> USA</label><br>    <input type="checkbox" id="iso-gb" name="iso[]" value="gb" checked="checked"><label for="iso-gb"> United Kingdom</label><br>    <input type="checkbox" id="iso-de" name="iso[]" value="de" ><label for="iso-de"> Germany</label><br>';
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us" checked="checked"><label for="iso-us"> USA</label><br>    <input type="checkbox" id="iso-gb" name="iso[]" value="gb" checked="checked"><label for="iso-gb"> UK</label><br>    <input type="checkbox" id="iso-de" name="iso[]" value="de" ><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
+
     public function testKeyValueArray()
     {
         $form_generator_array = [
@@ -118,11 +131,23 @@ class TestInputTypesCheckboxKeyValueArray extends TestCase
                         'label' => 'Nationalities',
                         'options' => [
                             'data' => [
-                                'from' => 'key_label_array',
-                                'key_label_array' => [
-                                    'us' => 'USA',
-                                    'gb' => 'United Kingdom',
-                                    'de' => 'Germany'
+                                'rows' => [
+                                    [
+                                        'iso' => 'us',
+                                        'name' => 'USA'
+                                    ],
+                                    [
+                                        'iso' => 'gb',
+                                        'name' => 'UK'
+                                    ],
+                                    [
+                                        'iso' => 'de',
+                                        'name' => 'Germany'
+                                    ]
+                                ],
+                                'settings' => [
+                                    'key' => 'iso',
+                                    'label' => 'name',
                                 ],
                             ],
                             'control' => [
@@ -139,7 +164,7 @@ class TestInputTypesCheckboxKeyValueArray extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us" ><label for="iso-us"> USA</label><br>    <input type="checkbox" id="iso-gb" name="iso[]" value="gb" checked="checked"><label for="iso-gb"> United Kingdom</label><br>    <input type="checkbox" id="iso-de" name="iso[]" value="de" checked="checked"><label for="iso-de"> Germany</label><br>';
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us" ><label for="iso-us"> USA</label><br>    <input type="checkbox" id="iso-gb" name="iso[]" value="gb" checked="checked"><label for="iso-gb"> UK</label><br>    <input type="checkbox" id="iso-de" name="iso[]" value="de" checked="checked"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
