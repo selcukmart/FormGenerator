@@ -32,7 +32,7 @@ class TestInputTypesStaticText extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
         $expected = '<div class="form-section" style="margin-top: -15px;">

@@ -36,7 +36,7 @@ class TestInputTypesHidden extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
         $expected = '<input id="address_identification" name="address_identification" value="" type="hidden">';

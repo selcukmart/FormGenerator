@@ -34,7 +34,7 @@ class TestInputTypesFormSection extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
         $expected = '<h4 class="form-section" style="text-transform: capitalize;margin-bottom: 0px; margin-top: 20px;">Address Information</h4>';

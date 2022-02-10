@@ -115,6 +115,7 @@ abstract class AbstractFormGeneratorBuilder
         }
         $this->prepareInputParts($input);
         $input_capsule = $this->detectInputCapsule($input);
+
         $this->formGeneratorDirector->renderToHtml($this->input_parts, $input_capsule);
     }
 

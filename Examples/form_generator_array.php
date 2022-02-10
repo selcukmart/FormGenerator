@@ -518,7 +518,7 @@ $form_generator_array = [
             [
                 'type' => 'button',
                 'label' => 'Button in Inputs',
-                'attibutes' => [
+                'attributes' => [
                     'name' => 'test'
                 ]
             ]

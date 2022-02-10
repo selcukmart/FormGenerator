@@ -28,7 +28,7 @@ class ButtonGroup extends AbstractInputTypes implements InputTypeInterface
             'attributes' => $items['attributes']
         ];
 
-        $default_template = $items['template'] ?? self::DEFAULT_TEMPLATE;
+        $default_template = $items['capsule_template'] ?? self::DEFAULT_TEMPLATE;
         $this->html_output_type = 'buttons';
         /**
          * For encapsulation div or etc...

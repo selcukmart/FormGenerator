@@ -11,7 +11,7 @@ namespace tests\InputTypes;
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesPassword extends TestCase
+class TestInputTypesButton extends TestCase
 {
     public function test()
     {
@@ -24,19 +24,23 @@ class TestInputTypesPassword extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'password',
-                        'attributes' => [
-                            'name' => 'password',
-                        ],
+                        'type' => 'button',
+                        /**
+                         * tpl filename
+                         */
                         'capsule_template' => 'SIMPLE',
+                        'label' => 'Button in Inputs',
+                        'attributes' => [
+                            'name' => 'test'
+                        ]
                     ],
                 ]
             ]
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<input name="password" value="" type="password" class="" placeholder="Password" __is_def="1" id="password" >';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<button name="test" type="button" class="">Button in Inputs</button>';
         $this->assertSame($expected, $html);
     }
 }

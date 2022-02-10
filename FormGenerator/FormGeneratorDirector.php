@@ -31,7 +31,6 @@ class FormGeneratorDirector
         FormGeneratorInputTrait,
         FormGeneratorMessagesTrait;
 
-
     protected
         $html_output_type = 'inputs',
         $base_dir,
@@ -117,12 +116,7 @@ class FormGeneratorDirector
         return $this->html_output_type;
     }
 
-    public function __destruct()
-    {
-
-    }
-
-    protected function increaseDirectorInstanceCount(): void
+    private function increaseDirectorInstanceCount(): void
     {
         self::$instance_count++;
     }
@@ -133,5 +127,10 @@ class FormGeneratorDirector
     public static function getInstanceCount(): int
     {
         return self::$instance_count;
+    }
+
+    public function __destruct()
+    {
+
     }
 }
