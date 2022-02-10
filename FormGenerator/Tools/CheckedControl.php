@@ -19,6 +19,7 @@ class CheckedControl
         $checkeds = [],
         $ckeck_id = 0,
         $field,
+        $from,
         $formGenerator;
 
     public function __construct(FormGeneratorDirector $formGenerator, array $control_array, $field, $row = null)
@@ -27,11 +28,27 @@ class CheckedControl
         $this->row = $row;
         $this->field = $field;
         $this->control_array = $control_array;
+        if (!$this->formGenerator->isAdd()) {
+            $this->from = $this->control_array['from'] ?? $this->detectFrom();
+        }
+
+    }
+
+    private function detectFrom(): string
+    {
+        $from = '';
+        foreach ($this->control_array as $option => $value) {
+            if (isset($this->control_array[$option])) {
+                $from = $option;
+                break;
+            }
+        }
+        return $from;
     }
 
     public function control($id): bool
     {
-        if($this->formGenerator->isAdd()){
+        if ($this->formGenerator->isAdd()) {
             return false;
         }
         if (empty($id)) {
@@ -40,13 +57,13 @@ class CheckedControl
         }
 
         if (isset($this->checkeds[$id])) {
-            $this->checked = $this->checked[$id];
+            $this->checked = $this->checkeds[$id];
             return $this->checked;
         }
         $this->checked = false;
         $this->ckeck_id = $id;
-        $from = $this->control_array['from'];
-        $this->checkeds[$id] = $this->{$from}();
+
+        $this->checkeds[$id] = $this->{$this->from}();
         return $this->checked;
     }
 

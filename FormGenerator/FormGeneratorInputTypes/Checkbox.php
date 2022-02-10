@@ -72,10 +72,12 @@ class Checkbox extends AbstractInputTypes implements InputTypeInterface
         $row->setMultipleLikeRadioCheckboxSelect(true);
         $row->setRow();
         $this->row = $row->getRow();
+
         $this->option_settings = $row->getOptionsSettings() ?? $this->option_settings;
         $key = $this->option_settings['key'];
         $label = $this->option_settings['label'];
         $checked_control = $this->checkedControl();
+
         foreach ($this->row as $option_row) {
 
             $id = $this->field . '-' . $option_row[$key];
