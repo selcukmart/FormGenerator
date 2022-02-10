@@ -15,7 +15,11 @@ class TestInputTypesStaticText extends TestCase
 {
     public function test()
     {
-        $any_data = '<div class="abc">Any Data, Input to here etc</div>';
+        $any_data = '<div class="abc">
+User ID: {$user_id}<br>
+Adress ID : {$address_identification}<br>
+Mobile Phone: {$mobile_phone}
+</div>';
        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
@@ -39,7 +43,11 @@ class TestInputTypesStaticText extends TestCase
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
         $expected = '<div class="form-section" style="margin-top: -15px;">
-    <p class="form-control-static"> <div class="abc">Any Data, Input to here etc</div> </p>
+    <p class="form-control-static"> <div class="abc">
+User ID: 8015<br>
+Adress ID : Work Adress<br>
+Mobile Phone: 5542856789
+</div> </p>
 </div>';
         $this->assertSame($expected, $html);
     }

@@ -104,7 +104,7 @@ class TestInputTypesCheckbox extends TestCase
 
     public function testQuery()
     {
-        require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
+        require_once __DIR__ . '/../../../Examples/DBExamples/Config/Db.php';
         $form_generator_array = [
             /**
              * Optional
@@ -142,7 +142,7 @@ class TestInputTypesCheckbox extends TestCase
     }
     public function testSQL()
     {
-        require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
+        require_once __DIR__ . '/../../../Examples/DBExamples/Config/Db.php';
         $form_generator_array = [
             'data' => [
                 'connection' => [

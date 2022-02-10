@@ -43,7 +43,7 @@ class TestInputTypesText extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input placeholder="Address Identification" id="address_identification" name="address_identification" value="" type="text" class="form-control">';
+        $expected = '<input placeholder="Nationality is Turkey Citizen" id="nationality_tc_or_not" name="nationality_tc_or_not" value="1" type="text" class="form-control">';
         $this->assertSame($expected, $html);
     }
 }

@@ -16,7 +16,7 @@ class TestInputTypesSelect extends TestCase
 {
     public function testKeyValueArray()
     {
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -31,9 +31,9 @@ class TestInputTypesSelect extends TestCase
                         'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'iso'
+                            'name' => 'country'
                         ],
-                        'label' => 'Nationalities',
+                        'label' => 'Countries',
                         'options' => [
                             'data' => [
                                 'from' => 'key_label_array',
@@ -51,13 +51,13 @@ class TestInputTypesSelect extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >United Kingdom</option><option value="de" >Germany</option></select>';
+        $expected = '<select name="country" type="select" class="" __is_def="1" id="country" ><option value="">...</option><option value="us" selected="selected" >USA</option><option value="gb" >United Kingdom</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 
     public function testRows()
     {
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -72,9 +72,9 @@ class TestInputTypesSelect extends TestCase
                         'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'iso'
+                            'name' => 'country'
                         ],
-                        'label' => 'Nationalities',
+                        'label' => 'Countries',
                         'options' => [
                             'data' => [
                                 'settings' => [
@@ -104,14 +104,14 @@ class TestInputTypesSelect extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="gb" >UK</option><option value="us" >USA</option><option value="de" >Germany</option></select>';
+        $expected = '<select name="country" type="select" class="" __is_def="1" id="country" ><option value="">...</option><option value="gb" >UK</option><option value="us" selected="selected" >USA</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 
     public function testQuery()
     {
-        require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
-       $form_generator_array = [
+        require_once __DIR__ . '/../../../Examples/DBExamples/Config/Db.php';
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -126,9 +126,9 @@ class TestInputTypesSelect extends TestCase
                         'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'iso'
+                            'name' => 'country'
                         ],
-                        'label' => 'Nationalities',
+                        'label' => 'Countries',
                         'options' => [
                             'data' => [
                                 'from' => 'query',
@@ -146,18 +146,16 @@ class TestInputTypesSelect extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
+        $expected = '<select name="country" type="select" class="" __is_def="1" id="country" ><option value="">...</option><option value="us" selected="selected" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 
     public function testSQL()
     {
-        require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
-       $form_generator_array = [
+        require_once __DIR__ . '/../../../Examples/DBExamples/Config/Db.php';
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
-            ],
-            'data' => [
                 'connection' => [
                     /**
                      * optional
@@ -183,9 +181,9 @@ class TestInputTypesSelect extends TestCase
                         'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'iso'
+                            'name' => 'country'
                         ],
-                        'label' => 'Nationalities',
+                        'label' => 'Countries',
                         'options' => [
                             'data' => [
                                 'from' => 'sql',
@@ -203,7 +201,8 @@ class TestInputTypesSelect extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
+
+        $expected = '<select name="country" type="select" class="" __is_def="1" id="country" ><option value="">...</option><option value="us" selected="selected" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 }
