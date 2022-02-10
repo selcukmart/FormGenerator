@@ -5,16 +5,17 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesTextarea extends TestCase
+class TestInputTypesWeek extends TestCase
 {
     public function test()
     {
+        $type = 'url';
         $form_generator_array = [
             /**
              * Optional
@@ -24,13 +25,13 @@ class TestInputTypesTextarea extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'textarea',
+                        'type' => $type,
                         /**
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'address_identification',
+                            'name' => 'test',
                         ]
                     ],
                 ]
@@ -39,7 +40,7 @@ class TestInputTypesTextarea extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<textarea placeholder="Address Identification" rows="3" id="address_identification" name="address_identification" type="textarea" class="form-control"></textarea>';
+        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
         $this->assertSame($expected, $html);
     }
 }

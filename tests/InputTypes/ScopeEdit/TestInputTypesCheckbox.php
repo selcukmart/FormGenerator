@@ -5,14 +5,14 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd;
 
 
 use Examples\DBExamples\Libraries\Database\DB;
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesRadio extends TestCase
+class TestInputTypesCheckbox extends TestCase
 {
     public function testKeyValueArray()
     {
@@ -25,7 +25,7 @@ class TestInputTypesRadio extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'radio',
+                        'type' => 'checkbox',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -45,10 +45,10 @@ class TestInputTypesRadio extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >United Kingdom</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> United Kingdom</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -63,7 +63,7 @@ class TestInputTypesRadio extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'radio',
+                        'type' => 'checkbox',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -95,10 +95,10 @@ class TestInputTypesRadio extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -114,7 +114,7 @@ class TestInputTypesRadio extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'radio',
+                        'type' => 'checkbox',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -134,13 +134,12 @@ class TestInputTypesRadio extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
-
     public function testSQL()
     {
         require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
@@ -168,7 +167,7 @@ class TestInputTypesRadio extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'radio',
+                        'type' => 'checkbox',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -188,10 +187,10 @@ class TestInputTypesRadio extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input type="checkbox" id="iso-us" name="iso[]" value="us"><label for="iso-us"> USA</label><br><input type="checkbox" id="iso-gb" name="iso[]" value="gb"><label for="iso-gb"> UK</label><br><input type="checkbox" id="iso-de" name="iso[]" value="de"><label for="iso-de"> Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 }

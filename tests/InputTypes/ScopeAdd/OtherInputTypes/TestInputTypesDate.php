@@ -5,16 +5,17 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesButton extends TestCase
+class TestInputTypesDate extends TestCase
 {
     public function test()
     {
+        $type = 'date';
         $form_generator_array = [
             /**
              * Optional
@@ -24,14 +25,13 @@ class TestInputTypesButton extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'button',
+                        'type' => $type,
                         /**
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
-                        'label' => 'Button in Inputs',
                         'attributes' => [
-                            'name' => 'test'
+                            'name' => 'test',
                         ]
                     ],
                 ]
@@ -40,7 +40,7 @@ class TestInputTypesButton extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<button name="test" type="button" class="">Button in Inputs</button>';
+        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
         $this->assertSame($expected, $html);
     }
 }

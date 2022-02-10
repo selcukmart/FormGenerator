@@ -5,16 +5,17 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesFormSection extends TestCase
+class TestInputTypesSearch extends TestCase
 {
     public function test()
     {
+        $type = 'search';
         $form_generator_array = [
             /**
              * Optional
@@ -24,20 +25,22 @@ class TestInputTypesFormSection extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'form_section',
-                        'label' => 'Address Information',
+                        'type' => $type,
                         /**
                          * tpl filename
                          */
-                        'capsule_template' => 'SIMPLE'
+                        'capsule_template' => 'SIMPLE',
+                        'attributes' => [
+                            'name' => 'test',
+                        ]
                     ],
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = '<h4 class="form-section" style="text-transform: capitalize;margin-bottom: 0px; margin-top: 20px;">Address Information</h4>';
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
         $this->assertSame($expected, $html);
     }
 }

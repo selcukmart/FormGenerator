@@ -5,14 +5,14 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd;
 
 
 use Examples\DBExamples\Libraries\Database\DB;
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesSelect extends TestCase
+class TestInputTypesRadio extends TestCase
 {
     public function testKeyValueArray()
     {
@@ -25,7 +25,7 @@ class TestInputTypesSelect extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'select',
+                        'type' => 'radio',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -45,10 +45,10 @@ class TestInputTypesSelect extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >United Kingdom</option><option value="de" >Germany</option></select>';
+        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >United Kingdom</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -63,7 +63,7 @@ class TestInputTypesSelect extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'select',
+                        'type' => 'radio',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -95,10 +95,10 @@ class TestInputTypesSelect extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="gb" >UK</option><option value="us" >USA</option><option value="de" >Germany</option></select>';
+        $expected = '<label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -114,7 +114,7 @@ class TestInputTypesSelect extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'select',
+                        'type' => 'radio',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -134,10 +134,10 @@ class TestInputTypesSelect extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
+        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
@@ -168,7 +168,7 @@ class TestInputTypesSelect extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'select',
+                        'type' => 'radio',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -188,10 +188,10 @@ class TestInputTypesSelect extends TestCase
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
+        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >UK</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 }

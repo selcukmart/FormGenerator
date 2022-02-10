@@ -5,17 +5,16 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesOutput extends TestCase
+class TestInputTypesNumber extends TestCase
 {
     public function test()
     {
-        $any_data = '<div class="abc">Any Data, Input to here etc</div>';
         $form_generator_array = [
             /**
              * Optional
@@ -25,18 +24,22 @@ class TestInputTypesOutput extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'output',
-                        'output' => $any_data,
-                        'label' => 'Any Data',
+                        'type' => 'number',
+                        /**
+                         * tpl filename
+                         */
                         'capsule_template' => 'SIMPLE',
+                        'attributes' => [
+                            'name' => 'test',
+                        ]
                     ],
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = trim($form_generator->getHtmlOutput());
-        $expected = $any_data;
+        $html = $form_generator->getHtmlOutput();
+        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="number" id="test" >';
         $this->assertSame($expected, $html);
     }
 }

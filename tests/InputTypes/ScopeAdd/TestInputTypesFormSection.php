@@ -5,13 +5,13 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesText extends TestCase
+class TestInputTypesFormSection extends TestCase
 {
     public function test()
     {
@@ -24,22 +24,20 @@ class TestInputTypesText extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'text',
+                        'type' => 'form_section',
+                        'label' => 'Address Information',
                         /**
                          * tpl filename
                          */
-                        'capsule_template' => 'SIMPLE',
-                        'attributes' => [
-                            'name' => 'address_identification',
-                        ]
+                        'capsule_template' => 'SIMPLE'
                     ],
                 ]
             ]
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
-        $html = $form_generator->getHtmlOutput();
-        $expected = '<input placeholder="Address Identification" id="address_identification" name="address_identification" value="" type="text" class="form-control">';
+        $html = trim($form_generator->getHtmlOutput());
+        $expected = '<h4 class="form-section" style="text-transform: capitalize;margin-bottom: 0px; margin-top: 20px;">Address Information</h4>';
         $this->assertSame($expected, $html);
     }
 }

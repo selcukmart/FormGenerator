@@ -5,13 +5,13 @@
  * 10:49
  */
 
-namespace tests\InputTypes;
+namespace Tests\InputTypes\ScopeAdd;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesStaticText extends TestCase
+class TestInputTypesOutput extends TestCase
 {
     public function test()
     {
@@ -25,19 +25,18 @@ class TestInputTypesStaticText extends TestCase
                 'decision' => [
                     // this is a form input row
                     [
-                        'type' => 'static_text',
-                        'content' => $any_data,
+                        'type' => 'output',
+                        'output' => $any_data,
+                        'label' => 'Any Data',
                         'capsule_template' => 'SIMPLE',
                     ],
                 ]
             ]
         ];
-        $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
+        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<div class="form-section" style="margin-top: -15px;">
-    <p class="form-control-static"> <div class="abc">Any Data, Input to here etc</div> </p>
-</div>';
+        $expected = $any_data;
         $this->assertSame($expected, $html);
     }
 }
