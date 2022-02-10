@@ -12,7 +12,7 @@ use Examples\DBExamples\Libraries\Database\DB;
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
 
-class TestInputTypesCheckbox extends TestCase
+class TestInputTypesSelect extends TestCase
 {
     public function testKeyValueArray()
     {
@@ -25,7 +25,7 @@ class TestInputTypesCheckbox extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'checkbox',
+                        'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -47,8 +47,8 @@ class TestInputTypesCheckbox extends TestCase
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >United Kingdom</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $html = trim($form_generator->getHtmlOutput());
+        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >United Kingdom</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 
@@ -63,7 +63,7 @@ class TestInputTypesCheckbox extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'checkbox',
+                        'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -97,8 +97,8 @@ class TestInputTypesCheckbox extends TestCase
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $html = trim($form_generator->getHtmlOutput());
+        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="gb" >UK</option><option value="us" >USA</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 
@@ -114,7 +114,7 @@ class TestInputTypesCheckbox extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'checkbox',
+                        'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -136,10 +136,11 @@ class TestInputTypesCheckbox extends TestCase
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $html = trim($form_generator->getHtmlOutput());
+        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
+
     public function testSQL()
     {
         require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
@@ -167,7 +168,7 @@ class TestInputTypesCheckbox extends TestCase
                 'decision' => [
                     [
                         // this is a form input row
-                        'type' => 'checkbox',
+                        'type' => 'select',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
                             'name' => 'iso'
@@ -189,8 +190,8 @@ class TestInputTypesCheckbox extends TestCase
         ];
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
-        $html = $form_generator->getHtmlOutput();
-        $expected = '<input type="checkbox" value="us" id="iso-us" name="iso[]" >USA</input><input type="checkbox" value="gb" id="iso-gb" name="iso[]" >UK</input><input type="checkbox" value="de" id="iso-de" name="iso[]" >Germany</input>';
+        $html = trim($form_generator->getHtmlOutput());
+        $expected = '<select name="iso" type="select" class="" __is_def="1" id="iso" ><option value="">...</option><option value="us" >USA</option><option value="gb" >UK</option><option value="de" >Germany</option></select>';
         $this->assertSame($expected, $html);
     }
 }

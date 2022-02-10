@@ -17,7 +17,6 @@ class Select extends AbstractInputTypes implements InputTypeInterface
 
 
     private
-        $unit_parts = [],
         $default_generator_arr = [
         'default_value' => '',
         'empty_option' => true,
@@ -64,22 +63,20 @@ class Select extends AbstractInputTypes implements InputTypeInterface
 
         $this->value = $this->item['attributes']['value'];
 
-
+        unset($this->item['attributes']['value']);
         $input_dom_array = [
             'element' => 'select',
             'attributes' => $this->item['attributes'],
             'content' => $this->optionGenerate()
         ];
 
-        $this->unit_parts = [
+
+        return [
             'input' => $this->toHtml($input_dom_array),
             'label' => $this->item['label'],
             'input_capsule_attributes' => '',
             'label_attributes' => ''
         ];
-
-
-        return $this->unit_parts;
     }
 
     private function optionGenerate()
