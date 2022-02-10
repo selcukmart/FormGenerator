@@ -24,8 +24,8 @@ class FormDataAsRow
         'district' => '0',
         'neighbourhood' => '0',
         'phone' => '',
-        'mobile_phone' => '5542856789',
-        'mail' => null,
+        'tel' => '+905542856789',
+        'email' => 'admin@hostingdevi.com',
         'password' => '12345678',
         'invoice_type' => '1',
         'identification_number' => '3514950',
@@ -34,6 +34,14 @@ class FormDataAsRow
         'tax_department' => '',
         'tax_number' => '',
         'is_e_invoice_user' => '2',
+        'color' => '#000',
+        'date' => '10.02.2022',
+        'datetime-local' => '10.02.2022 15:14',
+        'month' => 'february',
+        'height' => 180,
+        'time' => '15:30',
+        'website' => 'https://www.onlinekurum.com',
+        'week' => '6',
     ];
 
     /**

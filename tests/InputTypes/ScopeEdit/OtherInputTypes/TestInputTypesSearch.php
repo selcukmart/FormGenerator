@@ -5,18 +5,19 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesSearch extends TestCase
 {
     public function test()
     {
         $type = 'search';
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -34,7 +35,7 @@ class TestInputTypesSearch extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => 'address',
                         ]
                     ],
                 ]
@@ -43,7 +44,7 @@ class TestInputTypesSearch extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="address" value="Test strasse berlin" class="" placeholder="Address" __is_def="1" type="search" id="address" >';
         $this->assertSame($expected, $html);
     }
 }

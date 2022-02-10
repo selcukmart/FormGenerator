@@ -5,11 +5,12 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesDate extends TestCase
 {
@@ -34,7 +35,7 @@ class TestInputTypesDate extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => $type,
                         ]
                     ],
                 ]
@@ -43,7 +44,7 @@ class TestInputTypesDate extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="date" value="10.02.2022" class="" placeholder="Date" __is_def="1" type="date" id="date" >';
         $this->assertSame($expected, $html);
     }
 }

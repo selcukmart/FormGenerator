@@ -5,18 +5,19 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesRange extends TestCase
 {
     public function test()
     {
         $type = 'range';
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -34,7 +35,9 @@ class TestInputTypesRange extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => 'height',
+                            'min' => 10,
+                            'max' => 260
                         ]
                     ],
                 ]
@@ -43,7 +46,7 @@ class TestInputTypesRange extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="height" min="10" max="260" value="180" class="" placeholder="Height" __is_def="1" type="range" id="height" >';
         $this->assertSame($expected, $html);
     }
 }

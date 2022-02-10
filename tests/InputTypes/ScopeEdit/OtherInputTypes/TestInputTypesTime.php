@@ -5,18 +5,19 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesTime extends TestCase
 {
     public function test()
     {
         $type = 'time';
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -34,7 +35,7 @@ class TestInputTypesTime extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => $type,
                         ]
                     ],
                 ]
@@ -43,7 +44,7 @@ class TestInputTypesTime extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="time" value="15:30" class="" placeholder="Time" __is_def="1" type="time" id="time" >';
         $this->assertSame($expected, $html);
     }
 }

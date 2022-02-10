@@ -15,7 +15,7 @@ class TestInputTypesWeek extends TestCase
 {
     public function test()
     {
-        $type = 'url';
+        $type = 'week';
         $form_generator_array = [
             /**
              * Optional

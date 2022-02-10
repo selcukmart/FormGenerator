@@ -5,18 +5,19 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesColor extends TestCase
 {
     public function test()
     {
         $type = 'color';
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -34,7 +35,7 @@ class TestInputTypesColor extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => 'color',
                         ]
                     ],
                 ]
@@ -43,7 +44,7 @@ class TestInputTypesColor extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="color" value="#000" class="" placeholder="Color" __is_def="1" type="color" id="color" >';
         $this->assertSame($expected, $html);
     }
 }

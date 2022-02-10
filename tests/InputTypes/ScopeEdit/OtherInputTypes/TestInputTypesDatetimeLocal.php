@@ -5,18 +5,19 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesDatetimeLocal extends TestCase
 {
     public function test()
     {
         $type = 'datetime-local';
-       $form_generator_array = [
+        $form_generator_array = [
             'data' => [
                 'row' => FormDataAsRow::getData(),
             ],
@@ -34,7 +35,7 @@ class TestInputTypesDatetimeLocal extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => $type,
                         ]
                     ],
                 ]
@@ -43,7 +44,7 @@ class TestInputTypesDatetimeLocal extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="'.$type.'" id="test" >';
+        $expected = '<input name="datetime-local" value="10.02.2022 15:14" class="" placeholder="Datetime-local" __is_def="1" type="datetime-local" id="datetime-local" >';
         $this->assertSame($expected, $html);
     }
 }

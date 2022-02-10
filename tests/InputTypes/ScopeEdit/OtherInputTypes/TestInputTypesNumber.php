@@ -5,11 +5,12 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd\OtherInputTypes;
+namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;
 use PHPUnit\Framework\TestCase;
+use Tests\InputTypes\ScopeEdit\FormDataAsRow;
 
 class TestInputTypesNumber extends TestCase
 {
@@ -33,7 +34,7 @@ class TestInputTypesNumber extends TestCase
                          */
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'test',
+                            'name' => 'user_id',
                         ]
                     ],
                 ]
@@ -42,7 +43,7 @@ class TestInputTypesNumber extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input name="test" value="" class="" placeholder="Test" __is_def="1" type="number" id="test" >';
+        $expected = '<input name="user_id" value="8015" class="" placeholder="User Id" __is_def="1" type="number" id="user_id" >';
         $this->assertSame($expected, $html);
     }
 }
