@@ -39,12 +39,12 @@ abstract class AbstractFormDataProviders
 
     public static function getInstance(FormGeneratorDirector $formGenerator): AbstractFormDataProviders
     {
-        $cls = static::class;
-        if (!isset(self::$instances[$cls])) {
-            self::$instances[$cls] = new static($formGenerator);
+        $class = static::class;
+        if (!isset(self::$instances[FormGeneratorDirector::getInstanceCount()][$class])) {
+            self::$instances[FormGeneratorDirector::getInstanceCount()][$class] = new static($formGenerator);
         }
 
-        return self::$instances[$cls];
+        return self::$instances[FormGeneratorDirector::getInstanceCount()][$class];
     }
 
     /**

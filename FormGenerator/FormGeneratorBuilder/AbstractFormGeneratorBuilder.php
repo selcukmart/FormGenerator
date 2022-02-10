@@ -15,8 +15,9 @@ abstract class AbstractFormGeneratorBuilder
         $instances = [],
         $classnames = [];
 
-    const DEFAULT_TEMPLATE_CAPSULE_TPL = 'INPUT_CAPSULE';
-    const DEFAULT_FORM_CAPSULE_TPL = 'FORM_CAPSULE';
+    const
+        DEFAULT_TEMPLATE_CAPSULE_TPL = 'INPUT_CAPSULE',
+        DEFAULT_FORM_CAPSULE_TPL = 'FORM_CAPSULE';
     protected
         $input_capsule,
         $form_capsule,
@@ -44,11 +45,11 @@ abstract class AbstractFormGeneratorBuilder
     public static function getInstance(FormGeneratorDirector $formGenerator): AbstractFormGeneratorBuilder
     {
         $class = static::class;
-        if (!isset(self::$instances[$class])) {
-            self::$instances[$class] = new static($formGenerator);
+        if (!isset(self::$instances[FormGeneratorDirector::getInstanceCount()][$class])) {
+            self::$instances[FormGeneratorDirector::getInstanceCount()][$class] = new static($formGenerator);
         }
 
-        return self::$instances[$class];
+        return self::$instances[FormGeneratorDirector::getInstanceCount()][$class];
     }
 
     public function buildHtmlOutput($inputs = null, $parent_group = null): void

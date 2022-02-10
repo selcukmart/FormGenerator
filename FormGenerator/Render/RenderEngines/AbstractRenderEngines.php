@@ -33,10 +33,9 @@ abstract class AbstractRenderEngines
     public static function getInstance(FormGeneratorDirector $formGenerator, $templateObject): AbstractRenderEngines
     {
         $class = static::class;
-        if (!isset(self::$instances[$class])) {
-            self::$instances[$class] = new static($formGenerator, $templateObject);
+        if (!isset(self::$instances[FormGeneratorDirector::getInstanceCount()][$class])) {
+            self::$instances[FormGeneratorDirector::getInstanceCount()][$class] = new static($formGenerator, $templateObject);
         }
-
-        return self::$instances[$class];
+        return self::$instances[FormGeneratorDirector::getInstanceCount()][$class];
     }
 }

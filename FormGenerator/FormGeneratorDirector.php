@@ -18,6 +18,10 @@ use FormGenerator\FormGeneratorClassTraits\FormGeneratorScopeTrait;
 
 class FormGeneratorDirector
 {
+    private static
+        $instance_count = 0,
+        $instances = [];
+
     use
         FormGeneratorClassRenderTrait,
         FormGeneratorClassDataPrepareTrait,
@@ -27,7 +31,7 @@ class FormGeneratorDirector
         FormGeneratorInputTrait,
         FormGeneratorMessagesTrait;
 
-    private static $instances = [];
+
     protected
         $html_output_type = 'inputs',
         $base_dir,
@@ -36,6 +40,7 @@ class FormGeneratorDirector
 
     public function __construct(array $generator_array, $scope)
     {
+        $this->increaseDirectorInstanceCount();
         $this->setBaseDir();
         $this->setScope($scope);
         $this->setGeneratorArray($generator_array);
@@ -115,5 +120,18 @@ class FormGeneratorDirector
     public function __destruct()
     {
 
+    }
+
+    protected function increaseDirectorInstanceCount(): void
+    {
+        self::$instance_count++;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getInstanceCount(): int
+    {
+        return self::$instance_count;
     }
 }

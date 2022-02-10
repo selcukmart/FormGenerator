@@ -44,12 +44,13 @@ trait FormGeneratorClassRenderTrait
      */
     protected function getRenderInstance()
     {
-        if (isset(self::$instances['render'])) {
-            return self::$instances['render'];
+        $instance_name = 'render';
+        if ($this->isSetInstance($instance_name)) {
+            return $this->getInstance($instance_name);
         }
         $class = $this->getRenderClassName();
-        self::$instances['render'] = new $class($this);
-        return self::$instances['render'];
+        $this->setInstance($instance_name,new $class($this));
+        return $this->getInstance($instance_name);
     }
 
 
@@ -112,5 +113,32 @@ trait FormGeneratorClassRenderTrait
     protected function getSmartyByUserDefined()
     {
         return $this->generator_array[$this->generator_array['build']['render']['by']] ?? null;
+    }
+
+    /**
+     * @return bool
+     * @author selcukmart
+     * 10.02.2022
+     * 09:49
+     */
+    protected function isSetInstance($instance_name): bool
+    {
+        return isset(self::$instances[self::getInstanceCount()][$instance_name]);
+    }
+
+    /**
+     * @return mixed
+     * @author selcukmart
+     * 10.02.2022
+     * 09:50
+     */
+    protected function getInstance($instance_name)
+    {
+        return self::$instances[self::getInstanceCount()][$instance_name];
+    }
+
+    protected function setInstance($instance_name,$instance): void
+    {
+        self::$instances[self::getInstanceCount()][$instance_name] = $instance;
     }
 }

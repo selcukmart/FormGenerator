@@ -34,11 +34,11 @@ abstract class AbstractInputTypes
     public static function getInstance(FormGeneratorDirector $formGenerator): AbstractInputTypes
     {
         $class = static::class;
-        if (!isset(self::$instances[$class])) {
-            self::$instances[$class] = new static($formGenerator);
+        if (!isset(self::$instances[FormGeneratorDirector::getInstanceCount()][$class])) {
+            self::$instances[FormGeneratorDirector::getInstanceCount()][$class] = new static($formGenerator);
         }
 
-        return self::$instances[$class];
+        return self::$instances[FormGeneratorDirector::getInstanceCount()][$class];
     }
 
     protected function toHtml($input_dom_array, $inputType = null): string
