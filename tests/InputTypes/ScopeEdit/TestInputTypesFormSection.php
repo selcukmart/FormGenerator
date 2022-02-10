@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd;
+namespace Tests\InputTypes\ScopeEdit;
 
 
 use FormGenerator\FormGeneratorDirector;
