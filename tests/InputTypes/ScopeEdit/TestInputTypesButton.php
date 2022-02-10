@@ -16,6 +16,9 @@ class TestInputTypesButton extends TestCase
     public function test()
     {
         $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -29,9 +32,9 @@ class TestInputTypesButton extends TestCase
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
-                        'label' => 'Button in Inputs',
+                        'label' => 'Nationality is Turkey Citizen',
                         'attributes' => [
-                            'name' => 'test'
+                            'name' => 'nationality_tc_or_not'
                         ]
                     ],
                 ]
@@ -40,7 +43,7 @@ class TestInputTypesButton extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<button name="test" type="button" class="">Button in Inputs</button>';
+        $expected = '<button name="nationality_tc_or_not" type="button" class="">Nationality is Turkey Citizen</button>';
         $this->assertSame($expected, $html);
     }
 }

@@ -15,7 +15,10 @@ class TestInputTypesFile extends TestCase
 {
     public function test()
     {
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -29,8 +32,9 @@ class TestInputTypesFile extends TestCase
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
+                        'label' => 'Nationality is Turkey Citizen',
                         'attributes' => [
-                            'name' => 'address_identification',
+                            'name' => 'nationality_tc_or_not'
                         ]
                     ],
                 ]
@@ -39,12 +43,13 @@ class TestInputTypesFile extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<div class="fileinput fileinput-new" data-provides="fileinput">
+        $expected = '1
+<div class="fileinput fileinput-new" data-provides="fileinput">
     <div class="input-group input-medium">
         <div class="form-control uneditable-input input-fixed input-medium" data-trigger="fileinput"> <i class="fa fa-file fileinput-exists"></i>&nbsp;
             <span class="fileinput-filename"> </span> </div>
         <span class="input-group-addon btn default btn-file"> <span class="fileinput-new"> File Select </span> <span class="fileinput-exists"> Change </span>
-      <input name="address_identification" id="address_identification"  type="file">
+      <input name="nationality_tc_or_not" id="nationality_tc_or_not"  type="file">
       </span> <a href="javascript:;" class="input-group-addon btn red fileinput-exists" data-dismiss="fileinput"> Delete </a> </div>
 </div>';
         $this->assertSame($expected, $html);

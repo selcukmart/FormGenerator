@@ -15,8 +15,15 @@ class TestInputTypesOutput extends TestCase
 {
     public function test()
     {
-        $any_data = '<div class="abc">Any Data, Input to here etc</div>';
-        $form_generator_array = [
+        $any_data = '<div class="abc">
+User ID: {$user_id}<br>
+Adress ID : {$address_identification}<br>
+Mobile Phone: {$mobile_phone}
+</div>';
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -36,7 +43,11 @@ class TestInputTypesOutput extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = $any_data;
+        $expected = '<div class="abc">
+User ID: 8015<br>
+Adress ID : Work Adress<br>
+Mobile Phone: 5542856789
+</div>';
         $this->assertSame($expected, $html);
     }
 }

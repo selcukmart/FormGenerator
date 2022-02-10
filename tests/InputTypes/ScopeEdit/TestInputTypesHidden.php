@@ -16,6 +16,9 @@ class TestInputTypesHidden extends TestCase
     public function test()
     {
         $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -29,8 +32,9 @@ class TestInputTypesHidden extends TestCase
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
+                        'label' => 'Nationality is Turkey Citizen',
                         'attributes' => [
-                            'name' => 'address_identification',
+                            'name' => 'nationality_tc_or_not'
                         ]
                     ],
                 ]
@@ -39,7 +43,7 @@ class TestInputTypesHidden extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<input id="address_identification" name="address_identification" value="" type="hidden">';
+        $expected = '<input id="nationality_tc_or_not" name="nationality_tc_or_not" value="1" type="hidden">';
         $this->assertSame($expected, $html);
     }
 }

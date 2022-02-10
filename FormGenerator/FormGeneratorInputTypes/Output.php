@@ -9,6 +9,8 @@ namespace FormGenerator\FormGeneratorInputTypes;
 
 
 
+use Helpers\Template;
+
 class Output extends AbstractInputTypes implements InputTypeInterface
 {
 
@@ -28,6 +30,8 @@ class Output extends AbstractInputTypes implements InputTypeInterface
         $export_type = strtoupper($this->formGeneratorDirector->getBuildType());
         $result = $this->formGeneratorDirector->renderToHtml($this->item, $export_type, true);
         $this->item['output'] = $result ?: $this->item['output'];
+        $row_table = $this->formGeneratorDirector->getRow();
+        $this->item['output'] = Template::smarty($row_table, $this->item['output']);
         return [
             'input' => $this->item['output'],
             'label' => $this->item['label'],

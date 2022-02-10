@@ -16,7 +16,10 @@ class TestInputTypesTime extends TestCase
     public function test()
     {
         $type = 'time';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs

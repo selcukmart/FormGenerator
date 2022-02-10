@@ -16,7 +16,10 @@ class TestInputTypesDatetimeLocal extends TestCase
     public function test()
     {
         $type = 'datetime-local';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs

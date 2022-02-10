@@ -16,7 +16,10 @@ class TestInputTypesStaticText extends TestCase
     public function test()
     {
         $any_data = '<div class="abc">Any Data, Input to here etc</div>';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs

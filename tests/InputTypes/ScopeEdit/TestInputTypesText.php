@@ -15,7 +15,10 @@ class TestInputTypesText extends TestCase
 {
     public function test()
     {
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -29,8 +32,9 @@ class TestInputTypesText extends TestCase
                          * tpl filename
                          */
                         'capsule_template' => 'SIMPLE',
+                        'label' => 'Nationality is Turkey Citizen',
                         'attributes' => [
-                            'name' => 'address_identification',
+                            'name' => 'nationality_tc_or_not'
                         ]
                     ],
                 ]

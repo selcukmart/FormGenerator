@@ -16,7 +16,10 @@ class TestInputTypesDate extends TestCase
     public function test()
     {
         $type = 'date';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs

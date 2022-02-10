@@ -16,7 +16,10 @@ class TestInputTypesRadio extends TestCase
 {
     public function testKeyValueArray()
     {
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -28,9 +31,9 @@ class TestInputTypesRadio extends TestCase
                         'type' => 'radio',
                         'capsule_template' => 'SIMPLE',
                         'attributes' => [
-                            'name' => 'iso'
+                            'name' => 'country'
                         ],
-                        'label' => 'Nationalities',
+                        'label' => 'Countries',
                         'options' => [
                             'data' => [
                                 'from' => 'key_label_array',
@@ -48,13 +51,16 @@ class TestInputTypesRadio extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
-        $expected = '<label for="iso-us"> <input type="radio" value="us" id="iso-us" name="iso"  >USA</label><br>        <label for="iso-gb"> <input type="radio" value="gb" id="iso-gb" name="iso"  >United Kingdom</label><br>        <label for="iso-de"> <input type="radio" value="de" id="iso-de" name="iso"  >Germany</label><br>';
+        $expected = '<label for="country-us"> <input type="radio" value="us" id="country-us" name="country" checked >USA</label><br>        <label for="country-gb"> <input type="radio" value="gb" id="country-gb" name="country"  >United Kingdom</label><br>        <label for="country-de"> <input type="radio" value="de" id="country-de" name="country"  >Germany</label><br>';
         $this->assertSame($expected, $html);
     }
 
     public function testRows()
     {
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -105,7 +111,10 @@ class TestInputTypesRadio extends TestCase
     public function testQuery()
     {
         require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             /**
              * Optional
              * Form Inputs
@@ -144,7 +153,10 @@ class TestInputTypesRadio extends TestCase
     public function testSQL()
     {
         require_once __DIR__ . '/../../Examples/DBExamples/Config/Db.php';
-        $form_generator_array = [
+       $form_generator_array = [
+            'data' => [
+                'row' => FormDataAsRow::getData(),
+            ],
             'data' => [
                 'connection' => [
                     /**
