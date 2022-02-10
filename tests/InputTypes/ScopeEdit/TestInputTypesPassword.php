@@ -33,7 +33,7 @@ class TestInputTypesPassword extends TestCase
                 ]
             ]
         ];
-        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = trim($form_generator->getHtmlOutput());
         $expected = '<input name="password" value="" type="password" class="" placeholder="Password" __is_def="1" id="password" >';

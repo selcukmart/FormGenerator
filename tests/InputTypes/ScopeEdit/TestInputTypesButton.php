@@ -37,7 +37,7 @@ class TestInputTypesButton extends TestCase
                 ]
             ]
         ];
-        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
         $expected = '<button name="test" type="button" class="">Button in Inputs</button>';

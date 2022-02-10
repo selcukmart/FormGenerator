@@ -36,7 +36,7 @@ class TestInputTypesTextarea extends TestCase
                 ]
             ]
         ];
-        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
         $expected = '<textarea placeholder="Address Identification" rows="3" id="address_identification" name="address_identification" type="textarea" class="form-control"></textarea>';

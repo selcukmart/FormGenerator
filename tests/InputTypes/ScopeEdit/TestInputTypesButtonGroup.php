@@ -56,7 +56,7 @@ class TestInputTypesButtonGroup extends TestCase
                 ]
             ]
         ];
-        $$form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
+        $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput('buttons');
         $expected = '<button name="btn1" type="button" class="btn btn-success">Button</button><button name="btn2" type="reset" class="btn btn-success">Reset</button><button name="btn3" type="submit" class="btn btn-success">Submit</button>';
