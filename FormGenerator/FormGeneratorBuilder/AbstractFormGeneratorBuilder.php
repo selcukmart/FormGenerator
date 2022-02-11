@@ -96,6 +96,7 @@ abstract class AbstractFormGeneratorBuilder
     {
         $input_factory_class = $this->getInputFactoryClassName($input['type']);
         $input_factory = $input_factory_class::getInstance($this->formGeneratorDirector);
+
         $this->input_parts = $input_factory->createInput($input);
         if (!$this->isForm($input['type'])) {
             $this->addHelpBlockToInputparts($input);

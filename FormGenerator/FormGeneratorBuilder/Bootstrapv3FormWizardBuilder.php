@@ -31,6 +31,7 @@ class Bootstrapv3FormWizardBuilder extends AbstractFormGeneratorBuilder implemen
             if ($will_filtered) {
                 continue;
             }
+
             $this->is_string_group = !is_numeric($group) && is_string($group);
             if ($this->is_string_group && !isset($this->sections[$group])) {
                 $group_label = '';

@@ -18,16 +18,23 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
     public function createHtmlOutput(string $template): string
     {
         $renderObject = $this->formGenerator->getRenderobject();
+
         $template = $this->getTemplateFullPath($renderObject, $template);
+
         if ($template) {
             $renderObject->clearAllAssign();
             $input_parts = defaults_form_generator($this->render->getInputParts(), $this->render->getInputVariables());
             foreach ($input_parts as $index => $input_part) {
                 $renderObject->assign($index, $input_part);
             }
-
             $this->setResult(true);
-            return $renderObject->fetch($template);
+            try {
+                $result = $renderObject->fetch($template);
+            }catch (SmartyException $exception){
+                $this->setErrorMessage($exception->getMessage());
+                echo $exception->getMessage();
+            }
+            return $result;
         }
 
         return '';

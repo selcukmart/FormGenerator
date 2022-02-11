@@ -17,10 +17,12 @@ trait FormGeneratorClassHtmlBuilderTrait
 
     public function buildHtmlOutput(): void
     {
+
         if (!is_object($this->render_object)) {
             $this->setErrorMessage('Render Object not found');
             return;
         }
+
         $builderClassName = $this->getFormGeneratorBuilderClassName();
         $builder = $builderClassName::getInstance($this);
         $builder->buildHtmlOutput();
