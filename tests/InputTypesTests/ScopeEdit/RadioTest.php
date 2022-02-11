@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeEdit;
+namespace Tests\InputTypesTests\ScopeEdit;
 
 
 use Examples\DBExamples\Libraries\Database\DB;

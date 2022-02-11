@@ -143,12 +143,15 @@ trait FormGeneratorClassHtmlBuilderTrait
         if (isset($this->imploded_output[$type])) {
             return $this->imploded_output[$type];
         }
-        if (!isset($this->html_output[$type])) {
+
+        if ($type !== 'buttons' && !isset($this->html_output[$type])) {
             $type = 'inputs';
         }
+
         if (!isset($this->html_output[$type])) {
             return '';
         }
+
         $this->imploded_output[$type] = implode('', $this->html_output[$type]);
         return $this->imploded_output[$type];
     }

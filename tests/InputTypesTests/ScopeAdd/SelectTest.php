@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd;
+namespace Tests\InputTypesTests\ScopeAdd;
 
 
 use Examples\DBExamples\Libraries\Database\DB;

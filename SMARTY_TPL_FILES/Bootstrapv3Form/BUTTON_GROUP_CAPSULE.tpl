@@ -1,3 +1,3 @@
-<div class="form-footer">
+<div class="form-actions">
     {$input}
 </div>

@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\CheckboxCheckDataTests;
+namespace Tests\InputTypesTests\CheckboxCheckDataTests;
 
 
 use Examples\DBExamples\Libraries\Database\DB;

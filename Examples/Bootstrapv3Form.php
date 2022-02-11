@@ -6,10 +6,6 @@
  */
 
 
-use FormGenerator\FormGeneratorDirector;
-
 require(__DIR__ . '/../vendor/autoload.php');
 $format = 'Bootstrapv3Form';
 include __DIR__ . '/form_generator_array.php';
-
-

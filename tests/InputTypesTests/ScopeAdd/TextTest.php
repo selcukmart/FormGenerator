@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeAdd;
+namespace Tests\InputTypesTests\ScopeAdd;
 
 
 use FormGenerator\FormGeneratorDirector;
@@ -39,7 +39,7 @@ class TextTest extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'add');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input placeholder="Address Identification" id="address_identification" name="address_identification" value="" type="text" class="form-control">';
+        $expected = '<input name="address_identification" value="" class="" placeholder="Address Identification" __is_def="1" type="text" id="address_identification" >';
         $this->assertSame($expected, $html);
     }
 }

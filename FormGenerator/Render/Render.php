@@ -38,6 +38,7 @@ class Render
      */
     public function createHtmlOutput($template, $return, $html_output_type)
     {
+
         $htmlOutput = $this->getHtmlOutput($template);
         if ($return) {
             return $htmlOutput;
@@ -58,6 +59,7 @@ class Render
      */
     protected function getHtmlOutput($template)
     {
+
         $factoryClassname = $this->getFactoryClassname();
 
         $render_factory = $factoryClassname::getInstance($this->formGeneratorDirector, $this);

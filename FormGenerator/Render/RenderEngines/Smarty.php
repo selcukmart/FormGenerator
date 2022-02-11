@@ -19,7 +19,6 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
     {
         $renderObject = $this->formGenerator->getRenderobject();
         $template = $this->getTemplateFullPath($renderObject, $template);
-
         if ($template) {
             $renderObject->clearAllAssign();
             $input_parts = defaults_form_generator($this->render->getInputParts(), $this->render->getInputVariables());
@@ -48,7 +47,6 @@ class Smarty extends AbstractRenderEngines implements RenderInterface
             return self::$templates[$template];
         }
         $template_dir = $renderObject->getTemplateDir()[0] . $this->formGenerator->getBuildFormat();
-
         if (!is_dir($template_dir)) {
             $template_path = 'Generic';
         } else {

@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeEdit\OtherInputTypes;
+namespace Tests\InputTypesTests\ScopeEdit\OtherInputTypes;
 
 
 use FormGenerator\FormGeneratorDirector;

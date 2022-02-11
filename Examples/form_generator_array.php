@@ -181,7 +181,7 @@ $form_generator_array = [
             ],
             [
                 'type' => 'output',
-                'output' => '<div class="abc">Any Data, Input to here etc</div>',
+                'output' => '<div class="abc">Any Data, {$name} {$username}</div>',
                 'label' => 'Any Data'
             ],
             [

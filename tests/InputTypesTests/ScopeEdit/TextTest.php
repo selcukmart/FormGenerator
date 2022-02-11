@@ -5,7 +5,7 @@
  * 10:49
  */
 
-namespace Tests\InputTypes\ScopeEdit;
+namespace Tests\InputTypesTests\ScopeEdit;
 
 
 use FormGenerator\FormGeneratorDirector;
@@ -44,7 +44,7 @@ class TextTest extends TestCase
         $form_generator = new FormGeneratorDirector($form_generator_array, 'edit');
         $form_generator->buildHtmlOutput();
         $html = $form_generator->getHtmlOutput();
-        $expected = '<input placeholder="Nationality is Turkey Citizen" id="nationality_tc_or_not" name="nationality_tc_or_not" value="1" type="text" class="form-control">';
+        $expected = '<input name="nationality_tc_or_not" value="1" class="" placeholder="Nationality is Turkey Citizen" __is_def="1" type="text" id="nationality_tc_or_not" >';
         $this->assertSame($expected, $html);
     }
 }
