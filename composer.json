@@ -34,7 +34,7 @@
     "ext-mbstring": "*",
     "ext-iconv": "*",
     "ext-json": "*",
-    "smarty/smarty": "^3.0.0"
+    "smarty/smarty": "^4.0.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
