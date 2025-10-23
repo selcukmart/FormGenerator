@@ -1,0 +1,449 @@
+# FormGenerator V2
+
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
+
+## 🎯 What's New in V2
+
+- **PHP 8.1+**: Modern PHP features (enums, attributes, typed properties, readonly)
+- **Chain Pattern**: Fluent interface for intuitive form building
+- **Multi-Framework**: Symfony Bundle & Laravel ServiceProvider
+- **Data Providers**: Doctrine, Eloquent, PDO support
+- **Security First**: Built-in CSRF, XSS protection, input sanitization
+- **Modern Themes**: Bootstrap 5, Tailwind CSS ready
+- **Template Engines**: Twig & Smarty 5 support
+
+## 🚀 Installation
+
+```bash
+composer require selcukmart/form-generator
+```
+
+## 📖 Quick Start
+
+### Basic Usage
+
+```php
+use FormGenerator\V2\Builder\FormBuilder;
+use FormGenerator\V2\Renderer\TwigRenderer;
+use FormGenerator\V2\Theme\Bootstrap5Theme;
+
+// Setup
+$renderer = new TwigRenderer(__DIR__ . '/templates');
+$theme = new Bootstrap5Theme();
+
+// Build form with chain pattern
+$form = FormBuilder::create('user_form')
+    ->setAction('/users/save')
+    ->setMethod('POST')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+
+    // Add inputs fluently
+    ->addText('name', 'Full Name')
+        ->required()
+        ->minLength(3)
+        ->maxLength(100)
+        ->placeholder('Enter your name')
+        ->add()
+
+    ->addEmail('email', 'Email Address')
+        ->required()
+        ->add()
+
+    ->addPassword('password', 'Password')
+        ->required()
+        ->minLength(8)
+        ->add()
+
+    ->addSelect('country', 'Country')
+        ->options([
+            'us' => 'United States',
+            'uk' => 'United Kingdom',
+            'de' => 'Germany',
+        ])
+        ->add()
+
+    ->addSubmit('save', 'Create Account')
+    ->build();
+
+echo $form;
+```
+
+### With Doctrine (Symfony)
+
+```php
+use FormGenerator\V2\DataProvider\DoctrineDataProvider;
+use Doctrine\ORM\EntityManagerInterface;
+
+$provider = new DoctrineDataProvider($entityManager, User::class);
+
+$form = FormBuilder::create('edit_user')
+    ->edit() // Set edit mode
+    ->setDataProvider($provider)
+    ->loadData($userId) // Auto-load from Doctrine
+
+    ->addText('username', 'Username')
+        ->readonly()
+        ->add()
+
+    ->addText('firstName', 'First Name')
+        ->required()
+        ->add()
+
+    ->addSelect('role', 'Role')
+        ->optionsFromProvider($roleProvider, 'id', 'name')
+        ->add()
+
+    ->addSubmit('update', 'Update User')
+    ->build();
+```
+
+### With Laravel Eloquent
+
+```php
+use FormGenerator\V2\DataProvider\EloquentDataProvider;
+use App\Models\User;
+
+$provider = new EloquentDataProvider(User::class);
+
+$form = FormBuilder::create('user_form')
+    ->setDataProvider($provider)
+    ->loadData($userId)
+
+    ->addText('name')->required()->add()
+    ->addEmail('email')->required()->add()
+    ->addSubmit('save')
+    ->build();
+
+return view('users.form', ['form' => $form]);
+```
+
+## 🔧 Framework Integration
+
+### Symfony
+
+1. Register the bundle:
+
+```php
+// config/bundles.php
+return [
+    // ...
+    FormGenerator\V2\Integration\Symfony\FormGeneratorBundle::class => ['all' => true],
+];
+```
+
+2. Configure:
+
+```yaml
+# config/packages/form_generator.yaml
+form_generator:
+    default_theme: 'bootstrap5'
+    default_renderer: 'twig'
+    cache:
+        enabled: true
+        dir: '%kernel.cache_dir%/form_generator'
+```
+
+3. Use in controllers:
+
+```php
+use FormGenerator\V2\Integration\Symfony\FormType\FormGeneratorType;
+
+$symfonyForm = $this->createForm(FormGeneratorType::class, $user, [
+    'generator_builder' => $formBuilder,
+]);
+```
+
+### Laravel
+
+1. Publish configuration:
+
+```bash
+php artisan vendor:publish --tag=form-generator-config
+```
+
+2. Use in Blade templates:
+
+```blade
+@formGenerator($form)
+
+<!-- Or include assets -->
+@formAssets($theme)
+```
+
+3. In controllers:
+
+```php
+public function create()
+{
+    $form = app(FormBuilder::class)
+        ->setRenderer(app(TwigRenderer::class))
+        ->setTheme(app(Bootstrap5Theme::class))
+        ->addText('name')->required()->add()
+        ->addSubmit('create')
+        ->build();
+
+    return view('form', compact('form'));
+}
+```
+
+## 🎨 Themes
+
+### Bootstrap 5 (Included)
+
+```php
+use FormGenerator\V2\Theme\Bootstrap5Theme;
+
+$theme = new Bootstrap5Theme();
+
+// Enable floating labels
+$theme->enableFloatingLabels();
+
+// Enable horizontal form
+$theme->enableHorizontalForm('col-md-3', 'col-md-9');
+```
+
+### Custom Theme
+
+```php
+use FormGenerator\V2\Theme\AbstractTheme;
+
+class MyCustomTheme extends AbstractTheme
+{
+    protected function initialize(): void
+    {
+        $this->templateMap = [
+            'text' => 'custom/input_text.twig',
+            // ... other mappings
+        ];
+
+        $this->inputClasses = [
+            'text' => [
+                'wrapper' => 'my-form-group',
+                'label' => 'my-label',
+                'input' => 'my-input',
+            ],
+        ];
+    }
+
+    public function getName(): string
+    {
+        return 'My Custom Theme';
+    }
+
+    public function getVersion(): string
+    {
+        return '1.0.0';
+    }
+}
+```
+
+## 🔒 Security
+
+### CSRF Protection
+
+```php
+use FormGenerator\V2\Security\SecurityManager;
+
+$security = new SecurityManager();
+
+$form = FormBuilder::create('secure_form')
+    ->setSecurity($security)
+    ->enableCsrf() // Auto-generates CSRF token
+    ->build();
+
+// Validate on submit
+if ($_POST) {
+    $isValid = $security->validateCsrfToken(
+        'secure_form',
+        $_POST['_csrf_token']
+    );
+}
+```
+
+### Input Sanitization
+
+```php
+// Auto-sanitizes all input values
+$security = new SecurityManager();
+$form->setSecurity($security);
+
+// Manual sanitization
+$clean = $security->sanitize($_POST['user_input']);
+$cleanHtml = $security->sanitize($_POST['html_content'], allowHtml: true);
+```
+
+### File Upload Validation
+
+```php
+$form->addFile('avatar', 'Profile Picture')
+    ->attribute('accept', 'image/*')
+    ->add();
+
+// Validate upload
+if ($security->validateFileUpload($_FILES['avatar'])) {
+    $safeName = $security->getSafeFilename($_FILES['avatar']['name']);
+    // Process upload
+}
+```
+
+## 📊 Data Providers
+
+### Array Provider
+
+```php
+use FormGenerator\V2\DataProvider\ArrayDataProvider;
+
+$data = [
+    ['id' => 1, 'name' => 'John', 'email' => 'john@example.com'],
+    ['id' => 2, 'name' => 'Jane', 'email' => 'jane@example.com'],
+];
+
+$provider = new ArrayDataProvider($data);
+$form->setDataProvider($provider)->loadData(1);
+```
+
+### PDO Provider
+
+```php
+use FormGenerator\V2\DataProvider\PDODataProvider;
+
+$pdo = new PDO('mysql:host=localhost;dbname=mydb', 'user', 'pass');
+$provider = new PDODataProvider($pdo, 'users', 'id');
+
+$form->setDataProvider($provider)->loadData($userId);
+```
+
+### Doctrine Provider
+
+```php
+use FormGenerator\V2\DataProvider\DoctrineDataProvider;
+
+$provider = new DoctrineDataProvider($entityManager, User::class);
+$form->setDataProvider($provider)->loadData($userId);
+```
+
+### Eloquent Provider
+
+```php
+use FormGenerator\V2\DataProvider\EloquentDataProvider;
+
+$provider = new EloquentDataProvider(User::class);
+$form->setDataProvider($provider)->loadData($userId);
+```
+
+## 🧪 Input Types
+
+All HTML5 input types supported:
+
+- `addText()` - Text input
+- `addEmail()` - Email input
+- `addPassword()` - Password input
+- `addTextarea()` - Textarea
+- `addSelect()` - Select dropdown
+- `addCheckbox()` - Checkbox
+- `addRadio()` - Radio buttons
+- `addFile()` - File upload
+- `addImage()` - Image upload
+- `addHidden()` - Hidden input
+- `addNumber()` - Number input
+- `addDate()` - Date picker
+- `addDatetime()` - DateTime picker
+- `addTime()` - Time picker
+- `addColor()` - Color picker
+- `addRange()` - Range slider
+- `addSubmit()` - Submit button
+- `addReset()` - Reset button
+- `addButton()` - Generic button
+
+## 🎯 Validation
+
+### Built-in Validation
+
+```php
+$form->addEmail('email')
+    ->required()
+    ->minLength(5)
+    ->maxLength(100)
+    ->pattern('[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$')
+    ->add();
+
+$form->addNumber('age')
+    ->required()
+    ->min(18)
+    ->max(120)
+    ->add();
+```
+
+### Dependencies
+
+```php
+// Show company fields only when user type is "business"
+$form->addRadio('user_type', 'User Type')
+    ->options(['personal' => 'Personal', 'business' => 'Business'])
+    ->add();
+
+$form->addText('company_name', 'Company Name')
+    ->dependsOn('user_type', 'business')
+    ->required()
+    ->add();
+```
+
+## 📚 Documentation
+
+- [Installation Guide](docs/installation.md)
+- [Chain Pattern Guide](docs/chain-pattern.md)
+- [Data Providers](docs/data-providers.md)
+- [Security Features](docs/security.md)
+- [Theme Development](docs/themes.md)
+- [Symfony Integration](docs/symfony.md)
+- [Laravel Integration](docs/laravel.md)
+- [Migration from V1](UPGRADE.md)
+
+## 🔄 Upgrading from V1
+
+See [UPGRADE.md](UPGRADE.md) for detailed migration guide.
+
+**Quick comparison:**
+
+```php
+// V1 (Array-based)
+$config = [
+    'inputs' => [
+        ['type' => 'text', 'attributes' => ['name' => 'email']],
+    ],
+];
+$form = new FormGeneratorDirector($config, 'add');
+
+// V2 (Chain Pattern)
+$form = FormBuilder::create('form')
+    ->addText('email')->add()
+    ->build();
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📝 License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+## 👨‍💻 Author
+
+**selcukmart**
+- Email: admin@hostingdevi.com
+- GitHub: [@selcukmart](https://github.com/selcukmart)
+
+## 🙏 Acknowledgments
+
+- Bootstrap team for amazing UI framework
+- Twig team for excellent template engine
+- Symfony & Laravel communities
+
+---
+
+**Version 2.0.0** - Built with ❤️ using modern PHP
