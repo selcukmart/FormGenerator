@@ -11,8 +11,10 @@ use FormGenerator\V2\Contracts\{
     RendererInterface,
     ScopeType,
     SecurityInterface,
-    ThemeInterface
+    ThemeInterface,
+    ValidatorInterface
 };
+use FormGenerator\V2\Validation\{ValidationManager, SymfonyValidator};
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -44,9 +46,13 @@ class FormBuilder implements BuilderInterface
     private ?RendererInterface $renderer = null;
     private ?ThemeInterface $theme = null;
     private ?SecurityInterface $security = null;
+    private ?ValidatorInterface $validator = null;
     private bool $enableCsrf = true;
+    private bool $enableValidation = true;
+    private bool $enableClientSideValidation = true;
     private array $data = [];
     private ?string $enctype = null;
+    private ?object $dto = null;
 
     private function __construct(string $name)
     {
@@ -160,6 +166,33 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
+     * Set validator
+     */
+    public function setValidator(ValidatorInterface $validator): self
+    {
+        $this->validator = $validator;
+        return $this;
+    }
+
+    /**
+     * Enable/disable validation
+     */
+    public function enableValidation(bool $enable = true): self
+    {
+        $this->enableValidation = $enable;
+        return $this;
+    }
+
+    /**
+     * Enable/disable client-side (JavaScript) validation
+     */
+    public function enableClientSideValidation(bool $enable = true): self
+    {
+        $this->enableClientSideValidation = $enable;
+        return $this;
+    }
+
+    /**
      * Enable/disable CSRF protection
      */
     public function enableCsrf(bool $enable = true): self
@@ -192,6 +225,78 @@ class FormBuilder implements BuilderInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Set DTO/Entity object (Symfony DTO support)
+     * Automatically extracts data and validation rules
+     */
+    public function setDto(object $dto): self
+    {
+        $this->dto = $dto;
+
+        // Extract data from DTO
+        $reflection = new \ReflectionClass($dto);
+        foreach ($reflection->getProperties() as $property) {
+            $property->setAccessible(true);
+            $value = $property->getValue($dto);
+            if ($value !== null) {
+                $this->data[$property->getName()] = $value;
+            }
+        }
+
+        // Extract validation rules if using SymfonyValidator
+        if ($this->validator instanceof SymfonyValidator) {
+            $rules = $this->validator->extractRulesFromObject($dto);
+            foreach ($rules as $fieldName => $fieldRules) {
+                // Apply rules to corresponding inputs
+                foreach ($this->inputs as $input) {
+                    if ($input->getName() === $fieldName) {
+                        // Rules will be applied during validation
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get DTO object
+     */
+    public function getDto(): ?object
+    {
+        return $this->dto;
+    }
+
+    /**
+     * Validate form data against DTO
+     */
+    public function validateDto(array $data): array
+    {
+        if ($this->dto === null) {
+            throw new \RuntimeException('DTO not set. Use setDto() first.');
+        }
+
+        if (!$this->validator instanceof SymfonyValidator) {
+            throw new \RuntimeException('SymfonyValidator required for DTO validation');
+        }
+
+        // Hydrate DTO with data
+        $reflection = new \ReflectionClass($this->dto);
+        foreach ($data as $key => $value) {
+            if ($reflection->hasProperty($key)) {
+                $property = $reflection->getProperty($key);
+                $property->setAccessible(true);
+                $property->setValue($this->dto, $value);
+            }
+        }
+
+        // Validate DTO
+        $result = $this->validator->validateObject($this->dto);
+
+        return $result->getErrors();
     }
 
     /**
@@ -426,7 +531,42 @@ class FormBuilder implements BuilderInterface
             $formHtml .= "\n" . DependencyManager::generateScript($this->name);
         }
 
+        // Add validation JavaScript if validation is enabled
+        if ($this->enableValidation && $this->enableClientSideValidation && $this->validator !== null) {
+            $fieldsRules = $this->collectValidationRules();
+            if (!empty($fieldsRules)) {
+                $formHtml .= "\n" . ValidationManager::generateScript(
+                    $this->name,
+                    $fieldsRules,
+                    $this->validator
+                );
+            }
+        }
+
         return $formHtml;
+    }
+
+    /**
+     * Collect validation rules from all inputs
+     */
+    private function collectValidationRules(): array
+    {
+        $rules = [];
+
+        foreach ($this->inputs as $input) {
+            $config = $input->toArray();
+            if (!empty($config['validationRules'])) {
+                $rules[$config['name']] = $config['validationRules'];
+            }
+        }
+
+        // Merge with DTO rules if available
+        if ($this->dto !== null && $this->validator instanceof SymfonyValidator) {
+            $dtoRules = $this->validator->extractRulesFromObject($this->dto);
+            $rules = array_merge($dtoRules, $rules); // Input rules override DTO rules
+        }
+
+        return $rules;
     }
 
     /**
