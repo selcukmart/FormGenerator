@@ -290,6 +290,153 @@ if ($security->validateFileUpload($_FILES['avatar'])) {
 }
 ```
 
+## 🔗 Dependency Management
+
+**Native support for conditional field display** - Show/hide inputs based on other field values with **pure JavaScript** (no jQuery required)!
+
+### Basic Dependency
+
+```php
+$form = FormBuilder::create('invoice_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+
+    // Radio buttons that control visibility
+    ->addRadio('invoice_type', 'Invoice Type')
+        ->options([
+            '1' => 'Individual',
+            '2' => 'Corporate',
+        ])
+        ->controls('invoice_type') // Mark as dependency controller
+        ->add()
+
+    // Show only when invoice_type = 1
+    ->addText('id_number', 'ID Number')
+        ->required()
+        ->dependsOn('invoice_type', '1')
+        ->add()
+
+    // Show only when invoice_type = 2
+    ->addText('company_name', 'Company Name')
+        ->required()
+        ->dependsOn('invoice_type', '2')
+        ->add()
+
+    ->addSubmit('save')
+    ->build();
+
+// Pure JavaScript is automatically injected! No manual setup required.
+```
+
+### Select Dependencies
+
+```php
+// Country select controls other fields
+->addSelect('country', 'Country')
+    ->options([
+        'us' => 'United States',
+        'uk' => 'United Kingdom',
+        'tr' => 'Turkey',
+    ])
+    ->controls('country') // Mark as controller
+    ->add()
+
+// Show state selector only for US
+->addSelect('state', 'State')
+    ->dependsOn('country', 'us')
+    ->options([
+        'ca' => 'California',
+        'ny' => 'New York',
+        'tx' => 'Texas',
+    ])
+    ->add()
+
+// Show VAT field for UK and Turkey
+->addText('vat_number', 'VAT Number')
+    ->dependsOn('country', ['uk', 'tr']) // Multiple values!
+    ->add()
+```
+
+### Checkbox Dependencies
+
+```php
+// Checkbox controls email field
+->addCheckbox('newsletter', 'Subscribe to Newsletter')
+    ->controls('newsletter_group')
+    ->add()
+
+// Show email when checkbox is checked
+->addEmail('newsletter_email', 'Newsletter Email')
+    ->required()
+    ->dependsOn('newsletter', '1') // Checkbox value is '1' when checked
+    ->add()
+```
+
+### How It Works
+
+1. **Controller Fields**: Use `->controls('group_name')` to mark fields that control others
+2. **Dependent Fields**: Use `->dependsOn('field_name', 'value')` to show/hide based on controller
+3. **Auto JavaScript**: Pure JavaScript is automatically generated and injected once per form
+4. **Smooth Animation**: Fields fade in/out with CSS transitions
+5. **Form Validation**: Hidden fields are automatically disabled and cleared
+
+### Features
+
+- ✅ **Pure JavaScript** - No jQuery or other dependencies
+- ✅ **Automatic Generation** - JavaScript injected automatically, only once per form
+- ✅ **Multiple Values** - `dependsOn('field', ['val1', 'val2'])`
+- ✅ **Smooth Animations** - Fade in/out transitions
+- ✅ **Form-Specific** - Each form gets its own unique namespace
+- ✅ **Smart Validation** - Hidden fields are disabled/cleared automatically
+- ✅ **All Input Types** - Works with radio, select, checkbox, and more
+
+### Advanced Example
+
+```php
+$form = FormBuilder::create('complex_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+
+    // User type selector
+    ->addSelect('user_type', 'User Type')
+        ->options([
+            'personal' => 'Personal',
+            'business' => 'Business',
+            'non_profit' => 'Non-Profit',
+        ])
+        ->controls('user_type')
+        ->add()
+
+    // Personal fields (shown for 'personal')
+    ->addText('first_name', 'First Name')
+        ->dependsOn('user_type', 'personal')
+        ->add()
+
+    ->addText('last_name', 'Last Name')
+        ->dependsOn('user_type', 'personal')
+        ->add()
+
+    // Business fields (shown for 'business' or 'non_profit')
+    ->addText('organization_name', 'Organization Name')
+        ->dependsOn('user_type', ['business', 'non_profit'])
+        ->add()
+
+    // Tax ID (business only)
+    ->addText('tax_id', 'Tax ID')
+        ->dependsOn('user_type', 'business')
+        ->add()
+
+    // 501(c)(3) number (non-profit only)
+    ->addText('nonprofit_number', '501(c)(3) Number')
+        ->dependsOn('user_type', 'non_profit')
+        ->add()
+
+    ->addSubmit('register')
+    ->build();
+```
+
+See `/Examples/V2/WithDependencies.php` for a complete working example.
+
 ## 📊 Data Providers
 
 ### Array Provider

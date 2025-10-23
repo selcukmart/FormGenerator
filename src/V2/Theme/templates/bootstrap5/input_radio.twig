@@ -1,5 +1,5 @@
 {# Bootstrap 5 Radio Buttons #}
-<div class="mb-3">
+<div class="mb-3" {{ wrapperAttributes|attributes|raw }}>
     {% if label %}
         <label class="form-label">
             {{ label }}
@@ -15,6 +15,7 @@
                 id="{{ attributes.id }}_{{ key }}"
                 value="{{ key }}"
                 class="{{ classes.input }}"
+                {{ attributes|attributes|raw }}
                 {% if value == key %}checked{% endif %}
             />
             <label for="{{ attributes.id }}_{{ key }}" class="{{ classes.label }}">

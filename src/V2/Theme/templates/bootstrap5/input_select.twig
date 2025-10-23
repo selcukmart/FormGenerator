@@ -1,5 +1,5 @@
 {# Bootstrap 5 Select Dropdown #}
-<div class="{{ classes.wrapper }}">
+<div class="{{ classes.wrapper }}" {{ wrapperAttributes|attributes|raw }}>
     {% if label %}
         <label for="{{ attributes.id }}" class="{{ classes.label }}">
             {{ label }}

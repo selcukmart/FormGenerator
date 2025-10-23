@@ -419,7 +419,28 @@ class FormBuilder implements BuilderInterface
             'csrf_token' => $this->getCsrfToken(),
         ];
 
-        return $this->renderer->render($this->theme->getFormTemplate(), $context);
+        $formHtml = $this->renderer->render($this->theme->getFormTemplate(), $context);
+
+        // Add dependency management JavaScript if any inputs have dependencies
+        if ($this->hasDependencies()) {
+            $formHtml .= "\n" . DependencyManager::generateScript($this->name);
+        }
+
+        return $formHtml;
+    }
+
+    /**
+     * Check if form has any dependency configurations
+     */
+    private function hasDependencies(): bool
+    {
+        foreach ($this->inputs as $input) {
+            $config = $input->toArray();
+            if (!empty($config['dependencies']) || isset($config['attributes']['data-dependency'])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

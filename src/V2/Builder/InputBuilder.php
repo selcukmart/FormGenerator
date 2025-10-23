@@ -190,14 +190,58 @@ class InputBuilder
 
     /**
      * Add dependency (show/hide based on another field)
+     * This input will show/hide when the dependency field changes
+     *
+     * @param string $fieldName The field this input depends on
+     * @param string|array $value The value(s) that trigger this input to show
+     * @param string|null $group Optional group name for dependency management
      */
-    public function dependsOn(string $fieldName, mixed $value): self
+    public function dependsOn(string $fieldName, string|array $value, ?string $group = null): self
     {
+        $values = is_array($value) ? $value : [$value];
+
         $this->dependencies[] = [
             'field' => $fieldName,
-            'value' => $value,
+            'values' => $values,
+            'group' => $group ?? $fieldName, // Use field name as default group
         ];
+
+        // Add data attributes for JavaScript
+        $dependValues = array_map(fn($v) => $fieldName . '-' . $v, $values);
+        $this->wrapperAttributes['data-dependends'] = '';
+        $this->wrapperAttributes['data-dependend'] = implode(' ', $dependValues);
+        $this->wrapperAttributes['data-dependend-group'] = $group ?? $fieldName;
+
+        // Initially hide dependent fields (will be shown by JS if condition met)
+        $this->wrapperAttributes['style'] = 'display: none;';
+
         return $this;
+    }
+
+    /**
+     * Mark this input as a dependency controller
+     * Other inputs can depend on this input's value
+     *
+     * @param string|null $group Optional group name
+     */
+    public function isDependency(?string $group = null): self
+    {
+        $this->attributes['data-dependency'] = 'true';
+        $this->attributes['data-dependency-group'] = $group ?? $this->name;
+        $this->attributes['data-dependency-field'] = $this->name;
+
+        return $this;
+    }
+
+    /**
+     * Shortcut: Make this input control dependencies and configure dependent
+     *
+     * Example:
+     * ->controls('company_fields') // This field controls 'company_fields' group
+     */
+    public function controls(string $groupName): self
+    {
+        return $this->isDependency($groupName);
     }
 
     /**
