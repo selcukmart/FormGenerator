@@ -12,8 +12,12 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **Multi-Framework**: Symfony Bundle & Laravel ServiceProvider
 - **Data Providers**: Doctrine, Eloquent, PDO support
 - **Security First**: Built-in CSRF, XSS protection, input sanitization
-- **Modern Themes**: Bootstrap 5, Tailwind CSS ready
+- **Modern Themes**: Bootstrap 5, Tailwind CSS included
 - **Template Engines**: Twig & Smarty 5 support
+- **🆕 Native Validation**: Built-in PHP + JavaScript validation (no jQuery!)
+- **🆕 Symfony DTO Support**: Auto-extract validation from DTO/Entity
+- **🆕 Dependency Management**: Pure JavaScript conditional fields
+- **🆕 15+ Validation Rules**: required, email, minLength, pattern, etc.
 
 ## 🚀 Installation
 
@@ -436,6 +440,200 @@ $form = FormBuilder::create('complex_form')
 ```
 
 See `/Examples/V2/WithDependencies.php` for a complete working example.
+
+## ✅ Validation System
+
+**Built-in dual validation** - Both PHP backend and JavaScript frontend validation included!
+
+### Basic Validation
+
+```php
+use FormGenerator\V2\Validation\NativeValidator;
+
+$validator = new NativeValidator();
+
+$form = FormBuilder::create('user_form')
+    ->setValidator($validator)
+    ->enableClientSideValidation() // Auto JavaScript validation!
+
+    // Required field
+    ->addText('username', 'Username')
+        ->required()
+        ->minLength(3)
+        ->maxLength(20)
+        ->add()
+
+    // Email validation
+    ->addEmail('email', 'Email')
+        ->required()
+        ->email() // Validates email format
+        ->add()
+
+    // Password with pattern
+    ->addPassword('password', 'Password')
+        ->required()
+        ->minLength(8)
+        ->pattern('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/', 'Must contain uppercase, lowercase, and number')
+        ->add()
+
+    // Numeric range
+    ->addNumber('age', 'Age')
+        ->required()
+        ->min(18)
+        ->max(120)
+        ->add()
+
+    ->addSubmit('save')
+    ->build();
+
+// JavaScript validation automatically injected!
+```
+
+### Available Validation Rules
+
+| Rule | Description | JavaScript Support |
+|------|-------------|-------------------|
+| `required()` | Field cannot be empty | ✅ |
+| `email()` | Valid email format | ✅ |
+| `minLength(n)` | Minimum string length | ✅ |
+| `maxLength(n)` | Maximum string length | ✅ |
+| `min(n)` | Minimum numeric value | ✅ |
+| `max(n)` | Maximum numeric value | ✅ |
+| `pattern(regex)` | Regex pattern match | ✅ |
+| `url()` | Valid URL format | ✅ |
+| `numeric()` | Must be numeric | ✅ |
+| `integer()` | Must be integer | ✅ |
+| `alpha()` | Only letters | ✅ |
+| `alphanumeric()` | Letters and numbers | ✅ |
+| `date()` | Valid date | ✅ |
+| `match(field)` | Match another field | ✅ |
+| `in(array)` | Value in whitelist | ✅ |
+
+### Validation Features
+
+- ✅ **Real-time validation** on blur
+- ✅ **Clear errors** on input
+- ✅ **Error summary** on submit
+- ✅ **Focus first error** automatically
+- ✅ **Dependency-aware** (skips hidden fields)
+- ✅ **Bootstrap styling** for error messages
+- ✅ **Custom rules** support
+
+### Backend Validation
+
+```php
+// Validate on form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $errors = $validator->validateForm($_POST, [
+        'username' => ['required' => true, 'minLength' => 3],
+        'email' => ['required' => true, 'email' => true],
+        'age' => ['min' => 18, 'max' => 120],
+    ]);
+
+    foreach ($errors as $field => $result) {
+        if ($result->isFailed()) {
+            // Handle errors
+            $fieldErrors = $result->getErrors();
+        }
+    }
+}
+```
+
+### Custom Validation Rules
+
+```php
+$validator->addRule('username_available', function($value, $params, $context) {
+    // Check database
+    return !userExists($value);
+}, 'Username is already taken');
+
+// Use in form
+->addText('username')
+    ->required()
+    ->add(); // Rule applied via validator
+```
+
+## 🎯 Symfony DTO Support
+
+**Automatic validation extraction** from Symfony DTO/Entity constraints!
+
+### DTO Example
+
+```php
+use Symfony\Component\Validator\Constraints as Assert;
+
+class UserDTO
+{
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 50)]
+    public ?string $username = null;
+
+    #[Assert\Email]
+    public ?string $email = null;
+
+    #[Assert\Range(min: 18, max: 120)]
+    public ?int $age = null;
+}
+
+// Setup Symfony Validator
+use Symfony\Component\Validator\Validation;
+use FormGenerator\V2\Validation\{SymfonyValidator, NativeValidator};
+
+$symfonyValidator = Validation::createValidatorBuilder()
+    ->enableAnnotationMapping()
+    ->getValidator();
+
+$validator = new SymfonyValidator($symfonyValidator, new NativeValidator());
+
+// Use DTO with FormBuilder
+$userDto = new UserDTO();
+
+$form = FormBuilder::create('user_form')
+    ->setValidator($validator)
+    ->setDto($userDto) // Auto-extracts validation rules!
+
+    ->addText('username')->add() // Validation from DTO!
+    ->addEmail('email')->add()
+    ->addNumber('age')->add()
+
+    ->addSubmit('save')
+    ->build();
+
+// Validate against DTO
+if ($_POST) {
+    $errors = $form->validateDto($_POST);
+    if (empty($errors)) {
+        // DTO is valid, persist to database
+        $entityManager->persist($userDto);
+    }
+}
+```
+
+### Supported Symfony Constraints
+
+| Symfony Constraint | Mapped To |
+|-------------------|-----------|
+| `NotBlank`, `NotNull` | required |
+| `Email` | email |
+| `Length` | minLength/maxLength |
+| `Range` | min/max |
+| `Regex` | pattern |
+| `Url` | url |
+| `Type` | numeric/integer |
+| `Choice` | in |
+
+### DTO Features
+
+- ✅ Auto-extract validation rules
+- ✅ Auto-hydrate DTO from form data
+- ✅ Type-safe with PHP 8+ attributes
+- ✅ Works with Doctrine entities
+- ✅ JavaScript validation generated
+- ✅ DRY principle (define rules once)
+
+### Complete Example
+
+See `/Examples/V2/WithSymfonyDTO.php` and `/Examples/V2/WithValidation.php`
 
 ## 📊 Data Providers
 
