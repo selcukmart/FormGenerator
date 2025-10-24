@@ -42,6 +42,8 @@ class FormBuilder implements BuilderInterface
     private ScopeType $scope = ScopeType::ADD;
     private array $attributes = [];
     private array $inputs = [];
+    private array $sections = [];
+    private ?Section $currentSection = null;
     private ?DataProviderInterface $dataProvider = null;
     private ?RendererInterface $renderer = null;
     private ?ThemeInterface $theme = null;
@@ -193,6 +195,26 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
+     * Set custom animation options for dependencies
+     *
+     * @param array $options Options: enabled (bool), duration (int ms), type (fade|slide|none), easing (string)
+     */
+    public function setDependencyAnimation(array $options): self
+    {
+        DependencyManager::setAnimationOptions($this->name, $options);
+        return $this;
+    }
+
+    /**
+     * Disable dependency animations
+     */
+    public function disableDependencyAnimation(): self
+    {
+        DependencyManager::setAnimationOptions($this->name, ['enabled' => false]);
+        return $this;
+    }
+
+    /**
      * Enable/disable CSRF protection
      */
     public function enableCsrf(bool $enable = true): self
@@ -323,6 +345,84 @@ class FormBuilder implements BuilderInterface
     public function multipart(): self
     {
         $this->enctype = 'multipart/form-data';
+        return $this;
+    }
+
+    // ========== Section Methods ==========
+
+    /**
+     * Start a new section
+     *
+     * @param string $title Section title
+     * @param string $description Optional description (supports HTML)
+     */
+    public function addSection(string $title, string $description = ''): self
+    {
+        $section = new Section($title);
+        if ($description !== '') {
+            $section->setDescription($description);
+        }
+
+        $this->currentSection = $section;
+        $this->sections[] = $section;
+
+        return $this;
+    }
+
+    /**
+     * Set HTML content for current section
+     */
+    public function setSectionHtml(string $html): self
+    {
+        if ($this->currentSection !== null) {
+            $this->currentSection->setHtmlContent($html);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set attributes for current section
+     */
+    public function setSectionAttributes(array $attributes): self
+    {
+        if ($this->currentSection !== null) {
+            $this->currentSection->setAttributes($attributes);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set classes for current section
+     */
+    public function setSectionClasses(array $classes): self
+    {
+        if ($this->currentSection !== null) {
+            $this->currentSection->setClasses($classes);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Make current section collapsible
+     */
+    public function collapsibleSection(bool $collapsed = false): self
+    {
+        if ($this->currentSection !== null) {
+            $this->currentSection->collapsible($collapsed);
+        }
+
+        return $this;
+    }
+
+    /**
+     * End current section
+     */
+    public function endSection(): self
+    {
+        $this->currentSection = null;
         return $this;
     }
 
@@ -502,7 +602,10 @@ class FormBuilder implements BuilderInterface
      */
     public function addInputBuilder(InputBuilder $input): void
     {
-        $this->inputs[] = $input;
+        $this->inputs[] = [
+            'input' => $input,
+            'section' => $this->currentSection
+        ];
     }
 
     /**
@@ -553,7 +656,8 @@ class FormBuilder implements BuilderInterface
     {
         $rules = [];
 
-        foreach ($this->inputs as $input) {
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
             $config = $input->toArray();
             if (!empty($config['validationRules'])) {
                 $rules[$config['name']] = $config['validationRules'];
@@ -574,7 +678,8 @@ class FormBuilder implements BuilderInterface
      */
     private function hasDependencies(): bool
     {
-        foreach ($this->inputs as $input) {
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
             $config = $input->toArray();
             if (!empty($config['dependencies']) || isset($config['attributes']['data-dependency'])) {
                 return true;
@@ -615,8 +720,30 @@ class FormBuilder implements BuilderInterface
     private function buildInputsContext(): array
     {
         $inputsContext = [];
+        $currentSectionInputs = [];
+        $lastSection = null;
 
-        foreach ($this->inputs as $input) {
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $section = $item['section'];
+
+            // If we have sections, group inputs by section
+            if (!empty($this->sections)) {
+                // New section encountered
+                if ($section !== $lastSection) {
+                    // Save previous section inputs if any
+                    if ($lastSection !== null || !empty($currentSectionInputs)) {
+                        $inputsContext[] = [
+                            'is_section' => true,
+                            'section' => $lastSection?->toArray(),
+                            'inputs' => $currentSectionInputs
+                        ];
+                        $currentSectionInputs = [];
+                    }
+                    $lastSection = $section;
+                }
+            }
+
             $inputData = $input->toArray();
             $inputData['template'] = $this->theme->getInputTemplate($input->getType());
             $inputData['classes'] = $this->theme->getInputClasses($input->getType());
@@ -626,7 +753,20 @@ class FormBuilder implements BuilderInterface
                 $inputData['value'] = $this->security->sanitize($inputData['value']);
             }
 
-            $inputsContext[] = $inputData;
+            if (!empty($this->sections)) {
+                $currentSectionInputs[] = $inputData;
+            } else {
+                $inputsContext[] = $inputData;
+            }
+        }
+
+        // Add final section inputs if any
+        if (!empty($this->sections) && (!empty($currentSectionInputs) || $lastSection !== null)) {
+            $inputsContext[] = [
+                'is_section' => true,
+                'section' => $lastSection?->toArray(),
+                'inputs' => $currentSectionInputs
+            ];
         }
 
         return $inputsContext;

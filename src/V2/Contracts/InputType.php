@@ -37,13 +37,23 @@ enum InputType: string
     case BUTTON = 'button';
     case SUBMIT = 'submit';
     case RESET = 'reset';
+    case CHECKBOX_TREE = 'checkbox_tree';
+    case REPEATER = 'repeater';
 
     /**
      * Check if input type requires options (select, radio, checkbox)
      */
     public function requiresOptions(): bool
     {
-        return in_array($this, [self::SELECT, self::RADIO, self::CHECKBOX], true);
+        return in_array($this, [self::SELECT, self::RADIO, self::CHECKBOX, self::CHECKBOX_TREE], true);
+    }
+
+    /**
+     * Check if input type is complex (checkbox tree, repeater)
+     */
+    public function isComplex(): bool
+    {
+        return in_array($this, [self::CHECKBOX_TREE, self::REPEATER], true);
     }
 
     /**
