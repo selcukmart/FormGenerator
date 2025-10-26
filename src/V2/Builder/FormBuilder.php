@@ -547,6 +547,64 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
+     * Add checkbox tree (hierarchical checkboxes)
+     *
+     * @param string $name Field name
+     * @param string|null $label Field label
+     * @param array $tree Hierarchical array structure
+     * @param string $mode 'cascade' or 'independent'
+     *
+     * Example tree structure:
+     * [
+     *     ['value' => 'parent1', 'label' => 'Parent 1', 'children' => [
+     *         ['value' => 'child1', 'label' => 'Child 1'],
+     *         ['value' => 'child2', 'label' => 'Child 2']
+     *     ]],
+     *     ['value' => 'parent2', 'label' => 'Parent 2']
+     * ]
+     */
+    public function addCheckboxTree(
+        string $name,
+        ?string $label = null,
+        array $tree = [],
+        string $mode = CheckboxTreeManager::MODE_CASCADE
+    ): InputBuilder {
+        $input = $this->createInput($name, InputType::CHECKBOX_TREE, $label);
+        $input->setTree($tree);
+        $input->setTreeMode($mode);
+        return $input;
+    }
+
+    /**
+     * Add repeater field group (dynamic add/remove rows)
+     *
+     * @param string $name Field name
+     * @param string|null $label Field label
+     * @param callable $callback Callback to define repeatable fields
+     *
+     * Example:
+     * $form->addRepeater('contacts', 'Contact List', function($repeater) {
+     *     $repeater->addText('name', 'Name')->add();
+     *     $repeater->addEmail('email', 'Email')->add();
+     * });
+     */
+    public function addRepeater(string $name, ?string $label = null, ?callable $callback = null): InputBuilder
+    {
+        $input = $this->createInput($name, InputType::REPEATER, $label);
+        if ($callback !== null) {
+            // Create a temporary form builder for repeater fields
+            $repeaterBuilder = new FormBuilder($name . '_template');
+            $repeaterBuilder->setTheme($this->theme);
+            $repeaterBuilder->setRenderer($this->renderer);
+
+            $callback($repeaterBuilder);
+
+            $input->setRepeaterFields($repeaterBuilder);
+        }
+        return $input;
+    }
+
+    /**
      * Add submit button
      */
     public function addSubmit(string $name = 'submit', ?string $label = null): self

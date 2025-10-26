@@ -41,6 +41,8 @@ class TailwindTheme extends AbstractTheme
             'submit' => 'tailwind/button.twig',
             'reset' => 'tailwind/button.twig',
             'button' => 'tailwind/button.twig',
+            'checkbox_tree' => 'tailwind/input_checkbox_tree.twig',
+            'repeater' => 'tailwind/input_repeater.twig',
             'default' => 'tailwind/input_text.twig',
         ];
 
@@ -105,6 +107,23 @@ class TailwindTheme extends AbstractTheme
             ],
             'button' => [
                 'button' => 'inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+            ],
+            'checkbox_tree' => [
+                'wrapper' => 'mb-4',
+                'label' => 'block text-sm font-bold text-gray-900 mb-3',
+                'help' => 'mt-2 text-sm text-gray-500',
+                'error' => 'mt-2 text-sm text-red-600',
+            ],
+            'repeater' => [
+                'wrapper' => 'mb-4',
+                'label' => 'block text-sm font-bold text-gray-900 mb-3',
+                'help' => 'mt-2 text-sm text-gray-500',
+                'error' => 'mt-2 text-sm text-red-600',
+                'item' => 'bg-white border border-gray-200 rounded-lg mb-3 shadow-sm',
+                'item-header' => 'bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center rounded-t-lg',
+                'item-body' => 'p-4',
+                'add-button' => 'inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500',
+                'remove-button' => 'inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
             ],
             'default' => $baseInputClasses,
         ];

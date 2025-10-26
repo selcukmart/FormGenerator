@@ -32,6 +32,11 @@ class InputBuilder
     private bool $disabled = false;
     private bool $readonly = false;
     private ?string $defaultValue = null;
+    private array $tree = [];
+    private string $treeMode = CheckboxTreeManager::MODE_CASCADE;
+    private ?FormBuilder $repeaterFields = null;
+    private int $repeaterMin = 0;
+    private int $repeaterMax = 10;
 
     public function __construct(
         private readonly FormBuilder $formBuilder,
@@ -306,6 +311,81 @@ class InputBuilder
         return $this;
     }
 
+    // ========== CheckboxTree Methods ==========
+
+    /**
+     * Set tree structure for checkbox tree
+     *
+     * @param array $tree Hierarchical array structure
+     */
+    public function setTree(array $tree): self
+    {
+        $this->tree = $tree;
+        return $this;
+    }
+
+    /**
+     * Set tree mode (cascade or independent)
+     */
+    public function setTreeMode(string $mode): self
+    {
+        $this->treeMode = $mode;
+        return $this;
+    }
+
+    /**
+     * Get tree structure
+     */
+    public function getTree(): array
+    {
+        return $this->tree;
+    }
+
+    /**
+     * Get tree mode
+     */
+    public function getTreeMode(): string
+    {
+        return $this->treeMode;
+    }
+
+    // ========== Repeater Methods ==========
+
+    /**
+     * Set repeater field template
+     */
+    public function setRepeaterFields(FormBuilder $fields): self
+    {
+        $this->repeaterFields = $fields;
+        return $this;
+    }
+
+    /**
+     * Set minimum number of rows
+     */
+    public function minRows(int $min): self
+    {
+        $this->repeaterMin = $min;
+        return $this;
+    }
+
+    /**
+     * Set maximum number of rows
+     */
+    public function maxRows(int $max): self
+    {
+        $this->repeaterMax = $max;
+        return $this;
+    }
+
+    /**
+     * Get repeater fields
+     */
+    public function getRepeaterFields(): ?FormBuilder
+    {
+        return $this->repeaterFields;
+    }
+
     /**
      * Finish building this input and return to FormBuilder
      */
@@ -343,6 +423,19 @@ class InputBuilder
 
         if ($this->defaultValue !== null) {
             $config['defaultValue'] = $this->defaultValue;
+        }
+
+        // CheckboxTree specific
+        if ($this->type === InputType::CHECKBOX_TREE) {
+            $config['tree'] = $this->tree;
+            $config['treeMode'] = $this->treeMode;
+        }
+
+        // Repeater specific
+        if ($this->type === InputType::REPEATER) {
+            $config['repeaterFields'] = $this->repeaterFields;
+            $config['repeaterMin'] = $this->repeaterMin;
+            $config['repeaterMax'] = $this->repeaterMax;
         }
 
         return $config;

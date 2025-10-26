@@ -41,6 +41,8 @@ class Bootstrap5Theme extends AbstractTheme
             'submit' => 'bootstrap5/button.twig',
             'reset' => 'bootstrap5/button.twig',
             'button' => 'bootstrap5/button.twig',
+            'checkbox_tree' => 'bootstrap5/input_checkbox_tree.twig',
+            'repeater' => 'bootstrap5/input_repeater.twig',
             'default' => 'bootstrap5/input_text.twig',
         ];
 
@@ -117,6 +119,23 @@ class Bootstrap5Theme extends AbstractTheme
             ],
             'button' => [
                 'button' => 'btn btn-outline-primary',
+            ],
+            'checkbox_tree' => [
+                'wrapper' => 'mb-3',
+                'label' => 'form-label fw-bold',
+                'help' => 'form-text text-muted',
+                'error' => 'invalid-feedback',
+            ],
+            'repeater' => [
+                'wrapper' => 'mb-3',
+                'label' => 'form-label fw-bold',
+                'help' => 'form-text text-muted',
+                'error' => 'invalid-feedback',
+                'item' => 'card mb-2',
+                'item-header' => 'card-header bg-light d-flex justify-content-between align-items-center',
+                'item-body' => 'card-body',
+                'add-button' => 'btn btn-sm btn-success',
+                'remove-button' => 'btn btn-sm btn-danger',
             ],
             'default' => [
                 'wrapper' => 'mb-3',
