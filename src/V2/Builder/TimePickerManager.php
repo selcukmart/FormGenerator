@@ -106,6 +106,7 @@ class TimePickerManager
             'step' => 1, // Step for minutes/seconds
             'inline' => false,
             'position' => 'bottom-left',
+            'rtl' => false, // Right-to-left support
         ];
 
         $config = array_merge($defaultOptions, $options);

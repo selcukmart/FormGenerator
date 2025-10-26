@@ -109,6 +109,7 @@ class DatePickerManager
             'showClear' => true,
             'inline' => false,
             'position' => 'bottom-left', // bottom-left, bottom-right, top-left, top-right
+            'rtl' => false, // Right-to-left support for Arabic, Hebrew, etc.
         ];
 
         $config = array_merge($defaultOptions, $options);
@@ -157,6 +158,11 @@ class DatePickerManager
             // Set input as readonly to prevent manual entry (optional)
             this.input.setAttribute('autocomplete', 'off');
 
+            // Apply RTL if needed
+            if (this.options.rtl) {
+                this.input.setAttribute('dir', 'rtl');
+            }
+
             // Create calendar element
             this.createCalendar();
 
@@ -179,7 +185,7 @@ class DatePickerManager
 
         createCalendar() {
             this.calendar = document.createElement('div');
-            this.calendar.className = 'datepicker-calendar';
+            this.calendar.className = 'datepicker-calendar' + (this.options.rtl ? ' rtl' : '');
             this.calendar.style.display = 'none';
 
             if (this.options.inline) {
@@ -585,6 +591,13 @@ class DatePickerManager
             .datepicker-today:hover,
             .datepicker-clear:hover {
                 background: #f0f0f0;
+            }
+            /* RTL Support */
+            .datepicker-calendar.rtl {
+                direction: rtl;
+            }
+            .datepicker-calendar.rtl .datepicker-header {
+                flex-direction: row-reverse;
             }
         `;
         document.head.appendChild(style);

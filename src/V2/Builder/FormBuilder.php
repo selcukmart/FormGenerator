@@ -8,6 +8,7 @@ use FormGenerator\V2\Contracts\{
     BuilderInterface,
     DataProviderInterface,
     InputType,
+    OutputFormat,
     RendererInterface,
     ScopeType,
     SecurityInterface,
@@ -708,9 +709,21 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
-     * Build and return form HTML
+     * Build and return form as HTML (default)
      */
-    public function build(): string
+    public function build(OutputFormat $format = OutputFormat::HTML): string
+    {
+        return match ($format) {
+            OutputFormat::HTML => $this->buildAsHtml(),
+            OutputFormat::JSON => $this->buildAsJson(),
+            OutputFormat::XML => $this->buildAsXml(),
+        };
+    }
+
+    /**
+     * Build form as HTML
+     */
+    public function buildAsHtml(): string
     {
         if ($this->renderer === null) {
             throw new \RuntimeException('Renderer not set. Use setRenderer() before building.');
@@ -759,6 +772,136 @@ class FormBuilder implements BuilderInterface
         $formHtml .= $this->generatePickerScripts();
 
         return $formHtml;
+    }
+
+    /**
+     * Build form as JSON
+     */
+    public function buildAsJson(int $flags = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE): string
+    {
+        $data = [
+            'name' => $this->name,
+            'method' => $this->method,
+            'action' => $this->action,
+            'scope' => $this->scope->value,
+            'attributes' => $this->attributes,
+            'enctype' => $this->enctype,
+            'csrf_enabled' => $this->enableCsrf,
+            'validation_enabled' => $this->enableValidation,
+            'stepper_enabled' => $this->stepperEnabled,
+            'stepper_options' => $this->stepperOptions,
+            'sections' => array_map(fn($section) => $section->toArray(), $this->sections),
+            'inputs' => [],
+        ];
+
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $inputData = $input->toArray();
+
+            // Add section reference if exists
+            if ($item['section'] !== null) {
+                $inputData['section'] = $item['section']->toArray();
+            }
+
+            $data['inputs'][] = $inputData;
+        }
+
+        // Add validation rules
+        if ($this->enableValidation) {
+            $data['validation_rules'] = $this->collectValidationRules();
+        }
+
+        return json_encode($data, $flags);
+    }
+
+    /**
+     * Build form as XML
+     */
+    public function buildAsXml(): string
+    {
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><form></form>');
+
+        $xml->addAttribute('name', $this->name);
+        $xml->addAttribute('method', $this->method);
+        $xml->addAttribute('action', $this->action);
+        $xml->addAttribute('scope', $this->scope->value);
+
+        if ($this->enctype) {
+            $xml->addAttribute('enctype', $this->enctype);
+        }
+
+        // Add attributes
+        if (!empty($this->attributes)) {
+            $attributesNode = $xml->addChild('attributes');
+            foreach ($this->attributes as $key => $value) {
+                $attributesNode->addChild($key, htmlspecialchars((string)$value));
+            }
+        }
+
+        // Add settings
+        $settings = $xml->addChild('settings');
+        $settings->addChild('csrf_enabled', $this->enableCsrf ? 'true' : 'false');
+        $settings->addChild('validation_enabled', $this->enableValidation ? 'true' : 'false');
+        $settings->addChild('stepper_enabled', $this->stepperEnabled ? 'true' : 'false');
+
+        // Add sections
+        if (!empty($this->sections)) {
+            $sectionsNode = $xml->addChild('sections');
+            foreach ($this->sections as $section) {
+                $sectionData = $section->toArray();
+                $sectionNode = $sectionsNode->addChild('section');
+                $sectionNode->addChild('title', htmlspecialchars($sectionData['title']));
+                if ($sectionData['description']) {
+                    $sectionNode->addChild('description', htmlspecialchars($sectionData['description']));
+                }
+            }
+        }
+
+        // Add inputs
+        $inputsNode = $xml->addChild('inputs');
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $inputData = $input->toArray();
+
+            $inputNode = $inputsNode->addChild('input');
+            $inputNode->addAttribute('name', $inputData['name']);
+            $inputNode->addAttribute('type', $inputData['type']);
+
+            if ($inputData['label']) {
+                $inputNode->addChild('label', htmlspecialchars($inputData['label']));
+            }
+
+            if ($inputData['value']) {
+                $inputNode->addChild('value', htmlspecialchars((string)$inputData['value']));
+            }
+
+            if ($inputData['required']) {
+                $inputNode->addAttribute('required', 'true');
+            }
+
+            // Add validation rules
+            if (!empty($inputData['validationRules'])) {
+                $rulesNode = $inputNode->addChild('validation_rules');
+                foreach ($inputData['validationRules'] as $rule) {
+                    $ruleNode = $rulesNode->addChild('rule');
+                    $ruleNode->addAttribute('type', $rule['type']);
+                    if (isset($rule['value'])) {
+                        $ruleNode->addAttribute('value', (string)$rule['value']);
+                    }
+                }
+            }
+
+            // Add options for select/radio/checkbox
+            if (!empty($inputData['options'])) {
+                $optionsNode = $inputNode->addChild('options');
+                foreach ($inputData['options'] as $value => $label) {
+                    $optionNode = $optionsNode->addChild('option', htmlspecialchars((string)$label));
+                    $optionNode->addAttribute('value', (string)$value);
+                }
+            }
+        }
+
+        return $xml->asXML();
     }
 
     /**
@@ -823,7 +966,7 @@ class FormBuilder implements BuilderInterface
             // Generate appropriate picker script based on type
             $scripts .= "\n" . match ($pickerType) {
                 'date' => DatePickerManager::generateScript($inputId, $pickerOptions),
-                'datetime' => DatePickerManager::generateScript($inputId, array_merge(['showTime' => true], $pickerOptions)),
+                'datetime' => DateTimePickerManager::generateScript($inputId, $pickerOptions),
                 'time' => TimePickerManager::generateScript($inputId, $pickerOptions),
                 'range' => RangeSliderManager::generateScript($inputId, $pickerOptions),
                 default => '',

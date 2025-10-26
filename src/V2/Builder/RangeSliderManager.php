@@ -91,6 +91,7 @@ class RangeSliderManager
             'showValue' => true,
             'showTooltip' => true,
             'vertical' => false,
+            'rtl' => false, // Right-to-left support
         ];
 
         $config = array_merge($defaultOptions, $options);
