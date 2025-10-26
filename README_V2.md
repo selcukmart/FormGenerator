@@ -26,6 +26,7 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 
 ### Advanced Components
 - **🆕 Form Sections**: Organize forms with titles, descriptions, HTML content
+- **🆕 Form Wizard/Stepper**: Multi-step forms with progress tracking and validation
 - **🆕 CheckboxTree**: Hierarchical checkboxes with cascade/independent modes
 - **🆕 Repeater Fields**: Dynamic add/remove rows (like jquery.repeater, no jQuery!)
 - **🆕 Twig Extension**: Generate forms directly in Twig templates
@@ -1062,6 +1063,160 @@ document.querySelector('[data-repeater="contacts"]')
 **Key Difference:** Pure vanilla JavaScript - no jQuery required!
 
 See `Examples/V2/WithRepeater.php` for complete examples.
+
+### Form Wizard / Stepper
+
+Multi-step form wizards with progress tracking, validation, and beautiful UI. Sections automatically become steps!
+
+```php
+$form = FormBuilder::create('registration_wizard')
+    ->setTheme(new Bootstrap5Theme())
+
+    // Enable stepper mode
+    ->enableStepper([
+        'layout' => StepperManager::LAYOUT_HORIZONTAL, // or LAYOUT_VERTICAL
+        'mode' => StepperManager::MODE_LINEAR,          // or MODE_NON_LINEAR
+        'validateOnNext' => true,                       // Validate before proceeding
+        'animation' => true,                            // Smooth transitions
+        'animationDuration' => 300,                     // Animation duration (ms)
+    ])
+
+    // Step 1: Personal Information (section becomes a step)
+    ->addSection('Personal Info', 'Tell us about yourself')
+    ->addText('first_name', 'First Name')->required()->add()
+    ->addText('last_name', 'Last Name')->required()->add()
+    ->addEmail('email', 'Email')->required()->add()
+    ->endSection()
+
+    // Step 2: Account Details
+    ->addSection('Account Setup', 'Create your credentials')
+    ->addText('username', 'Username')->required()->minLength(4)->add()
+    ->addPassword('password', 'Password')->required()->minLength(8)->add()
+    ->endSection()
+
+    // Step 3: Preferences
+    ->addSection('Preferences', 'Customize your experience')
+    ->addCheckbox('newsletter', 'Newsletter')->options(['yes' => 'Subscribe'])->add()
+    ->addTextarea('bio', 'About You')->add()
+    ->endSection()
+
+    ->build();
+```
+
+**Layout Options:**
+
+**Horizontal Layout (LAYOUT_HORIZONTAL):**
+- Steps displayed horizontally at the top
+- Perfect for desktop interfaces
+- Progress shown left-to-right
+
+**Vertical Layout (LAYOUT_VERTICAL):**
+- Steps displayed vertically on the left
+- Great for long forms with many steps
+- Sidebar-style navigation
+
+**Mode Options:**
+
+**Linear Mode (MODE_LINEAR):**
+- Users must complete steps sequentially
+- Cannot skip to future steps
+- Previous steps can be revisited
+- Validates each step before proceeding
+- Best for guided workflows (checkout, onboarding)
+
+**Non-Linear Mode (MODE_NON_LINEAR):**
+- Users can jump to any step
+- No validation on navigation
+- Useful for editing existing data
+- Best for flexible workflows (settings, profiles)
+
+**JavaScript API:**
+
+```javascript
+// Access stepper instance
+const stepper = window.Stepper_registration_wizard;
+
+// Navigate
+stepper.goTo(2);           // Jump to step 3 (0-indexed)
+stepper.next();            // Go to next step
+stepper.previous();        // Go to previous step
+stepper.finish();          // Complete wizard
+
+// Get state
+stepper.getCurrentStep();  // Returns current step index
+stepper.getTotalSteps();   // Returns total number of steps
+stepper.getProgress();     // Returns progress percentage (0-100)
+
+// Validation
+stepper.validateStep(0);   // Validate specific step
+
+// Mark steps
+stepper.markStepCompleted(0);  // Mark step as completed
+stepper.markStepError(0);      // Mark step as error
+```
+
+**Events:**
+
+```javascript
+const stepperElement = document.querySelector('[data-stepper="registration_wizard"]');
+
+// Stepper initialized
+stepperElement.addEventListener('stepper:init', (e) => {
+    console.log('Total steps:', e.detail.totalSteps);
+});
+
+// Step changed
+stepperElement.addEventListener('stepper:change', (e) => {
+    console.log('From step:', e.detail.from);
+    console.log('To step:', e.detail.to);
+    // Save progress, update UI, etc.
+});
+
+// Next/Previous clicked
+stepperElement.addEventListener('stepper:next', (e) => {
+    console.log('Moving to step:', e.detail.step);
+});
+
+stepperElement.addEventListener('stepper:previous', (e) => {
+    console.log('Moving back to step:', e.detail.step);
+});
+
+// Validation failed
+stepperElement.addEventListener('stepper:validation-failed', (e) => {
+    console.log('Validation failed at step:', e.detail.step);
+    alert('Please fill all required fields');
+});
+
+// Wizard completed
+stepperElement.addEventListener('stepper:complete', (e) => {
+    console.log('Wizard completed!');
+    // Submit form, show success message, redirect, etc.
+});
+```
+
+**Features:**
+- **Auto-Submit**: Form automatically submits on finish
+- **Progress Tracking**: Real-time progress percentage
+- **State Management**: Pending/Active/Completed/Error states
+- **Responsive**: Works on mobile, tablet, desktop
+- **Accessible**: Keyboard navigation support
+- **Themeable**: Bootstrap 5 and Tailwind CSS included
+- **Customizable**: Override CSS, extend functionality
+
+**Use Cases:**
+- Multi-step registration forms
+- E-commerce checkout flows
+- Survey/questionnaire forms
+- Onboarding wizards
+- Settings/configuration panels
+- Application forms
+
+**Inspired By:**
+- [Metronic Stepper](https://preview.keenthemes.com/html/metronic/docs/general/stepper)
+
+**Key Difference:** Pure vanilla JavaScript with sections-as-steps architecture!
+
+See `Examples/V2/WithStepper.php` for complete examples.
 
 ## 🎨 Template Engine Integration
 

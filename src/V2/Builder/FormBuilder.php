@@ -55,6 +55,8 @@ class FormBuilder implements BuilderInterface
     private array $data = [];
     private ?string $enctype = null;
     private ?object $dto = null;
+    private bool $stepperEnabled = false;
+    private array $stepperOptions = [];
 
     private function __construct(string $name)
     {
@@ -212,6 +214,45 @@ class FormBuilder implements BuilderInterface
     {
         DependencyManager::setAnimationOptions($this->name, ['enabled' => false]);
         return $this;
+    }
+
+    /**
+     * Enable form stepper/wizard mode
+     * Sections will become steps in the stepper
+     *
+     * @param array $options Options: layout (horizontal|vertical), mode (linear|non-linear), animation (bool), validateOnNext (bool), animationDuration (int)
+     */
+    public function enableStepper(array $options = []): self
+    {
+        $this->stepperEnabled = true;
+        $this->stepperOptions = array_merge([
+            'layout' => StepperManager::LAYOUT_HORIZONTAL,
+            'mode' => StepperManager::MODE_LINEAR,
+            'startIndex' => 0,
+            'animation' => true,
+            'animationDuration' => 300,
+            'validateOnNext' => true,
+            'showNavigationButtons' => true,
+        ], $options);
+        return $this;
+    }
+
+    /**
+     * Disable form stepper mode
+     */
+    public function disableStepper(): self
+    {
+        $this->stepperEnabled = false;
+        $this->stepperOptions = [];
+        return $this;
+    }
+
+    /**
+     * Check if stepper mode is enabled
+     */
+    public function isStepperEnabled(): bool
+    {
+        return $this->stepperEnabled;
     }
 
     /**
@@ -683,6 +724,8 @@ class FormBuilder implements BuilderInterface
             'form' => $this->buildFormContext(),
             'inputs' => $this->buildInputsContext(),
             'csrf_token' => $this->getCsrfToken(),
+            'stepper_enabled' => $this->stepperEnabled,
+            'stepper_options' => $this->stepperOptions,
         ];
 
         $formHtml = $this->renderer->render($this->theme->getFormTemplate(), $context);
@@ -702,6 +745,14 @@ class FormBuilder implements BuilderInterface
                     $this->validator
                 );
             }
+        }
+
+        // Add stepper JavaScript if stepper is enabled and form has sections
+        if ($this->stepperEnabled && !empty($this->sections)) {
+            $formHtml .= "\n" . StepperManager::generateScript(
+                $this->name,
+                $this->stepperOptions
+            );
         }
 
         return $formHtml;

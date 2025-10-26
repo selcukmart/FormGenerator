@@ -1,4 +1,7 @@
 {# Tailwind CSS Form Template #}
+{% if stepper_enabled %}
+    {% include template_from_string(include('tailwind/form_stepper.twig')) %}
+{% else %}
 <form {{ form.attributes|attributes|raw }}>
     {% if csrf_token %}
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
@@ -53,3 +56,4 @@
         {% endif %}
     {% endfor %}
 </form>
+{% endif %}
