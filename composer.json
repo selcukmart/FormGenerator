@@ -1,13 +1,19 @@
 {
   "name": "selcukmart/form-generator",
-  "description": "description",
+  "description": "Modern PHP Form Generator with Chain Pattern - Supports Symfony, Laravel, Twig, and Smarty",
   "minimum-stability": "stable",
   "type": "library",
   "keywords": [
     "form",
     "html",
     "generate",
-    "form generator"
+    "form generator",
+    "symfony",
+    "laravel",
+    "twig",
+    "chain pattern",
+    "fluent interface",
+    "form builder"
   ],
   "license": "MIT",
   "authors": [
@@ -18,7 +24,9 @@
   ],
   "autoload": {
     "psr-4": {
-      "": ""
+      "FormGenerator\\V1\\": "FormGenerator/",
+      "FormGenerator\\V2\\": "src/V2/",
+      "FormGenerator\\": "src/V1/"
     },
     "files": [
       "Helpers/helpers.php"
@@ -26,18 +34,40 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "": "",
-      "Tests\\": "tests/"
+      "FormGenerator\\Tests\\": "tests/"
     }
   },
   "require": {
+    "php": ">=8.1",
     "ext-mbstring": "*",
     "ext-iconv": "*",
     "ext-json": "*",
-    "smarty/smarty": "^4.0.0"
+    "twig/twig": "^3.0",
+    "smarty/smarty": "^4.0|^5.0",
+    "symfony/http-foundation": "^6.0|^7.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "^9"
+    "phpunit/phpunit": "^10.0|^11.0",
+    "symfony/form": "^6.0|^7.0",
+    "doctrine/orm": "^2.0|^3.0",
+    "illuminate/support": "^10.0|^11.0",
+    "phpstan/phpstan": "^1.10",
+    "friendsofphp/php-cs-fixer": "^3.0"
+  },
+  "suggest": {
+    "symfony/form": "For Symfony Form integration",
+    "doctrine/orm": "For Doctrine ORM data provider",
+    "illuminate/database": "For Laravel Eloquent data provider"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "2.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "preferred-install": "dist"
   }
 }
