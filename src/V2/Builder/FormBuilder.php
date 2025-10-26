@@ -755,6 +755,9 @@ class FormBuilder implements BuilderInterface
             );
         }
 
+        // Add picker JavaScripts for inputs with pickers enabled
+        $formHtml .= $this->generatePickerScripts();
+
         return $formHtml;
     }
 
@@ -795,6 +798,39 @@ class FormBuilder implements BuilderInterface
             }
         }
         return false;
+    }
+
+    /**
+     * Generate picker scripts for all inputs with pickers enabled
+     */
+    private function generatePickerScripts(): string
+    {
+        $scripts = '';
+
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $config = $input->toArray();
+
+            // Skip if picker is disabled or not supported
+            if (empty($config['pickerEnabled']) || empty($config['pickerType'])) {
+                continue;
+            }
+
+            $inputId = $config['attributes']['id'] ?? $config['name'];
+            $pickerType = $config['pickerType'];
+            $pickerOptions = $config['pickerOptions'] ?? [];
+
+            // Generate appropriate picker script based on type
+            $scripts .= "\n" . match ($pickerType) {
+                'date' => DatePickerManager::generateScript($inputId, $pickerOptions),
+                'datetime' => DatePickerManager::generateScript($inputId, array_merge(['showTime' => true], $pickerOptions)),
+                'time' => TimePickerManager::generateScript($inputId, $pickerOptions),
+                'range' => RangeSliderManager::generateScript($inputId, $pickerOptions),
+                default => '',
+            };
+        }
+
+        return $scripts;
     }
 
     /**

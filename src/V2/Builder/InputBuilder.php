@@ -37,6 +37,8 @@ class InputBuilder
     private ?FormBuilder $repeaterFields = null;
     private int $repeaterMin = 0;
     private int $repeaterMax = 10;
+    private bool $pickerEnabled = true;  // Built-in picker enabled by default
+    private array $pickerOptions = [];
 
     public function __construct(
         private readonly FormBuilder $formBuilder,
@@ -386,6 +388,64 @@ class InputBuilder
         return $this->repeaterFields;
     }
 
+    // ========== Picker Methods ==========
+
+    /**
+     * Enable built-in picker (default)
+     */
+    public function enablePicker(): self
+    {
+        $this->pickerEnabled = true;
+        return $this;
+    }
+
+    /**
+     * Disable built-in picker (use custom picker or native HTML5 input)
+     */
+    public function disablePicker(): self
+    {
+        $this->pickerEnabled = false;
+        return $this;
+    }
+
+    /**
+     * Set picker locale
+     */
+    public function setPickerLocale(array $locale): self
+    {
+        $this->pickerOptions['locale'] = $locale;
+        return $this;
+    }
+
+    /**
+     * Set picker options
+     *
+     * For DatePicker: format, minDate, maxDate, disabledDates, weekStart, etc.
+     * For TimePicker: format (12/24), showSeconds, minTime, maxTime, step, etc.
+     * For RangeSlider: min, max, step, prefix, suffix, dual, etc.
+     */
+    public function setPickerOptions(array $options): self
+    {
+        $this->pickerOptions = array_merge($this->pickerOptions, $options);
+        return $this;
+    }
+
+    /**
+     * Get picker enabled status
+     */
+    public function isPickerEnabled(): bool
+    {
+        return $this->pickerEnabled && $this->type->supportsPicker();
+    }
+
+    /**
+     * Get picker options
+     */
+    public function getPickerOptions(): array
+    {
+        return $this->pickerOptions;
+    }
+
     /**
      * Finish building this input and return to FormBuilder
      */
@@ -436,6 +496,13 @@ class InputBuilder
             $config['repeaterFields'] = $this->repeaterFields;
             $config['repeaterMin'] = $this->repeaterMin;
             $config['repeaterMax'] = $this->repeaterMax;
+        }
+
+        // Picker specific
+        if ($this->type->supportsPicker()) {
+            $config['pickerEnabled'] = $this->pickerEnabled;
+            $config['pickerOptions'] = $this->pickerOptions;
+            $config['pickerType'] = $this->type->getPickerType();
         }
 
         return $config;

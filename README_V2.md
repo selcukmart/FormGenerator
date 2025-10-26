@@ -27,6 +27,7 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 ### Advanced Components
 - **🆕 Form Sections**: Organize forms with titles, descriptions, HTML content
 - **🆕 Form Wizard/Stepper**: Multi-step forms with progress tracking and validation
+- **🆕 Built-in Pickers**: Date, Time, DateTime, Range sliders with multi-language support
 - **🆕 CheckboxTree**: Hierarchical checkboxes with cascade/independent modes
 - **🆕 Repeater Fields**: Dynamic add/remove rows (like jquery.repeater, no jQuery!)
 - **🆕 Twig Extension**: Generate forms directly in Twig templates
@@ -1217,6 +1218,259 @@ stepperElement.addEventListener('stepper:complete', (e) => {
 **Key Difference:** Pure vanilla JavaScript with sections-as-steps architecture!
 
 See `Examples/V2/WithStepper.php` for complete examples.
+
+### Built-in Pickers
+
+Native JavaScript pickers for date, time, and range inputs with multi-language support. **Built-in pickers are enabled by default** but can be disabled if you prefer native HTML5 inputs or custom pickers.
+
+```php
+$form = FormBuilder::create('booking_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    // Date picker with English locale
+    ->addDate('event_date', 'Event Date')
+        ->required()
+        ->setPickerLocale(DatePickerManager::LOCALE_EN)
+        ->setPickerOptions([
+            'format' => 'yyyy-mm-dd',
+            'minDate' => date('Y-m-d'),  // Min date constraint
+            'maxDate' => '2025-12-31',    // Max date constraint
+            'disabledDates' => ['2025-01-01'], // Disable specific dates
+            'weekStart' => 0,  // 0 = Sunday, 1 = Monday
+            'showToday' => true,
+            'showClear' => true,
+        ])
+        ->add()
+
+    // Time picker with 12-hour format
+    ->addTime('event_time', 'Event Time')
+        ->setPickerOptions([
+            'format' => '12',  // or '24' for 24-hour
+            'showSeconds' => false,
+            'step' => 15,  // 15-minute intervals
+        ])
+        ->add()
+
+    // Range slider (single handle)
+    ->addRange('attendees', 'Number of Attendees')
+        ->setPickerOptions([
+            'min' => 1,
+            'max' => 100,
+            'value' => 10,
+            'step' => 1,
+            'suffix' => ' people',
+            'showValue' => true,
+            'showTooltip' => true,
+        ])
+        ->add()
+
+    // Range slider (dual handle)
+    ->addRange('price_range', 'Price Range')
+        ->setPickerOptions([
+            'min' => 0,
+            'max' => 1000,
+            'from' => 200,  // Start value
+            'to' => 800,    // End value
+            'dual' => true, // Enable dual handles
+            'prefix' => '$',
+            'step' => 10,
+        ])
+        ->add()
+
+    ->addSubmit('Book')
+    ->build();
+```
+
+**Date Picker Features:**
+- **Multi-language support**: English, Turkish, German, French, Spanish + custom locales
+- **Date formats**: yyyy-mm-dd, dd-mm-yyyy, mm-dd-yyyy
+- **Constraints**: Min/max dates, disabled dates
+- **Calendar display**: Configurable week start day
+- **Actions**: Today, Clear buttons
+- **Inline or popup mode**
+
+**Time Picker Features:**
+- **Formats**: 12-hour (AM/PM) or 24-hour
+- **Precision**: Show/hide seconds
+- **Intervals**: Custom step for minutes/seconds
+- **Constraints**: Min/max time
+- **Multi-language**: Customizable labels
+
+**Range Slider Features:**
+- **Single or dual handles**: One value or min/max range
+- **Custom formatting**: Prefix ($, €) and suffix (%, kg, etc.)
+- **Constraints**: Min/max values, step intervals
+- **Visual feedback**: Tooltips, value display
+- **Orientation**: Horizontal or vertical
+- **Keyboard navigation**: Arrow keys supported
+
+**Built-in Locales:**
+
+```php
+// English (default)
+DatePickerManager::LOCALE_EN
+TimePickerManager::LOCALE_EN
+RangeSliderManager::LOCALE_EN
+
+// Turkish
+DatePickerManager::LOCALE_TR
+TimePickerManager::LOCALE_TR
+RangeSliderManager::LOCALE_TR
+
+// German
+DatePickerManager::LOCALE_DE
+TimePickerManager::LOCALE_DE
+RangeSliderManager::LOCALE_DE
+
+// French
+DatePickerManager::LOCALE_FR
+TimePickerManager::LOCALE_FR
+RangeSliderManager::LOCALE_FR
+
+// Spanish
+DatePickerManager::LOCALE_ES
+TimePickerManager::LOCALE_ES
+RangeSliderManager::LOCALE_ES
+```
+
+**Custom Locale Example:**
+
+```php
+$customLocale = [
+    'months' => ['Janvier', 'Février', ...],
+    'monthsShort' => ['Jan', 'Fév', ...],
+    'weekdays' => ['Dimanche', 'Lundi', ...],
+    'weekdaysShort' => ['Dim', 'Lun', ...],
+    'weekdaysMin' => ['Di', 'Lu', ...],
+    'today' => 'Aujourd\'hui',
+    'clear' => 'Effacer',
+    'close' => 'Fermer',
+];
+
+$form->addDate('date_field', 'Date')
+    ->setPickerLocale($customLocale)
+    ->add();
+```
+
+**Disable Built-in Picker (Use Native HTML5):**
+
+```php
+// Use native HTML5 date input instead of custom picker
+$form->addDate('native_date', 'Date')
+    ->disablePicker()  // Disable built-in picker
+    ->add();
+
+// Use native HTML5 time input
+$form->addTime('native_time', 'Time')
+    ->disablePicker()
+    ->add();
+
+// Use native HTML5 range input
+$form->addRange('native_range', 'Range')
+    ->disablePicker()
+    ->attributes(['min' => '0', 'max' => '100'])
+    ->add();
+```
+
+**JavaScript API:**
+
+```javascript
+// Date Picker
+const datePicker = window.DatePicker_event_date;
+datePicker.selectDate('2025-12-25');
+datePicker.selectToday();
+datePicker.clear();
+datePicker.show();
+datePicker.hide();
+
+// Time Picker
+const timePicker = window.TimePicker_event_time;
+timePicker.setNow();
+timePicker.clear();
+timePicker.updateInput();
+
+// Range Slider
+const rangeSlider = window.RangeSlider_price_range;
+rangeSlider.setValue(50);  // Single handle
+rangeSlider.setValue({from: 200, to: 800});  // Dual handle
+const values = rangeSlider.getValues();
+```
+
+**Events:**
+
+```javascript
+// Date picker events
+document.getElementById('event_date').addEventListener('datepicker:change', (e) => {
+    console.log('Date:', e.detail.date, 'Value:', e.detail.value);
+});
+
+document.getElementById('event_date').addEventListener('datepicker:open', (e) => {
+    console.log('Calendar opened');
+});
+
+document.getElementById('event_date').addEventListener('datepicker:close', (e) => {
+    console.log('Calendar closed');
+});
+
+// Time picker events
+document.getElementById('event_time').addEventListener('timepicker:change', (e) => {
+    console.log('Time:', e.detail);
+});
+
+// Range slider events
+document.getElementById('price_range').addEventListener('rangeslider:change', (e) => {
+    console.log('Range:', e.detail);
+});
+```
+
+**Turkish Example:**
+
+```php
+$form = FormBuilder::create('turkish_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    ->addDate('dogum_tarihi', 'Doğum Tarihi')
+        ->setPickerLocale(DatePickerManager::LOCALE_TR)
+        ->setPickerOptions([
+            'format' => 'dd-mm-yyyy',
+            'weekStart' => 1,  // Pazartesi
+        ])
+        ->add()
+
+    ->addTime('randevu_saati', 'Randevu Saati')
+        ->setPickerLocale(TimePickerManager::LOCALE_TR)
+        ->setPickerOptions([
+            'format' => '24',
+        ])
+        ->add()
+
+    ->addRange('fiyat', 'Fiyat Aralığı')
+        ->setPickerOptions([
+            'min' => 0,
+            'max' => 10000,
+            'from' => 1000,
+            'to' => 5000,
+            'dual' => true,
+            'prefix' => '₺',
+            'locale' => RangeSliderManager::LOCALE_TR,
+        ])
+        ->add()
+
+    ->addSubmit('kaydet', 'Kaydet')
+    ->build();
+```
+
+**Key Features:**
+- **Built-in by Default**: Pickers automatically enabled for date/time/range inputs
+- **Opt-out Available**: Use `disablePicker()` to use native inputs or custom pickers
+- **Pure Vanilla JS**: No jQuery or external dependencies
+- **Multi-language**: 5 built-in locales + custom locale support
+- **Fully Customizable**: Extensive options for each picker type
+- **Accessible**: Keyboard navigation, ARIA support
+- **Responsive**: Works on mobile, tablet, desktop
+- **Themeable**: Compatible with Bootstrap 5 and Tailwind CSS
+
+See `Examples/V2/WithPickers.php` for complete examples.
 
 ## 🎨 Template Engine Integration
 

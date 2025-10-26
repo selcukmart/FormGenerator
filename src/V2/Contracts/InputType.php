@@ -73,6 +73,28 @@ enum InputType: string
     }
 
     /**
+     * Check if input type supports picker
+     */
+    public function supportsPicker(): bool
+    {
+        return in_array($this, [self::DATE, self::DATETIME, self::TIME, self::RANGE], true);
+    }
+
+    /**
+     * Get picker type for this input
+     */
+    public function getPickerType(): ?string
+    {
+        return match ($this) {
+            self::DATE => 'date',
+            self::DATETIME => 'datetime',
+            self::TIME => 'time',
+            self::RANGE => 'range',
+            default => null,
+        };
+    }
+
+    /**
      * Get HTML5 input type attribute value
      */
     public function getHtmlType(): string
