@@ -2,7 +2,7 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](CHANGELOG.md)
 
 Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 
@@ -35,6 +35,14 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 Dependency Management**: Pure JavaScript conditional fields
 - **🆕 Nested Dependencies**: Multi-level A→B→C dependency chains
 - **🆕 Custom Animations**: Configurable fade/slide/none animations
+- **✨ Event-Driven Dependencies** (v2.3.0): Native event system for field-level control
+  - **Field-Level Events**: onShow(), onHide(), onValueChange(), onPreRender(), etc.
+  - **Server-Side Evaluation**: PHP conditional rendering with enableServerSideDependencyEvaluation()
+  - **Custom Dependency Logic**: onDependencyCheck() for complex conditions
+  - **Event Chaining**: Multiple event listeners on single field
+  - **Framework-Agnostic**: No Symfony/Laravel dependency, pure native PHP
+  - **10+ Field Events**: Complete field lifecycle coverage
+  - **Cascading Events**: Automatic propagation through nested dependencies
 
 ### Advanced Components
 - **🆕 Form Sections**: Organize forms with titles, descriptions, HTML content
@@ -479,6 +487,270 @@ $form = FormBuilder::create('complex_form')
 ```
 
 See `/Examples/V2/WithDependencies.php` for a complete working example.
+
+### ⚡ Event-Driven Dependencies (v2.3.0)
+
+**Native event system for field-level control** - React to field changes with PHP event listeners on both server and client side!
+
+#### Field-Level Events
+
+Attach event listeners to individual fields for fine-grained control:
+
+```php
+$form = FormBuilder::create('event_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme);
+
+$form->addSelect('account_type', 'Account Type')
+    ->options([
+        '' => '-- Select Type --',
+        'personal' => 'Personal',
+        'business' => 'Business',
+    ])
+    ->isDependency()
+    ->add();
+
+$form->addText('company_name', 'Company Name')
+    ->dependsOn('account_type', 'business')
+    ->onShow(function(FieldEvent $event) {
+        // Called when field becomes visible
+        $event->getField()->required(true);
+    })
+    ->onHide(function(FieldEvent $event) {
+        // Called when field becomes hidden
+        $event->getField()->required(false);
+    })
+    ->add();
+
+echo $form->build();
+```
+
+#### Available Field Events
+
+- `onShow()` - Field becomes visible
+- `onHide()` - Field becomes hidden
+- `onValueChange()` - Field value changes
+- `onEnable()` - Field is enabled
+- `onDisable()` - Field is disabled
+- `onPreRender()` - Before field renders
+- `onPostRender()` - After field renders
+- `onDependencyCheck()` - Custom dependency logic
+- `onDependencyMet()` - Dependency condition met
+- `onDependencyNotMet()` - Dependency condition not met
+
+#### Server-Side Dependency Evaluation
+
+Enable PHP-side conditional rendering to completely hide fields with unmet dependencies:
+
+```php
+$form = FormBuilder::create('server_side_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->enableServerSideDependencyEvaluation() // PHP-side evaluation
+    ->setData([
+        'user_type' => 'business',
+    ]);
+
+$form->addSelect('user_type', 'User Type')
+    ->options(['personal' => 'Personal', 'business' => 'Business'])
+    ->isDependency()
+    ->add();
+
+// This will be rendered in HTML (dependency met)
+$form->addText('company_name', 'Company Name')
+    ->dependsOn('user_type', 'business')
+    ->add();
+
+// This will NOT be rendered in HTML (dependency not met)
+$form->addText('personal_id', 'Personal ID')
+    ->dependsOn('user_type', 'personal')
+    ->add();
+
+echo $form->build();
+```
+
+#### Custom Dependency Logic
+
+Use `onDependencyCheck()` for complex conditional logic:
+
+```php
+$form->addText('state', 'State')
+    ->dependsOn('country', 'US')
+    ->onDependencyCheck(function(FieldEvent $event) {
+        // Custom logic: Only show for US country AND admin role
+        $country = $event->getFieldValue('country');
+        $role = $event->getFieldValue('user_role');
+
+        $visible = ($country === 'US' && $role === 'admin');
+        $event->setVisible($visible);
+    })
+    ->add();
+```
+
+#### Programmatic Value Changes
+
+Trigger value changes programmatically on the PHP side:
+
+```php
+// Trigger value change (cascades to dependent fields)
+$form->triggerFieldValueChange('product_category', 'electronics', null);
+
+// Get field by name
+$field = $form->getInputBuilder('product_category');
+
+// Dispatch custom events
+$form->dispatchFieldEvent($field, FieldEvents::FIELD_SHOW);
+```
+
+#### Event Features
+
+- ✅ **10+ Field Events** - Complete field lifecycle coverage
+- ✅ **PHP & JavaScript** - Events work on both server and client side
+- ✅ **Server-Side Rendering** - Conditional rendering based on form data
+- ✅ **Custom Logic** - onDependencyCheck() for complex conditions
+- ✅ **Event Chaining** - Multiple listeners on single field
+- ✅ **Event Context** - Access form data and field values in events
+- ✅ **Framework-Agnostic** - Pure native PHP, no external dependencies
+
+See `/Examples/V2/WithEventDrivenDependencies.php` for comprehensive examples.
+
+### 🔗 Query String Based Conditional Rendering
+
+**Control field visibility using URL query parameters** - Perfect for feature flags, role-based forms, and dynamic pricing!
+
+Use query strings to conditionally render fields based on URL parameters:
+
+```php
+// Get query parameters
+$mode = $_GET['mode'] ?? '';
+$role = $_GET['role'] ?? '';
+
+$form = FormBuilder::create('query_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->enableServerSideDependencyEvaluation() // PHP-side rendering
+    ->setData([
+        'mode' => $mode,
+        'role' => $role,
+    ]);
+
+// Add query params as hidden fields
+$form->addHidden('mode', $mode)->isDependency()->add();
+$form->addHidden('role', $role)->isDependency()->add();
+
+$form->addText('username', 'Username')->required()->add();
+
+// Show only with ?mode=advanced
+$form->addText('advanced_settings', 'Advanced Settings')
+    ->dependsOn('mode', 'advanced')
+    ->add();
+
+// Show only with ?role=admin (NOT rendered in HTML if condition unmet)
+$form->addTextarea('admin_notes', 'Admin Notes')
+    ->dependsOn('role', 'admin')
+    ->add();
+
+echo $form->build();
+```
+
+**Complex Conditions** - Multiple query parameters:
+
+```php
+// Show only when ?country=US AND ?role=admin
+$form->addText('us_tax_settings', 'US Tax Settings')
+    ->dependsOn('country', 'US')
+    ->onDependencyCheck(function(FieldEvent $event) use ($request) {
+        $country = $request->query->get('country', '');
+        $role = $request->query->get('role', '');
+
+        $visible = ($country === 'US' && $role === 'admin');
+        $event->setVisible($visible);
+    })
+    ->add();
+```
+
+**Real-World Example** - Dynamic Pricing Form:
+
+```php
+$plan = $_GET['plan'] ?? 'basic';
+$promoCode = $_GET['promo'] ?? '';
+
+$form->enableServerSideDependencyEvaluation()
+    ->setData(['plan' => $plan, 'promo' => $promoCode]);
+
+$form->addHidden('plan', $plan)->isDependency()->add();
+$form->addHidden('promo', $promoCode)->isDependency()->add();
+
+// Basic plan fields (?plan=basic)
+$form->addNumber('users_basic', 'Users (max 10)')
+    ->dependsOn('plan', 'basic')
+    ->helpText('$10/month')
+    ->add();
+
+// Pro plan fields (?plan=pro)
+$form->addNumber('users_pro', 'Users (max 100)')
+    ->dependsOn('plan', 'pro')
+    ->helpText('$50/month')
+    ->add();
+
+// Enterprise plan fields (?plan=enterprise)
+$form->addText('dedicated_manager', 'Account Manager')
+    ->dependsOn('plan', 'enterprise')
+    ->add();
+
+// Promo code field (?promo=SAVE20)
+$form->addText('promo_display', 'Promo Code Applied!')
+    ->dependsOn('promo', 'SAVE20')
+    ->value('20% discount applied!')
+    ->readonly()
+    ->add();
+```
+
+**Symfony Controller Integration**:
+
+```php
+use Symfony\Component\HttpFoundation\Request;
+
+#[Route('/form/query-based')]
+public function queryBasedForm(Request $request): Response
+{
+    $mode = $request->query->get('mode', '');
+    $role = $request->query->get('role', '');
+
+    $form = FormBuilder::create('query_form')
+        ->setRenderer($renderer)
+        ->setTheme($theme)
+        ->enableServerSideDependencyEvaluation()
+        ->setData(['mode' => $mode, 'role' => $role]);
+
+    $form->addHidden('mode', $mode)->isDependency()->add();
+    $form->addHidden('role', $role)->isDependency()->add();
+
+    // Only with ?mode=advanced
+    $form->addText('advanced_settings', 'Advanced Settings')
+        ->dependsOn('mode', 'advanced')
+        ->add();
+
+    // Only with ?role=admin
+    $form->addTextarea('admin_notes', 'Admin Notes')
+        ->dependsOn('role', 'admin')
+        ->add();
+
+    return $this->render('form.html.twig', [
+        'form' => $form->build(),
+    ]);
+}
+```
+
+**Use Cases**:
+- ✅ **Feature Flags**: `?feature=beta` → Show beta features
+- ✅ **Role-Based Forms**: `?role=admin` → Show admin controls
+- ✅ **Pricing Plans**: `?plan=premium` → Show premium fields
+- ✅ **A/B Testing**: `?variant=B` → Show variant B fields
+- ✅ **Localization**: `?country=US` → Show country-specific fields
+- ✅ **Debug Mode**: `?debug=true` → Show debug fields
+
+See `/Examples/V2/WithQueryStringDependencies.php` and `/Examples/Symfony/QueryStringFormController.php` for complete examples.
 
 ## ✅ Validation System
 

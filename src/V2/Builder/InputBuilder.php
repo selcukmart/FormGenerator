@@ -39,6 +39,7 @@ class InputBuilder
     private int $repeaterMax = 10;
     private bool $pickerEnabled = true;  // Built-in picker enabled by default
     private array $pickerOptions = [];
+    private array $fieldEventListeners = []; // Field-level event listeners
 
     public function __construct(
         private readonly FormBuilder $formBuilder,
@@ -223,6 +224,163 @@ class InputBuilder
         $this->wrapperAttributes['style'] = 'display: none;';
 
         return $this;
+    }
+
+    /**
+     * Add event listener for this field
+     *
+     * @param string $eventName Event name (use FieldEvents constants)
+     * @param callable $listener Event listener callback
+     * @param int $priority Priority (higher = earlier execution)
+     */
+    public function addEventListener(string $eventName, callable $listener, int $priority = 0): self
+    {
+        if (!isset($this->fieldEventListeners[$eventName])) {
+            $this->fieldEventListeners[$eventName] = [];
+        }
+
+        $this->fieldEventListeners[$eventName][] = [
+            'listener' => $listener,
+            'priority' => $priority
+        ];
+
+        // Sort by priority (highest first)
+        usort($this->fieldEventListeners[$eventName], function ($a, $b) {
+            return $b['priority'] <=> $a['priority'];
+        });
+
+        return $this;
+    }
+
+    /**
+     * Shortcut: Add listener for when field value changes
+     *
+     * Example:
+     * ```php
+     * ->onValueChange(function(FieldEvent $event) {
+     *     // Handle value change
+     * })
+     * ```
+     */
+    public function onValueChange(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.value_change', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when field is shown
+     *
+     * Example:
+     * ```php
+     * ->onShow(function(FieldEvent $event) {
+     *     $event->getField()->required(true);
+     * })
+     * ```
+     */
+    public function onShow(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.show', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when field is hidden
+     *
+     * Example:
+     * ```php
+     * ->onHide(function(FieldEvent $event) {
+     *     $event->getField()->required(false);
+     * })
+     * ```
+     */
+    public function onHide(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.hide', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when field is enabled
+     */
+    public function onEnable(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.enable', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when field is disabled
+     */
+    public function onDisable(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.disable', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for before field renders
+     *
+     * Example:
+     * ```php
+     * ->onPreRender(function(FieldEvent $event) {
+     *     // Modify field config before render
+     *     if ($event->getFieldValue('user_type') === 'admin') {
+     *         $event->getField()->addClass('admin-only');
+     *     }
+     * })
+     * ```
+     */
+    public function onPreRender(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.pre_render', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for after field renders
+     */
+    public function onPostRender(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.post_render', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for dependency check
+     *
+     * Example:
+     * ```php
+     * ->onDependencyCheck(function(FieldEvent $event) {
+     *     $visible = $event->get('visible', true);
+     *     // Custom logic to determine visibility
+     *     if ($event->getFieldValue('custom_condition') === 'hide') {
+     *         $visible = false;
+     *     }
+     *     $event->setVisible($visible);
+     * })
+     * ```
+     */
+    public function onDependencyCheck(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.dependency_check', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when dependency is met
+     */
+    public function onDependencyMet(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.dependency_met', $listener, $priority);
+    }
+
+    /**
+     * Shortcut: Add listener for when dependency is not met
+     */
+    public function onDependencyNotMet(callable $listener, int $priority = 0): self
+    {
+        return $this->addEventListener('field.dependency_not_met', $listener, $priority);
+    }
+
+    /**
+     * Get all field event listeners
+     */
+    public function getFieldEventListeners(): array
+    {
+        return $this->fieldEventListeners;
     }
 
     /**
