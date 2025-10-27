@@ -17,6 +17,8 @@ use FormGenerator\V2\Contracts\{
     ValidatorInterface
 };
 use FormGenerator\V2\Validation\{ValidationManager, SymfonyValidator};
+use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents, EventSubscriberInterface};
+use FormGenerator\V2\Form\FormTypeInterface;
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -61,10 +63,12 @@ class FormBuilder implements BuilderInterface
     private array $stepperOptions = [];
     private ?TextDirection $direction = null;
     private ?array $locale = null;
+    private EventDispatcher $eventDispatcher;
 
     private function __construct(string $name)
     {
         $this->name = $name;
+        $this->eventDispatcher = new EventDispatcher();
     }
 
     /**
@@ -73,6 +77,60 @@ class FormBuilder implements BuilderInterface
     public static function create(string $name): self
     {
         return new self($name);
+    }
+
+    /**
+     * Create form from FormType class (Symfony-style)
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::createFromType(new UserRegistrationForm(), [
+     *     'csrf_protection' => true,
+     *     'action' => '/register',
+     * ]);
+     * ```
+     *
+     * @param FormTypeInterface $formType Form type instance
+     * @param array $options Form options (merged with form type's default options)
+     * @return self Form builder instance
+     */
+    public static function createFromType(FormTypeInterface $formType, array $options = []): self
+    {
+        // Get form name from type
+        $formName = $formType->getName();
+
+        // Create builder instance
+        $builder = new self($formName);
+
+        // Merge options
+        $defaultOptions = $formType->configureOptions();
+        $mergedOptions = array_merge($defaultOptions, $options);
+
+        // Apply options to builder
+        if (isset($mergedOptions['method'])) {
+            $builder->setMethod($mergedOptions['method']);
+        }
+
+        if (isset($mergedOptions['action'])) {
+            $builder->setAction($mergedOptions['action']);
+        }
+
+        if (isset($mergedOptions['attr'])) {
+            $builder->attributes($mergedOptions['attr']);
+        }
+
+        if (isset($mergedOptions['csrf_protection'])) {
+            $builder->enableCsrf($mergedOptions['csrf_protection']);
+        }
+
+        if (isset($mergedOptions['validation'])) {
+            $builder->enableValidation($mergedOptions['validation']);
+        }
+
+        // Build form using the form type
+        $formType->buildForm($builder, $mergedOptions);
+
+        return $builder;
     }
 
     /**
@@ -299,6 +357,42 @@ class FormBuilder implements BuilderInterface
         return $this->locale;
     }
 
+    // ========== Event System Methods ==========
+
+    /**
+     * Add event listener
+     *
+     * @param string $eventName Event name (use FormEvents constants)
+     * @param callable $listener Listener callable
+     * @param int $priority Priority (higher = earlier execution)
+     */
+    public function addEventListener(string $eventName, callable $listener, int $priority = 0): self
+    {
+        $this->eventDispatcher->addEventListener($eventName, $listener, $priority);
+        return $this;
+    }
+
+    /**
+     * Add event subscriber
+     *
+     * @param EventSubscriberInterface $subscriber Event subscriber
+     */
+    public function addSubscriber(EventSubscriberInterface $subscriber): self
+    {
+        $this->eventDispatcher->addSubscriber($subscriber);
+        return $this;
+    }
+
+    /**
+     * Get event dispatcher
+     *
+     * @return EventDispatcher Event dispatcher instance
+     */
+    public function getEventDispatcher(): EventDispatcher
+    {
+        return $this->eventDispatcher;
+    }
+
     /**
      * Enable/disable CSRF protection
      */
@@ -313,7 +407,22 @@ class FormBuilder implements BuilderInterface
      */
     public function setData(array $data): self
     {
+        // Dispatch PRE_SET_DATA event
+        $preSetDataEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SET_DATA, $preSetDataEvent);
+
+        // Get potentially modified data from event
+        $modifiedData = $preSetDataEvent->getData();
+        if (is_array($modifiedData)) {
+            $data = $modifiedData;
+        }
+
         $this->data = $data;
+
+        // Dispatch POST_SET_DATA event
+        $postSetDataEvent = new FormEvent($this, $this->data);
+        $this->eventDispatcher->dispatch(FormEvents::POST_SET_DATA, $postSetDataEvent);
+
         return $this;
     }
 
@@ -776,6 +885,10 @@ class FormBuilder implements BuilderInterface
             throw new \RuntimeException('Theme not set. Use setTheme() before building.');
         }
 
+        // Dispatch PRE_BUILD event
+        $preBuildEvent = new FormEvent($this, $this->data, ['format' => 'html']);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_BUILD, $preBuildEvent);
+
         $context = [
             'form' => $this->buildFormContext(),
             'inputs' => $this->buildInputsContext(),
@@ -813,6 +926,16 @@ class FormBuilder implements BuilderInterface
 
         // Add picker JavaScripts for inputs with pickers enabled
         $formHtml .= $this->generatePickerScripts();
+
+        // Dispatch POST_BUILD event (allows modifying final HTML)
+        $postBuildEvent = new FormEvent($this, $formHtml, ['format' => 'html']);
+        $this->eventDispatcher->dispatch(FormEvents::POST_BUILD, $postBuildEvent);
+
+        // Get potentially modified HTML from event
+        $modifiedHtml = $postBuildEvent->getData();
+        if (is_string($modifiedHtml)) {
+            $formHtml = $modifiedHtml;
+        }
 
         return $formHtml;
     }
