@@ -313,6 +313,256 @@ class InputBuilder
         return $this;
     }
 
+    /**
+     * Validation: Set Laravel-style validation rules
+     *
+     * Example: ->rules('required|email|min:3|max:255')
+     */
+    public function rules(string $rules): self
+    {
+        $this->validationRules['rules'] = $rules;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be numeric
+     */
+    public function numeric(): self
+    {
+        $this->validationRules['numeric'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be an integer
+     */
+    public function integer(): self
+    {
+        $this->validationRules['integer'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a string
+     */
+    public function string(): self
+    {
+        $this->validationRules['string'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a boolean
+     */
+    public function boolean(): self
+    {
+        $this->validationRules['boolean'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be an array
+     */
+    public function array(): self
+    {
+        $this->validationRules['array'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a valid URL
+     */
+    public function url(): self
+    {
+        $this->validationRules['url'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a valid IP address
+     *
+     * @param string|null $version 'ipv4' or 'ipv6' or null for both
+     */
+    public function ip(?string $version = null): self
+    {
+        $this->validationRules['ip'] = $version ?? true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be valid JSON
+     */
+    public function json(): self
+    {
+        $this->validationRules['json'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must contain only alphabetic characters
+     */
+    public function alpha(): self
+    {
+        $this->validationRules['alpha'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must contain only alphanumeric characters
+     */
+    public function alphaNumeric(): self
+    {
+        $this->validationRules['alpha_numeric'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be numeric digits with exact length
+     *
+     * @param int|null $length Exact length or null to just check if digits
+     */
+    public function digits(?int $length = null): self
+    {
+        $this->validationRules['digits'] = $length ?? true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a valid date
+     */
+    public function date(): self
+    {
+        $this->validationRules['date'] = true;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must match a specific date format
+     *
+     * @param string $format Date format (e.g., 'Y-m-d', 'd/m/Y')
+     */
+    public function dateFormat(string $format): self
+    {
+        $this->validationRules['date_format'] = $format;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a date before another date
+     *
+     * @param string $date Date to compare against
+     */
+    public function before(string $date): self
+    {
+        $this->validationRules['before'] = $date;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be a date after another date
+     *
+     * @param string $date Date to compare against
+     */
+    public function after(string $date): self
+    {
+        $this->validationRules['after'] = $date;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be between two values
+     *
+     * @param int|float $min Minimum value
+     * @param int|float $max Maximum value
+     */
+    public function between(int|float $min, int|float $max): self
+    {
+        $this->validationRules['between'] = [$min, $max];
+        return $this;
+    }
+
+    /**
+     * Validation: Value must match another field (e.g., password confirmation)
+     *
+     * @param string|null $field Field name to match (defaults to {name}_confirmation)
+     */
+    public function confirmed(?string $field = null): self
+    {
+        $this->validationRules['confirmed'] = $field ?? $this->name . '_confirmation';
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be in a list of allowed values
+     *
+     * @param array $values Allowed values
+     */
+    public function in(array $values): self
+    {
+        $this->validationRules['in'] = $values;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must not be in a list of disallowed values
+     *
+     * @param array $values Disallowed values
+     */
+    public function notIn(array $values): self
+    {
+        $this->validationRules['not_in'] = $values;
+        return $this;
+    }
+
+    /**
+     * Validation: Value must be unique in database table
+     *
+     * @param string $table Table name
+     * @param string|null $column Column name (defaults to field name)
+     * @param mixed $except ID to except (for updates)
+     * @param string $idColumn ID column name (defaults to 'id')
+     */
+    public function unique(
+        string $table,
+        ?string $column = null,
+        mixed $except = null,
+        string $idColumn = 'id'
+    ): self {
+        $this->validationRules['unique'] = [
+            'table' => $table,
+            'column' => $column ?? $this->name,
+            'except' => $except,
+            'idColumn' => $idColumn,
+        ];
+        return $this;
+    }
+
+    /**
+     * Validation: Value must exist in database table
+     *
+     * @param string $table Table name
+     * @param string|null $column Column name (defaults to field name)
+     */
+    public function exists(string $table, ?string $column = null): self
+    {
+        $this->validationRules['exists'] = [
+            'table' => $table,
+            'column' => $column ?? $this->name,
+        ];
+        return $this;
+    }
+
+    /**
+     * Validation: Match regex pattern (alias for pattern())
+     *
+     * @param string $regex Regular expression pattern
+     * @param string|null $message Custom error message
+     */
+    public function regex(string $regex, ?string $message = null): self
+    {
+        return $this->pattern($regex, $message);
+    }
+
     // ========== CheckboxTree Methods ==========
 
     /**

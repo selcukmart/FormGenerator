@@ -487,6 +487,222 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
+     * Validate form data using Laravel-style validation
+     *
+     * This method extracts validation rules from all form inputs and validates
+     * the provided data using the new Laravel-style Validator.
+     *
+     * Example:
+     * ```php
+     * try {
+     *     $validated = $form->validateData($_POST);
+     *     // Data is valid, use $validated
+     * } catch (ValidationException $e) {
+     *     $errors = $e->errors();
+     *     // Display errors
+     * }
+     * ```
+     *
+     * @param array $data Data to validate
+     * @param array $customMessages Custom error messages (optional)
+     * @param array $customAttributes Custom attribute names (optional)
+     * @param \PDO|null $dbConnection Database connection for unique/exists rules (optional)
+     * @return array Validated data
+     * @throws \FormGenerator\V2\Validation\ValidationException
+     */
+    public function validateData(
+        array $data,
+        array $customMessages = [],
+        array $customAttributes = [],
+        ?\PDO $dbConnection = null
+    ): array {
+        $rules = $this->extractValidationRules();
+
+        $validator = new \FormGenerator\V2\Validation\Validator(
+            $data,
+            $rules,
+            $customMessages,
+            $customAttributes
+        );
+
+        if ($dbConnection !== null) {
+            $validator->setDatabaseConnection($dbConnection);
+        }
+
+        // Dispatch PRE_SUBMIT event
+        $preSubmitEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SUBMIT, $preSubmitEvent);
+
+        try {
+            // Perform validation
+            $validated = $validator->validate();
+
+            // Dispatch VALIDATION_SUCCESS event
+            $validationSuccessEvent = new FormEvent($this, $validated);
+            $this->eventDispatcher->dispatch(FormEvents::VALIDATION_SUCCESS, $validationSuccessEvent);
+
+            // Dispatch POST_SUBMIT event
+            $postSubmitEvent = new FormEvent($this, $validated);
+            $this->eventDispatcher->dispatch(FormEvents::POST_SUBMIT, $postSubmitEvent);
+
+            return $validated;
+        } catch (\FormGenerator\V2\Validation\ValidationException $e) {
+            // Dispatch VALIDATION_ERROR event
+            $validationErrorEvent = new FormEvent($this, $e->errors());
+            $this->eventDispatcher->dispatch(FormEvents::VALIDATION_ERROR, $validationErrorEvent);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Extract validation rules from all form inputs
+     *
+     * Converts InputBuilder validation rules to Laravel-style rule strings.
+     *
+     * @return array Validation rules
+     */
+    private function extractValidationRules(): array
+    {
+        $rules = [];
+
+        foreach ($this->inputs as $input) {
+            $inputRules = $input->getValidationRules();
+
+            if (empty($inputRules)) {
+                continue;
+            }
+
+            $fieldName = $input->getName();
+            $ruleParts = [];
+
+            foreach ($inputRules as $ruleName => $ruleValue) {
+                // Handle Laravel-style rule strings
+                if ($ruleName === 'rules' && is_string($ruleValue)) {
+                    $ruleParts[] = $ruleValue;
+                    continue;
+                }
+
+                // Convert InputBuilder rules to Laravel-style rules
+                switch ($ruleName) {
+                    case 'required':
+                        $ruleParts[] = 'required';
+                        break;
+                    case 'email':
+                        $ruleParts[] = 'email';
+                        break;
+                    case 'minLength':
+                    case 'min':
+                        $ruleParts[] = "min:$ruleValue";
+                        break;
+                    case 'maxLength':
+                    case 'max':
+                        $ruleParts[] = "max:$ruleValue";
+                        break;
+                    case 'numeric':
+                        $ruleParts[] = 'numeric';
+                        break;
+                    case 'integer':
+                        $ruleParts[] = 'integer';
+                        break;
+                    case 'string':
+                        $ruleParts[] = 'string';
+                        break;
+                    case 'boolean':
+                        $ruleParts[] = 'boolean';
+                        break;
+                    case 'array':
+                        $ruleParts[] = 'array';
+                        break;
+                    case 'url':
+                        $ruleParts[] = 'url';
+                        break;
+                    case 'ip':
+                        if ($ruleValue === true) {
+                            $ruleParts[] = 'ip';
+                        } else {
+                            $ruleParts[] = "ip:$ruleValue";
+                        }
+                        break;
+                    case 'json':
+                        $ruleParts[] = 'json';
+                        break;
+                    case 'alpha':
+                        $ruleParts[] = 'alpha';
+                        break;
+                    case 'alpha_numeric':
+                        $ruleParts[] = 'alpha_numeric';
+                        break;
+                    case 'digits':
+                        if ($ruleValue === true) {
+                            $ruleParts[] = 'digits';
+                        } else {
+                            $ruleParts[] = "digits:$ruleValue";
+                        }
+                        break;
+                    case 'date':
+                        $ruleParts[] = 'date';
+                        break;
+                    case 'date_format':
+                        $ruleParts[] = "date_format:$ruleValue";
+                        break;
+                    case 'before':
+                        $ruleParts[] = "before:$ruleValue";
+                        break;
+                    case 'after':
+                        $ruleParts[] = "after:$ruleValue";
+                        break;
+                    case 'between':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'between:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'confirmed':
+                        $ruleParts[] = "confirmed:$ruleValue";
+                        break;
+                    case 'in':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'in:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'not_in':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'not_in:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'unique':
+                        if (is_array($ruleValue)) {
+                            $params = [
+                                $ruleValue['table'],
+                                $ruleValue['column'],
+                                $ruleValue['except'] ?? '',
+                                $ruleValue['idColumn'] ?? 'id'
+                            ];
+                            $ruleParts[] = 'unique:' . implode(',', $params);
+                        }
+                        break;
+                    case 'exists':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'exists:' . $ruleValue['table'] . ',' . $ruleValue['column'];
+                        }
+                        break;
+                    case 'pattern':
+                        if (is_array($ruleValue) && isset($ruleValue['regex'])) {
+                            $ruleParts[] = 'regex:' . $ruleValue['regex'];
+                        }
+                        break;
+                }
+            }
+
+            if (!empty($ruleParts)) {
+                $rules[$fieldName] = implode('|', $ruleParts);
+            }
+        }
+
+        return $rules;
+    }
+
+    /**
      * Validate form data against DTO
      */
     public function validateDto(array $data): array
