@@ -26,6 +26,11 @@ use FormGenerator\V2\Form\{
     FormCollection
 };
 use FormGenerator\V2\DataMapper\FormDataMapper;
+use FormGenerator\V2\Type\{
+    TypeRegistry,
+    TypeExtensionRegistry,
+    OptionsResolver
+};
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -2032,5 +2037,154 @@ class FormBuilder implements BuilderInterface
     public function getInputs(): array
     {
         return $this->inputs;
+    }
+
+    // ========================================================================
+    // TYPE SYSTEM (v2.5.0)
+    // ========================================================================
+
+    /**
+     * Add field using type system (v2.5.0)
+     *
+     * Create a field using a registered type with options.
+     * Supports custom types, built-in types, and type extensions.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addField('email', 'email', [
+     *         'label' => 'Email Address',
+     *         'required' => true,
+     *         'help' => 'We will never share your email',
+     *     ])
+     *
+     *     ->addField('phone', 'phone', [
+     *         'label' => 'Phone Number',
+     *         'country' => 'US',
+     *     ])
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param string $name Field name
+     * @param string $type Type name (registered type or built-in)
+     * @param array $options Field options
+     * @return InputBuilder
+     * @since 2.5.0
+     */
+    public function addField(string $name, string $type, array $options = []): InputBuilder
+    {
+        // Ensure built-in types are registered
+        TypeRegistry::registerBuiltInTypes();
+
+        // Get type instance
+        if (!TypeRegistry::has($type)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Type "%s" is not registered. Did you forget to register it with TypeRegistry::register()?',
+                $type
+            ));
+        }
+
+        $typeInstance = TypeRegistry::get($type);
+
+        // Build type hierarchy (type + all parents)
+        $typeHierarchy = TypeRegistry::getTypeHierarchy($type);
+
+        // Create options resolver
+        $resolver = new OptionsResolver();
+
+        // Configure options (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->configureOptions($resolver);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->configureOptions($resolver);
+            }
+        }
+
+        // Resolve options
+        $resolvedOptions = $resolver->resolve($options);
+
+        // Create input builder (we need to determine InputType from the type)
+        // For now, create a generic TEXT type and let the type configure it
+        $input = $this->createInput($name, InputType::TEXT, $resolvedOptions['label'] ?? $name);
+
+        // Build field (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->buildField($input, $resolvedOptions);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->buildField($input, $resolvedOptions);
+            }
+        }
+
+        // Finish view (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->finishView($input, $resolvedOptions);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->finishView($input, $resolvedOptions);
+            }
+        }
+
+        return $input;
+    }
+
+    /**
+     * Register a custom type
+     *
+     * Convenience method for registering types
+     *
+     * @param string $name Type name
+     * @param string $className Type class name
+     * @since 2.5.0
+     */
+    public static function registerType(string $name, string $className): void
+    {
+        TypeRegistry::register($name, $className);
+    }
+
+    /**
+     * Register a type extension
+     *
+     * Convenience method for registering extensions
+     *
+     * @param TypeExtensionInterface $extension Type extension
+     * @since 2.5.0
+     */
+    public static function registerTypeExtension($extension): void
+    {
+        TypeExtensionRegistry::register($extension);
+    }
+
+    /**
+     * Check if a type is registered
+     *
+     * @param string $name Type name
+     * @return bool
+     * @since 2.5.0
+     */
+    public static function hasType(string $name): bool
+    {
+        TypeRegistry::registerBuiltInTypes();
+        return TypeRegistry::has($name);
+    }
+
+    /**
+     * Get all registered type names
+     *
+     * @return array<string>
+     * @since 2.5.0
+     */
+    public static function getRegisteredTypes(): array
+    {
+        TypeRegistry::registerBuiltInTypes();
+        return TypeRegistry::getTypeNames();
     }
 }

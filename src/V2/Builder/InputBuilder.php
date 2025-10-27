@@ -1059,6 +1059,21 @@ class InputBuilder
         return $this->type;
     }
 
+    /**
+     * Set input type (v2.5.0)
+     *
+     * Allows types to change the InputType
+     *
+     * @param InputType $type New input type
+     * @return self
+     * @since 2.5.0
+     */
+    public function setType(InputType $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
     public function getValue(): mixed
     {
         return $this->value;

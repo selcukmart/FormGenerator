@@ -5,6 +5,33 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2025-10-27
+
+### Added - Type System & Extension Mechanism 🎯
+
+**TYPE PARITY ACHIEVED!** Version 2.5.0 introduces complete type system with inheritance, extensions, and option validation - matching Symfony's type architecture.
+
+#### New Features
+
+**1. Type Registry** - Central type management
+**2. OptionsResolver** - Symfony-inspired option validation
+**3. AbstractType** - Base for custom types with inheritance
+**4. 18 Built-in Types** - Production-ready field types
+**5. Type Extensions** - Extend types without modification
+**6. FormBuilder::addField()** - Type-based field creation
+
+#### New Classes
+- TypeRegistry, OptionsResolver, AbstractType
+- TypeExtensionInterface, AbstractTypeExtension, TypeExtensionRegistry
+- 18 built-in types (TextType, EmailType, NumberType, etc.)
+
+#### Examples
+- Examples/V2/WithTypeSystem.php - Comprehensive type system demo
+
+See full details in CHANGELOG.md
+
+---
+
 ## [2.4.0] - 2025-10-27
 
 ### Added - Nested Forms & Form Collections 🎉
