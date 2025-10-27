@@ -2,19 +2,63 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.3.1-blue.svg)](CHANGELOG.md)
 
-Modern PHP Form Generator with Chain Pattern, Event-Driven Architecture, Symfony & Laravel Integration
+Modern PHP Form Generator with Chain Pattern, Event-Driven Architecture, Data Transformation, Symfony & Laravel Integration
 
 ---
 
-## 🎉 Version 2.3 is Here!
+## 🎉 Version 2.3.1 is Here!
 
-**FormGenerator V2.3** brings native event-driven dependency system for both PHP and JavaScript!
+**FormGenerator V2.3.1** adds powerful Data Transformation support inspired by Symfony!
 
 ### 📖 [Read Full V2 Documentation →](README_V2.md)
 
-### Quick V2.3 Example
+### Quick V2.3.1 Example - Data Transformation
+
+```php
+use FormGenerator\V2\Builder\FormBuilder;
+use FormGenerator\V2\DataTransformer\DateTimeToStringTransformer;
+use FormGenerator\V2\DataTransformer\StringToArrayTransformer;
+
+// Model data with proper types
+$userData = [
+    'name' => 'John Doe',
+    'birthday' => new \DateTime('1990-05-15'),  // DateTime object
+    'tags' => ['php', 'symfony', 'laravel'],     // Array
+];
+
+$form = FormBuilder::create('user_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->setData($userData)
+
+    ->addText('name', 'Full Name')
+        ->required()
+        ->add()
+
+    // DateTime ↔ String transformation (NEW in v2.3.1!)
+    ->addDate('birthday', 'Birthday')
+        ->addTransformer(new DateTimeToStringTransformer('Y-m-d'))
+        ->add()
+
+    // Array ↔ String transformation (NEW in v2.3.1!)
+    ->addText('tags', 'Skills')
+        ->addTransformer(new StringToArrayTransformer(', '))
+        ->add()
+
+    ->addSubmit('save')
+    ->build();
+
+echo $form; // DateTime & Array automatically formatted for display!
+
+// After form submission - transform back to model format
+$modelData = $form->applyReverseTransform($_POST);
+// $modelData['birthday'] is now a DateTime object
+// $modelData['tags'] is now an array
+```
+
+### Quick V2.3 Example - Event-Driven Dependencies
 
 ```php
 use FormGenerator\V2\Builder\FormBuilder;
@@ -39,7 +83,7 @@ $form = FormBuilder::create('user_form')
         ->isDependency()
         ->add()
 
-    // Event-Driven Dependencies (NEW in v2.3!)
+    // Event-Driven Dependencies
     ->addText('company_name', 'Company Name')
         ->dependsOn('user_type', 'business') // Auto show/hide!
         ->onShow(function(FieldEvent $event) {
@@ -85,6 +129,17 @@ $form->addText('advanced_settings', 'Advanced Settings')
 echo $form->build();
 ```
 
+### What's New in V2.3.1?
+
+**🆕 Data Transformation (Symfony-Inspired)**
+- ✅ **DateTimeToStringTransformer**: Convert DateTime objects ↔ formatted strings
+- ✅ **StringToArrayTransformer**: Convert arrays ↔ comma-separated strings
+- ✅ **NumberToLocalizedStringTransformer**: Format numbers with locale settings
+- ✅ **BooleanToStringTransformer**: Convert boolean ↔ string representations
+- ✅ **CallbackTransformer**: Custom transformation logic with closures
+- ✅ **Chainable Transformers**: Apply multiple transformers in sequence
+- ✅ **Automatic Application**: Transformers applied during form build and submission
+
 ### What's New in V2.3?
 
 **🆕 Event-Driven Dependencies**
@@ -97,6 +152,7 @@ echo $form->build();
 **Core Features**
 - ✅ **PHP 8.1+** with modern features (enums, attributes, readonly)
 - ✅ **Chain Pattern** fluent interface
+- ✅ **Data Transformation** inspired by Symfony (v2.3.1+)
 - ✅ **Dependency Management** with pure JavaScript (no jQuery!)
 - ✅ **Symfony & Laravel** integration out of the box
 - ✅ **Multiple Data Sources**: Doctrine, Eloquent, PDO, Array
@@ -176,9 +232,11 @@ echo $form_generator->getHtmlOutput();
 - [Migration Guide from V1 to V2](UPGRADE.md)
 - [Examples](/Examples/V2/)
   - [Basic Usage](/Examples/V2/BasicUsage.php)
-  - [Event-Driven Dependencies](/Examples/V2/WithEventDrivenDependencies.php) ⭐ NEW!
-  - [Query String Dependencies](/Examples/V2/WithQueryStringDependencies.php) ⭐ NEW!
-  - [Symfony Integration](/Examples/Symfony/QueryStringFormController.php) ⭐ NEW!
+  - [Data Transformation](/Examples/V2/WithDataTransformation.php) ⭐ NEW in v2.3.1!
+  - [Symfony Data Transformation](/Examples/Symfony/DataTransformationController.php) ⭐ NEW in v2.3.1!
+  - [Event-Driven Dependencies](/Examples/V2/WithEventDrivenDependencies.php)
+  - [Query String Dependencies](/Examples/V2/WithQueryStringDependencies.php)
+  - [Symfony Integration](/Examples/Symfony/QueryStringFormController.php)
   - [Dependency Management](/Examples/V2/WithDependencies.php)
   - [With Doctrine](/Examples/V2/WithDoctrine.php)
   - [With Laravel](/Examples/V2/WithLaravel.php)
