@@ -37,8 +37,12 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 Smarty Plugin**: Generate forms directly in Smarty templates
 
 ### Developer Experience
-- **🆕 PHPUnit 10+**: Comprehensive test suite with 100+ tests
+- **🆕 PHPUnit 10+**: Comprehensive test suite with 150+ tests
 - **🆕 Code Coverage**: 80%+ coverage with HTML reports
+- **🆕 Test Coverage for New Features**: Complete test coverage for all new features
+  - TextDirection & OutputFormat enum tests
+  - FormBuilder direction, locale, and output format tests
+  - DatePicker, TimePicker, DateTimePicker, RangeSlider tests
 - **🆕 CONTRIBUTING.md**: Complete contribution guidelines
 - **🆕 Multiple Output Formats**: HTML, JSON, XML output for different use cases
 
@@ -1932,12 +1936,20 @@ vendor/bin/phpunit --coverage-html coverage/html
 ```
 tests/
 ├── bootstrap.php          # Test bootstrap
-├── TestCase.php           # Base test class
+├── TestCase.php           # Base test class with HTML/JS assertion helpers
 ├── Unit/                  # Unit tests
 │   ├── Builder/
 │   │   ├── FormBuilderTest.php
+│   │   ├── FormBuilderNewFeaturesTest.php  # 🆕 Direction, Locale, Output Format
 │   │   ├── InputBuilderTest.php
-│   │   └── DependencyManagerTest.php
+│   │   ├── DependencyManagerTest.php
+│   │   ├── DatePickerManagerTest.php        # 🆕 Date picker tests
+│   │   ├── TimePickerManagerTest.php        # 🆕 Time picker tests
+│   │   ├── DateTimePickerManagerTest.php    # 🆕 DateTime picker tests
+│   │   └── RangeSliderManagerTest.php       # 🆕 Range slider tests
+│   ├── Contracts/
+│   │   ├── TextDirectionTest.php            # 🆕 TextDirection enum tests
+│   │   └── OutputFormatTest.php             # 🆕 OutputFormat enum tests
 │   ├── Validation/
 │   │   └── NativeValidatorTest.php
 │   └── DataProvider/
@@ -1946,11 +1958,20 @@ tests/
 ```
 
 **Test Coverage:**
-- FormBuilder: 25+ tests
-- InputBuilder: 20+ tests
-- NativeValidator: 30+ tests (all 15 rules)
-- DependencyManager: JavaScript generation tests
-- Data Providers: Doctrine, Eloquent, PDO, Array
+- **FormBuilder**: 25+ tests (core functionality)
+- **FormBuilder New Features**: 35+ tests (direction, locale, output formats)
+- **InputBuilder**: 20+ tests
+- **NativeValidator**: 30+ tests (all 15 validation rules)
+- **DependencyManager**: JavaScript generation tests
+- **Picker Managers**: 60+ tests
+  - DatePickerManager: 20+ tests (locales, RTL, options)
+  - TimePickerManager: 15+ tests (12/24-hour, RTL, options)
+  - DateTimePickerManager**: 15+ tests (tabbed interface, RTL, locales)
+  - RangeSliderManager: 15+ tests (single/dual handles, RTL, options)
+- **Enums**: 15+ tests (TextDirection, OutputFormat)
+- **Data Providers**: Doctrine, Eloquent, PDO, Array
+
+**Total Tests**: 150+ tests covering all new features
 
 **Code Coverage Target:** 80%+
 
