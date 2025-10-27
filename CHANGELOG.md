@@ -5,6 +5,43 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2025-10-27
+
+### Added - Cross-Field Validation & Validation Groups ✅
+
+**ADVANCED VALIDATION COMPLETE!** Version 2.7.0 adds sophisticated validation capabilities including cross-field validation and validation groups - achieving full validation parity with Symfony.
+
+#### New Features
+
+**1. Cross-Field Validation**
+- Callback constraint for custom validation logic
+- Access to all form data during validation
+- Field-specific error messages with atPath()
+
+**2. Validation Groups**
+- Conditional validation based on scenarios
+- Group-specific constraints
+- Multiple groups per rule
+
+**3. ExecutionContext**
+- Context for validation with buildViolation()
+- ViolationBuilder for fluent error creation
+- Parameter interpolation in messages
+
+**4. FormBuilder Enhancements**
+- addConstraint() - Add form-level constraints
+- setValidationGroups() - Define validation groups
+- validateWithConstraints() - Enhanced validation
+
+#### New Classes
+- ExecutionContext, ViolationBuilder
+- Callback constraint, GroupedValidation
+
+#### Examples
+- Examples/V2/WithCrossFieldValidation.php (5 scenarios)
+
+---
+
 ## [2.5.0] - 2025-10-27
 
 ### Added - Type System & Extension Mechanism 🎯

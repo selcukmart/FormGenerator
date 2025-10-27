@@ -78,6 +78,8 @@ class FormBuilder implements BuilderInterface
     private EventDispatcher $eventDispatcher;
     private array $nestedForms = []; // v2.4.0: Nested forms
     private array $collections = []; // v2.4.0: Collections
+    private array $constraints = []; // v2.7.0: Form-level constraints
+    private array $validationGroups = []; // v2.7.0: Validation groups
 
     private function __construct(string $name)
     {
@@ -2186,5 +2188,150 @@ class FormBuilder implements BuilderInterface
     {
         TypeRegistry::registerBuiltInTypes();
         return TypeRegistry::getTypeNames();
+    }
+
+    // ========================================================================
+    // CROSS-FIELD VALIDATION & GROUPS (v2.7.0)
+    // ========================================================================
+
+    /**
+     * Add form-level constraint (v2.7.0)
+     *
+     * Add a constraint that validates the entire form data.
+     * Perfect for cross-field validation.
+     *
+     * Example:
+     * ```php
+     * use FormGenerator\V2\Validation\Constraints\Callback;
+     *
+     * $form = FormBuilder::create('user')
+     *     ->addPassword('password')->add()
+     *     ->addPassword('password_confirm')->add()
+     *
+     *     // Cross-field validation
+     *     ->addConstraint(new Callback(function($data, $context) {
+     *         if ($data['password'] !== $data['password_confirm']) {
+     *             $context->buildViolation('Passwords do not match')
+     *                     ->atPath('password_confirm')
+     *                     ->addViolation();
+     *         }
+     *     }))
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param object $constraint Constraint instance
+     * @return self
+     * @since 2.7.0
+     */
+    public function addConstraint(object $constraint): self
+    {
+        $this->constraints[] = $constraint;
+        return $this;
+    }
+
+    /**
+     * Get all form-level constraints
+     *
+     * @return array
+     * @since 2.7.0
+     */
+    public function getConstraints(): array
+    {
+        return $this->constraints;
+    }
+
+    /**
+     * Set validation groups for this form (v2.7.0)
+     *
+     * Define which validation groups to use when validating.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('username')
+     *         ->required(['groups' => ['registration', 'profile']])
+     *         ->minLength(3, ['groups' => ['registration']])
+     *         ->add()
+     *
+     *     ->setValidationGroups(['registration']) // Only validate registration rules
+     *     ->buildForm();
+     * ```
+     *
+     * @param array $groups Validation group names
+     * @return self
+     * @since 2.7.0
+     */
+    public function setValidationGroups(array $groups): self
+    {
+        $this->validationGroups = $groups;
+        return $this;
+    }
+
+    /**
+     * Get validation groups
+     *
+     * @return array
+     * @since 2.7.0
+     */
+    public function getValidationGroups(): array
+    {
+        return empty($this->validationGroups) ? ['Default'] : $this->validationGroups;
+    }
+
+    /**
+     * Validate form data with cross-field validation and groups (v2.7.0)
+     *
+     * Enhanced validation that supports:
+     * - Cross-field validation via constraints
+     * - Validation groups
+     * - ExecutionContext for better error handling
+     *
+     * @param array $data Data to validate
+     * @param array $groups Validation groups (overrides form groups)
+     * @return array Validation errors
+     * @since 2.7.0
+     */
+    public function validateWithConstraints(array $data, array $groups = []): array
+    {
+        $groups = !empty($groups) ? $groups : $this->getValidationGroups();
+        $errors = [];
+
+        // First, validate fields using standard validation
+        if ($this->validator !== null) {
+            $result = $this->validator->validate($data);
+            if (!$result->isValid()) {
+                $errors = $result->getErrors();
+            }
+        }
+
+        // Then, run form-level constraints
+        $context = new \FormGenerator\V2\Validation\ExecutionContext($data);
+
+        foreach ($this->constraints as $constraint) {
+            // Check if constraint applies to current groups
+            if (method_exists($constraint, 'getGroups')) {
+                $constraintGroups = $constraint->getGroups();
+                if (!array_intersect($groups, $constraintGroups)) {
+                    continue; // Skip this constraint
+                }
+            }
+
+            if (method_exists($constraint, 'validate')) {
+                $constraint->validate($data, $context);
+            }
+        }
+
+        // Merge constraint violations with field errors
+        if ($context->hasViolations()) {
+            foreach ($context->getViolations() as $path => $messages) {
+                if (!isset($errors[$path])) {
+                    $errors[$path] = [];
+                }
+                $errors[$path] = array_merge($errors[$path], $messages);
+            }
+        }
+
+        return $errors;
     }
 }
