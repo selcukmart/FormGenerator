@@ -2,6 +2,7 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
 
 Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 
@@ -17,10 +18,21 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **Template Engines**: Twig & Smarty 5 support
 
 ### Validation & Dependencies
+- **✨ Laravel-Style Validation** (v2.1.0): Comprehensive server-side validation with 25+ rules
+  - **Type validation**: required, string, boolean, integer, numeric, array
+  - **Pattern validation**: alpha, alpha_numeric, regex, digits
+  - **Size validation**: min, max, between
+  - **Format validation**: email, url, ip, json
+  - **Date validation**: date, date_format, before, after
+  - **Comparison validation**: confirmed, in, not_in
+  - **Database validation**: unique, exists (with PDO support)
+  - **Fluent API**: `->required()->email()->unique('users', 'email')`
+  - **Custom messages**: Field-specific error messages
+  - **Event integration**: Validation lifecycle events
+  - **ValidationException**: Rich error bag with JSON export
 - **🆕 Native Validation**: Built-in PHP + JavaScript validation (no jQuery!)
 - **🆕 Symfony DTO Support**: Auto-extract validation from DTO/Entity
 - **🆕 Dependency Management**: Pure JavaScript conditional fields
-- **🆕 15+ Validation Rules**: required, email, minLength, pattern, etc.
 - **🆕 Nested Dependencies**: Multi-level A→B→C dependency chains
 - **🆕 Custom Animations**: Configurable fade/slide/none animations
 
@@ -579,6 +591,194 @@ $validator->addRule('username_available', function($value, $params, $context) {
     ->required()
     ->add(); // Rule applied via validator
 ```
+
+## 🔥 Laravel-Style Validation (v2.1.0)
+
+**Server-side validation with 25+ rules** - Laravel-inspired fluent validation system!
+
+### Quick Start
+
+```php
+use FormGenerator\V2\Validation\{ValidatorFactory, ValidationException};
+
+// Simple validation
+try {
+    $validated = ValidatorFactory::validate($_POST, [
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:8|confirmed',
+        'age' => 'required|integer|between:18,100',
+    ]);
+
+    // Data is valid, use $validated
+} catch (ValidationException $e) {
+    $errors = $e->errors();
+}
+```
+
+### FormBuilder Integration
+
+```php
+$form = FormBuilder::create('register')
+    ->addText('username', 'Username')
+        ->required()
+        ->alphaNumeric()
+        ->minLength(3)
+        ->maxLength(20)
+        ->unique('users', 'username')
+        ->add()
+
+    ->addEmail('email', 'Email')
+        ->required()
+        ->email()
+        ->unique('users', 'email')
+        ->add()
+
+    ->addPassword('password', 'Password')
+        ->required()
+        ->minLength(8)
+        ->confirmed()
+        ->add()
+
+    ->addPassword('password_confirmation', 'Confirm Password')
+        ->required()
+        ->add()
+
+    ->addNumber('age', 'Age')
+        ->integer()
+        ->between(18, 100)
+        ->add()
+
+    ->addSubmit('register', 'Create Account')
+    ->build();
+
+// Validate on submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $pdo = new PDO('mysql:host=localhost;dbname=myapp', 'user', 'pass');
+        $validated = $form->validateData($_POST, [], [], $pdo);
+
+        // Registration successful!
+    } catch (ValidationException $e) {
+        // Display errors
+        $errors = $e->errors();
+    }
+}
+```
+
+### 25 Available Validation Rules
+
+#### Type Validation
+- `required()` - Field is required
+- `string()` - Must be a string
+- `integer()` - Must be an integer
+- `numeric()` - Must be numeric
+- `boolean()` - Must be boolean
+- `array()` - Must be an array
+
+#### Pattern Validation
+- `alpha()` - Only alphabetic characters
+- `alphaNumeric()` - Only alphanumeric characters
+- `digits(?int $length)` - Numeric digits (optional exact length)
+- `regex(string $pattern)` - Match regex pattern
+
+#### Size Validation
+- `min(int|float $value)` - Minimum value/length/count
+- `max(int|float $value)` - Maximum value/length/count
+- `between(int|float $min, int|float $max)` - Between min and max
+
+#### Format Validation
+- `email()` - Valid email address
+- `url()` - Valid URL
+- `ip(?string $version)` - Valid IP (optional: 'ipv4' or 'ipv6')
+- `json()` - Valid JSON string
+
+#### Date Validation
+- `date()` - Valid date
+- `dateFormat(string $format)` - Match specific date format
+- `before(string $date)` - Date before specified date
+- `after(string $date)` - Date after specified date
+
+#### Comparison Validation
+- `confirmed(?string $field)` - Match confirmation field
+- `in(array $values)` - Value in allowed list
+- `notIn(array $values)` - Value not in disallowed list
+
+#### Database Validation
+- `unique(string $table, ?string $column, mixed $except, string $idColumn)` - Unique in database
+- `exists(string $table, ?string $column)` - Exists in database
+
+### Custom Error Messages
+
+```php
+$customMessages = [
+    'email.required' => 'Please enter your email address',
+    'email.email' => 'Please enter a valid email address',
+    'password.min' => 'Password must be at least 8 characters',
+    'age.between' => 'Age must be between 18 and 100',
+];
+
+$validated = $form->validateData($_POST, $customMessages);
+```
+
+### Database Validation Example
+
+```php
+// Profile update with unique email (except current user)
+$userId = $_SESSION['user_id'];
+
+$form = FormBuilder::create('profile')
+    ->addEmail('email', 'Email')
+        ->required()
+        ->email()
+        ->unique('users', 'email', $userId, 'id')  // Except current user
+        ->add()
+
+    ->addText('phone', 'Phone')
+        ->regex('/^\+?[0-9]{10,15}$/', 'Invalid phone format')
+        ->add()
+
+    ->addSubmit('update', 'Update Profile')
+    ->build();
+```
+
+### API Validation Example
+
+```php
+// Validate JSON API request
+$json = file_get_contents('php://input');
+$data = json_decode($json, true);
+
+try {
+    $validated = ValidatorFactory::validate($data, [
+        'name' => 'required|string|min:3|max:255',
+        'email' => 'required|email|unique:users,email',
+        'role' => 'required|in:user,admin,moderator',
+        'settings' => 'json',
+    ]);
+
+    // Return success
+    echo json_encode(['success' => true, 'data' => $validated]);
+} catch (ValidationException $e) {
+    // Return errors
+    http_response_code(422);
+    echo $e->toJson();
+}
+```
+
+### Validation Features
+
+- ✅ **Laravel-compatible syntax** - Familiar API for Laravel developers
+- ✅ **25+ built-in rules** - Comprehensive validation coverage
+- ✅ **Database validation** - unique/exists with PDO support
+- ✅ **Custom error messages** - Per-field and per-rule messages
+- ✅ **Event integration** - Lifecycle events (PRE_SUBMIT, VALIDATION_SUCCESS, etc.)
+- ✅ **Bail mode** - Stop on first failure
+- ✅ **Validated data only** - Returns only validated fields
+- ✅ **Rich error bag** - JSON export, first(), all() methods
+- ✅ **Fluent FormBuilder API** - Chain validation methods
+- ✅ **Extensible** - Add custom rules via RuleInterface
+
+📖 **Full documentation**: [docs/V2/VALIDATION.md](docs/V2/VALIDATION.md)
 
 ## 🎯 Symfony DTO Support
 
