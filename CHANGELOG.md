@@ -5,6 +5,151 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-10-27
+
+### Added - Blade Template Engine Support
+
+Complete Laravel Blade template engine integration for FormGenerator V2, providing the same level of support as Twig and Smarty template engines.
+
+#### Core Blade Components
+
+- **BladeRenderer** (`FormGenerator\V2\Renderer\BladeRenderer`)
+  - Full RendererInterface implementation
+  - Laravel Illuminate/View integration
+  - Blade template compilation and caching
+  - Global variables support
+  - Custom directives support
+  - Template existence checking
+  - Cache management (enable/disable/clear)
+  - Helper methods: `renderAttributes()`, `renderClasses()`
+  - Standalone or Laravel-integrated usage
+
+#### Blade Directives
+
+- **Form Control Directives**:
+  - `@formStart(name, options)` - Start a form
+  - `@formEnd` - End and render the form
+
+- **Input Directives** (11 directives):
+  - `@formText(name, label, options)` - Text input
+  - `@formEmail(name, label, options)` - Email input
+  - `@formPassword(name, label, options)` - Password input
+  - `@formTextarea(name, label, options)` - Textarea
+  - `@formNumber(name, label, options)` - Number input
+  - `@formDate(name, label, options)` - Date input
+  - `@formSelect(name, label, selectOptions, options)` - Select dropdown
+  - `@formCheckbox(name, label, options)` - Checkbox
+  - `@formRadio(name, label, radioOptions, options)` - Radio buttons
+  - `@formSubmit(label, options)` - Submit button
+  - `@formButton(label, type, options)` - Button
+
+- **Helper Directives**:
+  - `@attributes($array)` - Render HTML attributes from array
+  - `@classes($array)` - Render CSS classes from array
+  - `@csrf($formName)` - CSRF token field
+
+#### Blade Components
+
+Modern component-based syntax for Laravel 8+:
+
+- `<x-form>` - Form wrapper component
+- `<x-form-text>` - Text input component
+- `<x-form-email>` - Email input component
+- `<x-form-password>` - Password input component
+- `<x-form-textarea>` - Textarea component
+- `<x-form-number>` - Number input component
+- `<x-form-select>` - Select dropdown component
+- `<x-form-submit>` - Submit button component
+
+All components support:
+- Required/optional fields
+- Placeholder text
+- Help text
+- Default values
+- CSS classes
+- Validation attributes (min, max, minLength, maxLength, pattern)
+- Readonly/disabled states
+
+#### Laravel Integration
+
+- **BladeServiceProvider** (`FormGenerator\V2\Integration\Blade\BladeServiceProvider`)
+  - Auto-registration of directives and components
+  - Service container bindings
+  - BladeRenderer singleton
+  - Configuration publishing
+  - Laravel 11+ auto-discovery support
+
+- **Service Container Bindings**:
+  - `BladeRenderer::class` - Singleton blade renderer
+  - `RendererInterface::class` - Bound to BladeRenderer
+  - `FormBuilder::class` - Singleton form builder with Blade renderer
+
+#### Examples & Documentation
+
+- **Usage Examples**:
+  - `examples/blade/user-registration.blade.php` - Registration form using directives
+  - `examples/blade/contact-form-components.blade.php` - Contact form using components
+  - `examples/blade/README.md` - Comprehensive Blade integration guide
+
+- **Directive Syntax Example**:
+  ```blade
+  @formStart('user-form', ['action' => '/submit', 'method' => 'POST'])
+  @formText('username', 'Username', ['required' => true, 'minLength' => 3])
+  @formEmail('email', 'Email', ['required' => true])
+  @formPassword('password', 'Password', ['required' => true])
+  @formSubmit('Register')
+  @formEnd
+  ```
+
+- **Component Syntax Example**:
+  ```blade
+  <x-form name="user-form" action="/submit" method="POST">
+      <x-form-text name="username" label="Username" required />
+      <x-form-email name="email" label="Email" required />
+      <x-form-password name="password" label="Password" required />
+      <x-form-submit>Register</x-form-submit>
+  </x-form>
+  ```
+
+#### Testing
+
+- **BladeRendererTest** - Comprehensive unit tests
+  - Template rendering
+  - Global variables
+  - Template existence checking
+  - Cache management
+  - Helper methods testing
+  - Path management
+
+### Technical Details
+
+- **PHP Version**: 8.1+
+- **Laravel Support**: 10.x, 11.x (auto-discovery enabled)
+- **Illuminate Packages**: illuminate/view, illuminate/filesystem, illuminate/events
+- **Architecture**: Service provider pattern, component-based
+- **Backward Compatibility**: Full backward compatibility maintained
+
+### Installation
+
+```bash
+composer require selcukmart/form-generator
+```
+
+For Laravel:
+```bash
+php artisan vendor:publish --tag=form-generator-config
+```
+
+### Breaking Changes
+
+None. All changes are backward compatible.
+
+### Migration from 2.1.0
+
+No migration required. Blade support is additive - existing code continues to work unchanged.
+
+---
+
 ## [2.1.0] - 2025-10-27
 
 ### Added - Laravel-Style Validation System (Phase 1)

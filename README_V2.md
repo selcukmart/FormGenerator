@@ -2,7 +2,7 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](CHANGELOG.md)
 
 Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 
@@ -15,7 +15,7 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **Data Providers**: Doctrine, Eloquent, PDO support
 - **Security First**: Built-in CSRF, XSS protection, input sanitization
 - **Modern Themes**: Bootstrap 5, Tailwind CSS included
-- **Template Engines**: Twig & Smarty 5 support
+- **Template Engines**: Twig, Smarty 5 & **Blade** (v2.2.0) support
 
 ### Validation & Dependencies
 - **✨ Laravel-Style Validation** (v2.1.0): Comprehensive server-side validation with 25+ rules
@@ -2111,6 +2111,121 @@ $smarty->registerPlugin('function', 'form_end', ['FormGeneratorPlugin', 'formEnd
 - ✅ Forms defined directly in templates
 - ✅ Automatic theme and renderer injection
 - ✅ Clean, readable template syntax
+
+### Blade Integration (v2.2.0)
+
+Complete Laravel Blade template engine support with directives and components:
+
+**Setup (Laravel):**
+```php
+// Auto-registered via service provider (Laravel 11+)
+// Or add to config/app.php:
+'providers' => [
+    \FormGenerator\V2\Integration\Blade\BladeServiceProvider::class,
+],
+
+// Publish configuration (optional)
+php artisan vendor:publish --tag=form-generator-config
+```
+
+**Usage with Blade Directives:**
+```blade
+{{-- registration.blade.php --}}
+@formStart('registration', ['action' => '/register', 'method' => 'POST'])
+
+@formText('username', 'Username', ['required' => true, 'placeholder' => 'Enter username'])
+@formEmail('email', 'Email Address', ['required' => true])
+@formPassword('password', 'Password', ['required' => true, 'minLength' => 8])
+
+@formSelect('country', 'Country', ['us' => 'United States', 'uk' => 'United Kingdom'])
+
+@formCheckbox('newsletter', 'Subscribe to newsletter')
+
+@formSubmit('Create Account')
+
+@formEnd
+```
+
+**Usage with Blade Components (Modern Syntax):**
+```blade
+{{-- contact.blade.php --}}
+<x-form name="contact" action="/contact" method="POST">
+
+    <x-form-text
+        name="full_name"
+        label="Full Name"
+        required
+        placeholder="Enter your name"
+    />
+
+    <x-form-email
+        name="email"
+        label="Email"
+        required
+    />
+
+    <x-form-textarea
+        name="message"
+        label="Message"
+        required
+        rows="5"
+        placeholder="Type your message..."
+    />
+
+    <x-form-select
+        name="department"
+        label="Department"
+        :options="['sales' => 'Sales', 'support' => 'Support']"
+        required
+    />
+
+    <x-form-submit>Send Message</x-form-submit>
+
+</x-form>
+```
+
+**Available Directives:**
+- `@formStart()` / `@formEnd` - Form wrapper
+- `@formText()`, `@formEmail()`, `@formPassword()` - Text inputs
+- `@formTextarea()`, `@formNumber()`, `@formDate()` - Other inputs
+- `@formSelect()`, `@formCheckbox()`, `@formRadio()` - Options
+- `@formSubmit()`, `@formButton()` - Buttons
+- `@attributes()`, `@classes()`, `@csrf()` - Helpers
+
+**Available Components:**
+- `<x-form>` - Form wrapper
+- `<x-form-text>`, `<x-form-email>`, `<x-form-password>` - Text inputs
+- `<x-form-textarea>`, `<x-form-number>` - Other inputs
+- `<x-form-select>`, `<x-form-submit>` - Select and submit
+
+**Standalone Usage (Non-Laravel):**
+```php
+use FormGenerator\V2\Renderer\BladeRenderer;
+use FormGenerator\V2\Integration\Blade\FormGeneratorBladeDirectives;
+use FormGenerator\V2\Theme\Bootstrap5Theme;
+
+$renderer = new BladeRenderer(__DIR__ . '/views', __DIR__ . '/cache');
+FormGeneratorBladeDirectives::setRenderer($renderer);
+FormGeneratorBladeDirectives::setDefaultTheme(new Bootstrap5Theme());
+FormGeneratorBladeDirectives::register();
+
+// Use in your Blade templates
+echo $renderer->render('registration', $data);
+```
+
+**Features:**
+- ✅ Full Laravel integration with service provider
+- ✅ Auto-discovery for Laravel 11+
+- ✅ Blade directives for classic syntax
+- ✅ Blade components for modern syntax
+- ✅ Standalone usage (non-Laravel)
+- ✅ Validation integration
+- ✅ All FormGenerator features supported
+
+**Examples:**
+- See `examples/blade/user-registration.blade.php` - Using directives
+- See `examples/blade/contact-form-components.blade.php` - Using components
+- See `examples/blade/README.md` - Complete guide
 
 ## 🧪 Testing
 
