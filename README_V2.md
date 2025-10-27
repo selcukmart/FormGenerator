@@ -28,6 +28,8 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 Form Sections**: Organize forms with titles, descriptions, HTML content
 - **🆕 Form Wizard/Stepper**: Multi-step forms with progress tracking and validation
 - **🆕 Built-in Pickers**: Date, Time, DateTime, Range sliders with multi-language support
+- **🆕 DateTime Picker**: Combined date+time picker with tabbed interface
+- **🆕 RTL Support**: Full right-to-left language support (Arabic, Hebrew)
 - **🆕 CheckboxTree**: Hierarchical checkboxes with cascade/independent modes
 - **🆕 Repeater Fields**: Dynamic add/remove rows (like jquery.repeater, no jQuery!)
 - **🆕 Twig Extension**: Generate forms directly in Twig templates
@@ -37,6 +39,7 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 PHPUnit 10+**: Comprehensive test suite with 100+ tests
 - **🆕 Code Coverage**: 80%+ coverage with HTML reports
 - **🆕 CONTRIBUTING.md**: Complete contribution guidelines
+- **🆕 Multiple Output Formats**: HTML, JSON, XML output for different use cases
 
 ## 🚀 Installation
 
@@ -1471,6 +1474,248 @@ $form = FormBuilder::create('turkish_form')
 - **Themeable**: Compatible with Bootstrap 5 and Tailwind CSS
 
 See `Examples/V2/WithPickers.php` for complete examples.
+
+### DateTime Picker
+
+Combined date and time picker with tabbed interface for seamless datetime selection.
+
+```php
+$form = FormBuilder::create('meeting_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    // DateTime picker with 12-hour format
+    ->addDatetime('meeting_datetime', 'Meeting Date & Time')
+        ->required()
+        ->setPickerLocale(DateTimePickerManager::LOCALE_EN)
+        ->setPickerOptions([
+            'timeFormat' => '12',  // 12-hour with AM/PM
+            'showSeconds' => false,
+            'minDateTime' => date('Y-m-d H:i:s'),
+        ])
+        ->add()
+
+    // DateTime picker with 24-hour format
+    ->addDatetime('appointment', 'Appointment')
+        ->setPickerOptions([
+            'timeFormat' => '24',  // 24-hour format
+            'showSeconds' => true,
+        ])
+        ->add()
+
+    ->addSubmit('Schedule')
+    ->build();
+```
+
+**Features:**
+- **Tabbed Interface**: Separate tabs for date and time selection
+- **Combined Selection**: Select both date and time in one picker
+- **All Date Features**: Calendar navigation, min/max dates, disabled dates
+- **All Time Features**: Hour/minute/second selection, 12/24 hour formats
+- **Multi-language**: Supports all picker locales (EN, TR, DE, FR, ES, AR, HE)
+- **RTL Support**: Full right-to-left language support
+- **Now Button**: Set current date and time instantly
+- **Clear Button**: Reset both date and time
+
+**Available Locales:**
+```php
+DateTimePickerManager::LOCALE_EN  // English
+DateTimePickerManager::LOCALE_TR  // Turkish
+DateTimePickerManager::LOCALE_AR  // Arabic (RTL)
+DateTimePickerManager::LOCALE_HE  // Hebrew (RTL)
+```
+
+### RTL (Right-to-Left) Support
+
+Full support for right-to-left languages like Arabic and Hebrew.
+
+```php
+$form = FormBuilder::create('arabic_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    // Arabic date picker
+    ->addDate('birth_date', 'تاريخ الميلاد')
+        ->setPickerLocale(DatePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            'rtl' => true,          // Enable RTL
+            'weekStart' => 6,       // Saturday
+            'format' => 'dd-mm-yyyy',
+        ])
+        ->add()
+
+    // Arabic time picker
+    ->addTime('appointment_time', 'وقت الموعد')
+        ->setPickerLocale(TimePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            'rtl' => true,
+            'format' => '12',
+        ])
+        ->add()
+
+    // Arabic datetime picker
+    ->addDatetime('meeting_datetime', 'تاريخ ووقت الاجتماع')
+        ->setPickerLocale(DateTimePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            'rtl' => true,
+            'timeFormat' => '24',
+        ])
+        ->add()
+
+    ->addSubmit('حفظ', 'حفظ')
+    ->build();
+```
+
+**Hebrew Example:**
+```php
+$form = FormBuilder::create('hebrew_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    ->addDate('date_field', 'תאריך')
+        ->setPickerLocale(DatePickerManager::LOCALE_HE)
+        ->setPickerOptions([
+            'rtl' => true,
+            'weekStart' => 0,  // Sunday (common in Israel)
+        ])
+        ->add()
+
+    ->addTime('time_field', 'שעה')
+        ->setPickerLocale(TimePickerManager::LOCALE_HE)
+        ->setPickerOptions(['rtl' => true])
+        ->add()
+
+    ->addSubmit('save', 'שמור')
+    ->build();
+```
+
+**RTL Features:**
+- **Automatic Direction**: Input fields get `dir="rtl"` attribute
+- **Layout Adjustment**: Picker popups align correctly for RTL
+- **CSS Support**: All pickers have RTL-specific styling
+- **Flex Direction**: Navigation buttons flip for RTL
+- **Built-in Locales**: Arabic and Hebrew locales included
+- **Custom Locales**: Easy to add more RTL languages
+
+**Supported in All Pickers:**
+- Date Picker (`addDate()`)
+- Time Picker (`addTime()`)
+- DateTime Picker (`addDatetime()`)
+- Range Slider (`addRange()`)
+
+### Multiple Output Formats
+
+Generate forms in HTML, JSON, or XML format for different use cases.
+
+```php
+use FormGenerator\V2\Contracts\OutputFormat;
+
+$form = FormBuilder::create('user_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->addText('name', 'Name')->required()->add()
+    ->addEmail('email', 'Email')->required()->add()
+    ->addSelect('country', 'Country')->options([
+        'us' => 'United States',
+        'uk' => 'United Kingdom',
+    ])->add()
+    ->addSubmit('save', 'Save');
+
+// HTML output (default)
+$html = $form->build();
+$html = $form->build(OutputFormat::HTML);
+$html = $form->buildAsHtml();
+
+// JSON output (for APIs)
+$json = $form->build(OutputFormat::JSON);
+$json = $form->buildAsJson();
+$json = $form->buildAsJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+// XML output (for exports)
+$xml = $form->build(OutputFormat::XML);
+$xml = $form->buildAsXml();
+```
+
+**HTML Output** (Default):
+```html
+<form name="user_form" method="POST" action="/api/users">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+    </div>
+    <!-- ... more fields ... -->
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<script>/* validation & picker scripts */</script>
+```
+
+**JSON Output** (API Integration):
+```json
+{
+    "name": "user_form",
+    "method": "POST",
+    "action": "/api/users",
+    "scope": "add",
+    "csrf_enabled": true,
+    "validation_enabled": true,
+    "inputs": [
+        {
+            "name": "name",
+            "type": "text",
+            "label": "Name",
+            "required": true,
+            "validationRules": [
+                {"type": "required"}
+            ]
+        }
+    ],
+    "validation_rules": {
+        "name": [{"type": "required"}],
+        "email": [{"type": "required"}, {"type": "email"}]
+    }
+}
+```
+
+**XML Output** (Data Export):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="user_form" method="POST" action="/api/users" scope="add">
+    <settings>
+        <csrf_enabled>true</csrf_enabled>
+        <validation_enabled>true</validation_enabled>
+    </settings>
+    <inputs>
+        <input name="name" type="text" required="true">
+            <label>Name</label>
+            <validation_rules>
+                <rule type="required"/>
+            </validation_rules>
+        </input>
+    </inputs>
+</form>
+```
+
+**Use Cases:**
+
+**JSON Format:**
+- REST API form schemas
+- Frontend framework integration (React, Vue, Angular)
+- Form configuration storage
+- Dynamic form generation
+- Mobile app integration
+
+**XML Format:**
+- SOAP API integration
+- Legacy system integration
+- Data export/import
+- Configuration files
+- Enterprise systems integration
+
+**HTML Format:**
+- Traditional web applications
+- Server-side rendering
+- Direct browser rendering
+
+**Backward Compatibility:**
+- `build()` without parameters returns HTML (default behavior)
+- All existing code continues to work without changes
 
 ## 🎨 Template Engine Integration
 
