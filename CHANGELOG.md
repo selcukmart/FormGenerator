@@ -5,6 +5,101 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2025-10-27
+
+### Added - Advanced Error Handling & Error Bubbling 🔴
+
+**PROFESSIONAL ERROR HANDLING!** Version 2.9.0 introduces enterprise-grade error handling with severity levels, bubbling strategies, and rich error presentation - achieving full error management parity with Symfony.
+
+#### New Features
+
+**1. Error Severity Levels**
+- ErrorLevel enum: ERROR, WARNING, INFO
+- Different treatment for critical errors vs warnings
+- Filter errors by severity level
+- Blocking vs non-blocking errors
+
+**2. Structured Error Objects**
+- FormError class with message, level, path, parameters
+- ErrorList collection with filtering and transformation
+- Parameter interpolation in error messages
+- Rich error metadata (cause, origin, parameters)
+
+**3. Error Bubbling**
+- Automatic error propagation from nested forms to parents
+- ErrorBubblingStrategy for customizable bubbling behavior
+- Configurable strategies: enabled, disabled, stopOnBlocking, withDepthLimit
+- Path-aware error bubbling (e.g., address.street → shipping.address.street)
+
+**4. Error Presentation**
+- getErrorsAsArray() - Nested array format
+- getErrorsFlattened() - Flat dot notation
+- getErrorList() - Structured ErrorList object
+- Multiple filtering options: byPath(), byLevel(), blocking()
+
+**5. Form Class Enhancements**
+- addError() - Add errors with severity and parameters
+- getErrorList() - Get structured errors with bubbling
+- setErrorBubblingStrategy() - Configure bubbling behavior
+- Backward compatible with existing getErrors()
+
+#### Use Cases
+
+**Nested Form Errors with Bubbling**
+```php
+$userForm->add('address', $addressForm);
+$addressForm->addError('Invalid ZIP', ErrorLevel::ERROR, 'zipcode');
+
+// Errors automatically bubble from address to user form
+$allErrors = $userForm->getErrorList(deep: true);
+// Contains: address.zipcode → "Invalid ZIP"
+```
+
+**Error Severity Filtering**
+```php
+$form->addError('Email required', ErrorLevel::ERROR, 'email');
+$form->addError('Weak password', ErrorLevel::WARNING, 'password');
+
+$criticalOnly = $form->getErrorList()->blocking();
+$warningsOnly = $form->getErrorList()->byLevel(ErrorLevel::WARNING);
+```
+
+**Parameterized Error Messages**
+```php
+$form->addError(
+    'Field {{ field }} must be at least {{ min }} characters',
+    ErrorLevel::ERROR,
+    'username',
+    ['field' => 'username', 'min' => 3]
+);
+// Output: "Field username must be at least 3 characters"
+```
+
+#### New Classes
+- ErrorLevel (enum): Error severity levels
+- FormError: Structured error representation
+- ErrorList: Error collection with filtering
+- ErrorBubblingStrategy: Configurable error bubbling
+
+#### Enhanced Classes
+- Form: Added addError(), getErrorList(), getErrorsAsArray(), getErrorsFlattened(), setErrorBubblingStrategy()
+
+#### Examples
+- Examples/V2/WithAdvancedErrorHandling.php (7 comprehensive scenarios)
+
+#### Breaking Changes
+None - Fully backward compatible. Existing getErrors() still works.
+
+#### Comparison with Symfony
+- ✅ Error severity levels
+- ✅ Error bubbling from nested forms
+- ✅ Structured error objects
+- ✅ Multiple error presentation formats
+- ✅ Configurable bubbling strategies
+- 🚀 Better: Simpler API, richer error metadata, more filtering options
+
+---
+
 ## [2.8.0] - 2025-10-27
 
 ### Added - Dynamic Form Modification API 🔄

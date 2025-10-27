@@ -7,6 +7,7 @@ namespace FormGenerator\V2\Form;
 use FormGenerator\V2\Contracts\{RendererInterface, ThemeInterface, ValidatorInterface};
 use FormGenerator\V2\Validation\ValidationManager;
 use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents};
+use FormGenerator\V2\Error\{ErrorList, FormError, ErrorLevel, ErrorBubblingStrategy};
 
 /**
  * Form - Stateful Form Object with Nested Support
@@ -66,9 +67,19 @@ class Form implements FormInterface
     private ?FormInterface $parent = null;
 
     /**
-     * Validation errors
+     * Validation errors (legacy array format)
      */
     private array $errors = [];
+
+    /**
+     * Structured error list (v2.9.0)
+     */
+    private ErrorList $errorList;
+
+    /**
+     * Error bubbling strategy (v2.9.0)
+     */
+    private ErrorBubblingStrategy $errorBubblingStrategy;
 
     /**
      * Validator instance
@@ -108,6 +119,8 @@ class Form implements FormInterface
         $this->metadata = $metadata;
         $this->state = FormState::READY;
         $this->eventDispatcher = new EventDispatcher();
+        $this->errorList = new ErrorList();
+        $this->errorBubblingStrategy = ErrorBubblingStrategy::enabled();
     }
 
     public function getName(): string
@@ -283,6 +296,114 @@ class Form implements FormInterface
     public function hasErrors(): bool
     {
         return !empty($this->errors);
+    }
+
+    /**
+     * Get structured error list (v2.9.0)
+     *
+     * @param bool $deep Include errors from children
+     * @return ErrorList Structured error collection
+     */
+    public function getErrorList(bool $deep = false): ErrorList
+    {
+        if (!$deep) {
+            return $this->errorList;
+        }
+
+        // Collect errors from all children with bubbling
+        $allErrors = clone $this->errorList;
+
+        foreach ($this->children as $name => $child) {
+            if ($this->errorBubblingStrategy->isEnabled()) {
+                $bubbledErrors = $this->errorBubblingStrategy->collectErrors($this, $child);
+                $allErrors = $allErrors->merge($bubbledErrors);
+            }
+        }
+
+        return $allErrors;
+    }
+
+    /**
+     * Get errors as nested array (v2.9.0)
+     *
+     * Returns errors in nested array format:
+     * [
+     *   'email' => ['Email is required'],
+     *   'address' => [
+     *     'street' => ['Street is required'],
+     *     'zipcode' => ['Invalid ZIP']
+     *   ]
+     * ]
+     */
+    public function getErrorsAsArray(bool $deep = false): array
+    {
+        return $this->getErrorList($deep)->toArray();
+    }
+
+    /**
+     * Get errors as flat array with dot notation (v2.9.0)
+     *
+     * Returns errors in flat format:
+     * [
+     *   'email' => 'Email is required',
+     *   'address.street' => 'Street is required',
+     *   'address.zipcode' => 'Invalid ZIP'
+     * ]
+     */
+    public function getErrorsFlattened(bool $deep = false): array
+    {
+        return $this->getErrorList($deep)->toFlat();
+    }
+
+    /**
+     * Add error to form (v2.9.0)
+     *
+     * @param string $message Error message
+     * @param ErrorLevel $level Error severity
+     * @param string|null $path Field path
+     * @param array $parameters Message parameters
+     */
+    public function addError(
+        string $message,
+        ErrorLevel $level = ErrorLevel::ERROR,
+        ?string $path = null,
+        array $parameters = []
+    ): self {
+        $error = new FormError(
+            message: $message,
+            level: $level,
+            path: $path,
+            parameters: $parameters,
+            origin: $this
+        );
+
+        $this->errorList->add($error);
+
+        // Also add to legacy errors array for backward compatibility
+        if ($path) {
+            $this->errors[$path][] = $message;
+        } else {
+            $this->errors['_form'][] = $message;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set error bubbling strategy (v2.9.0)
+     */
+    public function setErrorBubblingStrategy(ErrorBubblingStrategy $strategy): self
+    {
+        $this->errorBubblingStrategy = $strategy;
+        return $this;
+    }
+
+    /**
+     * Get error bubbling strategy (v2.9.0)
+     */
+    public function getErrorBubblingStrategy(): ErrorBubblingStrategy
+    {
+        return $this->errorBubblingStrategy;
     }
 
     public function add(string $name, string|FormInterface $type = 'text', array $options = []): self
