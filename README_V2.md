@@ -28,15 +28,23 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 Form Sections**: Organize forms with titles, descriptions, HTML content
 - **🆕 Form Wizard/Stepper**: Multi-step forms with progress tracking and validation
 - **🆕 Built-in Pickers**: Date, Time, DateTime, Range sliders with multi-language support
+- **🆕 DateTime Picker**: Combined date+time picker with tabbed interface
+- **🆕 Form-Level Locale**: Set locale once at form level - applies to all pickers automatically
+- **🆕 Form-Level Direction**: Set RTL/LTR once at form level - applies to all inputs/pickers
 - **🆕 CheckboxTree**: Hierarchical checkboxes with cascade/independent modes
 - **🆕 Repeater Fields**: Dynamic add/remove rows (like jquery.repeater, no jQuery!)
 - **🆕 Twig Extension**: Generate forms directly in Twig templates
 - **🆕 Smarty Plugin**: Generate forms directly in Smarty templates
 
 ### Developer Experience
-- **🆕 PHPUnit 10+**: Comprehensive test suite with 100+ tests
+- **🆕 PHPUnit 10+**: Comprehensive test suite with 150+ tests
 - **🆕 Code Coverage**: 80%+ coverage with HTML reports
+- **🆕 Test Coverage for New Features**: Complete test coverage for all new features
+  - TextDirection & OutputFormat enum tests
+  - FormBuilder direction, locale, and output format tests
+  - DatePicker, TimePicker, DateTimePicker, RangeSlider tests
 - **🆕 CONTRIBUTING.md**: Complete contribution guidelines
+- **🆕 Multiple Output Formats**: HTML, JSON, XML output for different use cases
 
 ## 🚀 Installation
 
@@ -1281,6 +1289,56 @@ $form = FormBuilder::create('booking_form')
     ->build();
 ```
 
+**✨ New: Form-Level Locale Support**
+
+Set locale once at form level - automatically applies to all pickers!
+
+```php
+// OLD WAY: Setting locale for each picker individually ❌
+$form = FormBuilder::create('form')
+    ->setTheme(new Bootstrap5Theme())
+    ->addDate('date1', 'Date')
+        ->setPickerLocale(DatePickerManager::LOCALE_TR)  // Repetitive
+        ->add()
+    ->addTime('time1', 'Time')
+        ->setPickerLocale(TimePickerManager::LOCALE_TR)  // Repetitive
+        ->add()
+    ->addDatetime('datetime1', 'DateTime')
+        ->setPickerLocale(DateTimePickerManager::LOCALE_TR)  // Repetitive
+        ->add();
+
+// NEW WAY: Set locale once at form level ✅
+$form = FormBuilder::create('form')
+    ->setTheme(new Bootstrap5Theme())
+    ->setLocale(DatePickerManager::LOCALE_TR)  // 🎯 Set once!
+
+    // All pickers automatically use Turkish locale
+    ->addDate('date1', 'Tarih')->add()
+    ->addTime('time1', 'Saat')->add()
+    ->addDatetime('datetime1', 'Tarih ve Saat')->add()
+    ->addRange('range1', 'Aralık')->add();
+
+// Combined with RTL support
+$form = FormBuilder::create('arabic_form')
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)              // Set direction once
+    ->setLocale(DateTimePickerManager::LOCALE_AR)   // Set locale once
+
+    // All pickers get both RTL and Arabic locale automatically!
+    ->addDate('date', 'تاريخ')->add()
+    ->addTime('time', 'وقت')->add()
+    ->addDatetime('datetime', 'تاريخ ووقت')->add();
+```
+
+**Benefits:**
+- ✅ **Set once**: Configure locale at form level, not for each picker
+- ✅ **DRY Principle**: Don't Repeat Yourself - write less code
+- ✅ **Cleaner code**: No repetitive `setPickerLocale()` calls
+- ✅ **Easier maintenance**: Change locale in one place
+- ✅ **Less error-prone**: Can't forget to set locale on a picker
+- ✅ **Flexible**: Can still override for specific pickers if needed
+- ✅ **Works with all output formats**: HTML, JSON, XML
+
 **Date Picker Features:**
 - **Multi-language support**: English, Turkish, German, French, Spanish + custom locales
 - **Date formats**: yyyy-mm-dd, dd-mm-yyyy, mm-dd-yyyy
@@ -1472,6 +1530,297 @@ $form = FormBuilder::create('turkish_form')
 
 See `Examples/V2/WithPickers.php` for complete examples.
 
+### DateTime Picker
+
+Combined date and time picker with tabbed interface for seamless datetime selection.
+
+```php
+$form = FormBuilder::create('meeting_form')
+    ->setTheme(new Bootstrap5Theme())
+
+    // DateTime picker with 12-hour format
+    ->addDatetime('meeting_datetime', 'Meeting Date & Time')
+        ->required()
+        ->setPickerLocale(DateTimePickerManager::LOCALE_EN)
+        ->setPickerOptions([
+            'timeFormat' => '12',  // 12-hour with AM/PM
+            'showSeconds' => false,
+            'minDateTime' => date('Y-m-d H:i:s'),
+        ])
+        ->add()
+
+    // DateTime picker with 24-hour format
+    ->addDatetime('appointment', 'Appointment')
+        ->setPickerOptions([
+            'timeFormat' => '24',  // 24-hour format
+            'showSeconds' => true,
+        ])
+        ->add()
+
+    ->addSubmit('Schedule')
+    ->build();
+```
+
+**Features:**
+- **Tabbed Interface**: Separate tabs for date and time selection
+- **Combined Selection**: Select both date and time in one picker
+- **All Date Features**: Calendar navigation, min/max dates, disabled dates
+- **All Time Features**: Hour/minute/second selection, 12/24 hour formats
+- **Multi-language**: Supports all picker locales (EN, TR, DE, FR, ES, AR, HE)
+- **RTL Support**: Full right-to-left language support
+- **Now Button**: Set current date and time instantly
+- **Clear Button**: Reset both date and time
+
+**Available Locales:**
+```php
+DateTimePickerManager::LOCALE_EN  // English
+DateTimePickerManager::LOCALE_TR  // Turkish
+DateTimePickerManager::LOCALE_AR  // Arabic (RTL)
+DateTimePickerManager::LOCALE_HE  // Hebrew (RTL)
+```
+
+### RTL (Right-to-Left) Support
+
+Full support for right-to-left languages like Arabic and Hebrew. **Set direction once at form level** and it automatically applies to all inputs and pickers.
+
+**✨ New: Form-Level Direction Support**
+
+```php
+use FormGenerator\V2\Contracts\TextDirection;
+
+// Arabic form - Set RTL once for the entire form
+$form = FormBuilder::create('arabic_form')
+    ->setRenderer($renderer)
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)  // 🎯 Set once - applies to everything!
+
+    // All inputs and pickers automatically get RTL
+    ->addText('name', 'الاسم الكامل')
+        ->required()
+        ->add()
+
+    ->addDate('birth_date', 'تاريخ الميلاد')
+        ->setPickerLocale(DatePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            // No need to set 'rtl' => true anymore!
+            'weekStart' => 6,       // Saturday
+            'format' => 'dd-mm-yyyy',
+        ])
+        ->add()
+
+    ->addTime('appointment_time', 'وقت الموعد')
+        ->setPickerLocale(TimePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            // RTL automatically applied!
+            'format' => '12',
+        ])
+        ->add()
+
+    ->addDatetime('meeting_datetime', 'تاريخ ووقت الاجتماع')
+        ->setPickerLocale(DateTimePickerManager::LOCALE_AR)
+        ->setPickerOptions([
+            // RTL automatically applied!
+            'timeFormat' => '24',
+        ])
+        ->add()
+
+    ->addSubmit('submit', 'حفظ')
+    ->build();
+```
+
+**Hebrew Example:**
+```php
+use FormGenerator\V2\Contracts\TextDirection;
+
+$form = FormBuilder::create('hebrew_form')
+    ->setRenderer($renderer)
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)  // 🎯 Set once!
+
+    ->addText('name', 'שם מלא')
+        ->required()
+        ->add()
+
+    ->addDate('date_field', 'תאריך')
+        ->setPickerLocale(DatePickerManager::LOCALE_HE)
+        ->setPickerOptions([
+            // RTL automatically applied!
+            'weekStart' => 0,  // Sunday (common in Israel)
+        ])
+        ->add()
+
+    ->addTime('time_field', 'שעה')
+        ->setPickerLocale(TimePickerManager::LOCALE_HE)
+        ->add()
+
+    ->addSubmit('save', 'שמור')
+    ->build();
+```
+
+**LTR (Left-to-Right) Example:**
+```php
+use FormGenerator\V2\Contracts\TextDirection;
+
+// English form - LTR is default but can be set explicitly
+$form = FormBuilder::create('english_form')
+    ->setRenderer($renderer)
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::LTR)  // Optional - LTR is default
+
+    ->addText('name', 'Full Name')->required()->add()
+    ->addDate('birth_date', 'Birth Date')
+        ->setPickerLocale(DatePickerManager::LOCALE_EN)
+        ->add()
+    ->addSubmit('submit', 'Submit')
+    ->build();
+```
+
+**How It Works:**
+1. **Set Once**: Use `setDirection(TextDirection::RTL)` or `setDirection(TextDirection::LTR)` when creating the form
+2. **Auto-Apply to Form**: The `<form>` element gets `dir="rtl"` or `dir="ltr"` attribute
+3. **Auto-Apply to Inputs**: All input fields get the `dir` attribute automatically
+4. **Auto-Apply to Pickers**: All pickers (date, time, datetime, range) automatically get `rtl: true` or `rtl: false`
+5. **No Repetition**: No need to set RTL option for each picker individually
+
+**RTL Features:**
+- **Form-Level Setting**: Set direction once, applies to everything
+- **Automatic Direction**: All inputs and form elements get correct `dir` attribute
+- **Layout Adjustment**: Picker popups align correctly for RTL
+- **CSS Support**: All pickers have RTL-specific styling
+- **Flex Direction**: Navigation buttons flip for RTL
+- **Built-in Locales**: Arabic and Hebrew locales included
+- **Custom Locales**: Easy to add more RTL languages
+- **Output Formats**: Direction included in JSON and XML output
+
+**Supported in All Pickers:**
+- Date Picker (`addDate()`)
+- Time Picker (`addTime()`)
+- DateTime Picker (`addDatetime()`)
+- Range Slider (`addRange()`)
+
+**Benefits:**
+- ✅ Cleaner code - no repetition
+- ✅ Easier maintenance - change once
+- ✅ Less error-prone - can't forget to set RTL on a picker
+- ✅ Works with all output formats (HTML, JSON, XML)
+
+### Multiple Output Formats
+
+Generate forms in HTML, JSON, or XML format for different use cases.
+
+```php
+use FormGenerator\V2\Contracts\OutputFormat;
+
+$form = FormBuilder::create('user_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->addText('name', 'Name')->required()->add()
+    ->addEmail('email', 'Email')->required()->add()
+    ->addSelect('country', 'Country')->options([
+        'us' => 'United States',
+        'uk' => 'United Kingdom',
+    ])->add()
+    ->addSubmit('save', 'Save');
+
+// HTML output (default)
+$html = $form->build();
+$html = $form->build(OutputFormat::HTML);
+$html = $form->buildAsHtml();
+
+// JSON output (for APIs)
+$json = $form->build(OutputFormat::JSON);
+$json = $form->buildAsJson();
+$json = $form->buildAsJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+// XML output (for exports)
+$xml = $form->build(OutputFormat::XML);
+$xml = $form->buildAsXml();
+```
+
+**HTML Output** (Default):
+```html
+<form name="user_form" method="POST" action="/api/users">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+    </div>
+    <!-- ... more fields ... -->
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<script>/* validation & picker scripts */</script>
+```
+
+**JSON Output** (API Integration):
+```json
+{
+    "name": "user_form",
+    "method": "POST",
+    "action": "/api/users",
+    "scope": "add",
+    "csrf_enabled": true,
+    "validation_enabled": true,
+    "inputs": [
+        {
+            "name": "name",
+            "type": "text",
+            "label": "Name",
+            "required": true,
+            "validationRules": [
+                {"type": "required"}
+            ]
+        }
+    ],
+    "validation_rules": {
+        "name": [{"type": "required"}],
+        "email": [{"type": "required"}, {"type": "email"}]
+    }
+}
+```
+
+**XML Output** (Data Export):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="user_form" method="POST" action="/api/users" scope="add">
+    <settings>
+        <csrf_enabled>true</csrf_enabled>
+        <validation_enabled>true</validation_enabled>
+    </settings>
+    <inputs>
+        <input name="name" type="text" required="true">
+            <label>Name</label>
+            <validation_rules>
+                <rule type="required"/>
+            </validation_rules>
+        </input>
+    </inputs>
+</form>
+```
+
+**Use Cases:**
+
+**JSON Format:**
+- REST API form schemas
+- Frontend framework integration (React, Vue, Angular)
+- Form configuration storage
+- Dynamic form generation
+- Mobile app integration
+
+**XML Format:**
+- SOAP API integration
+- Legacy system integration
+- Data export/import
+- Configuration files
+- Enterprise systems integration
+
+**HTML Format:**
+- Traditional web applications
+- Server-side rendering
+- Direct browser rendering
+
+**Backward Compatibility:**
+- `build()` without parameters returns HTML (default behavior)
+- All existing code continues to work without changes
+
 ## 🎨 Template Engine Integration
 
 ### Twig Extension
@@ -1587,12 +1936,20 @@ vendor/bin/phpunit --coverage-html coverage/html
 ```
 tests/
 ├── bootstrap.php          # Test bootstrap
-├── TestCase.php           # Base test class
+├── TestCase.php           # Base test class with HTML/JS assertion helpers
 ├── Unit/                  # Unit tests
 │   ├── Builder/
 │   │   ├── FormBuilderTest.php
+│   │   ├── FormBuilderNewFeaturesTest.php  # 🆕 Direction, Locale, Output Format
 │   │   ├── InputBuilderTest.php
-│   │   └── DependencyManagerTest.php
+│   │   ├── DependencyManagerTest.php
+│   │   ├── DatePickerManagerTest.php        # 🆕 Date picker tests
+│   │   ├── TimePickerManagerTest.php        # 🆕 Time picker tests
+│   │   ├── DateTimePickerManagerTest.php    # 🆕 DateTime picker tests
+│   │   └── RangeSliderManagerTest.php       # 🆕 Range slider tests
+│   ├── Contracts/
+│   │   ├── TextDirectionTest.php            # 🆕 TextDirection enum tests
+│   │   └── OutputFormatTest.php             # 🆕 OutputFormat enum tests
 │   ├── Validation/
 │   │   └── NativeValidatorTest.php
 │   └── DataProvider/
@@ -1601,11 +1958,20 @@ tests/
 ```
 
 **Test Coverage:**
-- FormBuilder: 25+ tests
-- InputBuilder: 20+ tests
-- NativeValidator: 30+ tests (all 15 rules)
-- DependencyManager: JavaScript generation tests
-- Data Providers: Doctrine, Eloquent, PDO, Array
+- **FormBuilder**: 25+ tests (core functionality)
+- **FormBuilder New Features**: 35+ tests (direction, locale, output formats)
+- **InputBuilder**: 20+ tests
+- **NativeValidator**: 30+ tests (all 15 validation rules)
+- **DependencyManager**: JavaScript generation tests
+- **Picker Managers**: 60+ tests
+  - DatePickerManager: 20+ tests (locales, RTL, options)
+  - TimePickerManager: 15+ tests (12/24-hour, RTL, options)
+  - DateTimePickerManager**: 15+ tests (tabbed interface, RTL, locales)
+  - RangeSliderManager: 15+ tests (single/dual handles, RTL, options)
+- **Enums**: 15+ tests (TextDirection, OutputFormat)
+- **Data Providers**: Doctrine, Eloquent, PDO, Array
+
+**Total Tests**: 150+ tests covering all new features
 
 **Code Coverage Target:** 80%+
 
