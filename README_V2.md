@@ -29,7 +29,8 @@ Modern PHP Form Generator with Chain Pattern, Symfony & Laravel Integration
 - **🆕 Form Wizard/Stepper**: Multi-step forms with progress tracking and validation
 - **🆕 Built-in Pickers**: Date, Time, DateTime, Range sliders with multi-language support
 - **🆕 DateTime Picker**: Combined date+time picker with tabbed interface
-- **🆕 RTL Support**: Full right-to-left language support (Arabic, Hebrew)
+- **🆕 Form-Level Locale**: Set locale once at form level - applies to all pickers automatically
+- **🆕 Form-Level Direction**: Set RTL/LTR once at form level - applies to all inputs/pickers
 - **🆕 CheckboxTree**: Hierarchical checkboxes with cascade/independent modes
 - **🆕 Repeater Fields**: Dynamic add/remove rows (like jquery.repeater, no jQuery!)
 - **🆕 Twig Extension**: Generate forms directly in Twig templates
@@ -1283,6 +1284,56 @@ $form = FormBuilder::create('booking_form')
     ->addSubmit('Book')
     ->build();
 ```
+
+**✨ New: Form-Level Locale Support**
+
+Set locale once at form level - automatically applies to all pickers!
+
+```php
+// OLD WAY: Setting locale for each picker individually ❌
+$form = FormBuilder::create('form')
+    ->setTheme(new Bootstrap5Theme())
+    ->addDate('date1', 'Date')
+        ->setPickerLocale(DatePickerManager::LOCALE_TR)  // Repetitive
+        ->add()
+    ->addTime('time1', 'Time')
+        ->setPickerLocale(TimePickerManager::LOCALE_TR)  // Repetitive
+        ->add()
+    ->addDatetime('datetime1', 'DateTime')
+        ->setPickerLocale(DateTimePickerManager::LOCALE_TR)  // Repetitive
+        ->add();
+
+// NEW WAY: Set locale once at form level ✅
+$form = FormBuilder::create('form')
+    ->setTheme(new Bootstrap5Theme())
+    ->setLocale(DatePickerManager::LOCALE_TR)  // 🎯 Set once!
+
+    // All pickers automatically use Turkish locale
+    ->addDate('date1', 'Tarih')->add()
+    ->addTime('time1', 'Saat')->add()
+    ->addDatetime('datetime1', 'Tarih ve Saat')->add()
+    ->addRange('range1', 'Aralık')->add();
+
+// Combined with RTL support
+$form = FormBuilder::create('arabic_form')
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)              // Set direction once
+    ->setLocale(DateTimePickerManager::LOCALE_AR)   // Set locale once
+
+    // All pickers get both RTL and Arabic locale automatically!
+    ->addDate('date', 'تاريخ')->add()
+    ->addTime('time', 'وقت')->add()
+    ->addDatetime('datetime', 'تاريخ ووقت')->add();
+```
+
+**Benefits:**
+- ✅ **Set once**: Configure locale at form level, not for each picker
+- ✅ **DRY Principle**: Don't Repeat Yourself - write less code
+- ✅ **Cleaner code**: No repetitive `setPickerLocale()` calls
+- ✅ **Easier maintenance**: Change locale in one place
+- ✅ **Less error-prone**: Can't forget to set locale on a picker
+- ✅ **Flexible**: Can still override for specific pickers if needed
+- ✅ **Works with all output formats**: HTML, JSON, XML
 
 **Date Picker Features:**
 - **Multi-language support**: English, Turkish, German, French, Spanish + custom locales

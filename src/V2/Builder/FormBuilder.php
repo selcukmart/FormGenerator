@@ -60,6 +60,7 @@ class FormBuilder implements BuilderInterface
     private bool $stepperEnabled = false;
     private array $stepperOptions = [];
     private ?TextDirection $direction = null;
+    private ?array $locale = null;
 
     private function __construct(string $name)
     {
@@ -276,6 +277,26 @@ class FormBuilder implements BuilderInterface
     public function getDirection(): ?TextDirection
     {
         return $this->direction;
+    }
+
+    /**
+     * Set locale for the form (for pickers and localization)
+     * This will apply to all pickers (date, time, datetime, range) automatically
+     *
+     * @param array $locale Locale array (e.g., DatePickerManager::LOCALE_EN)
+     */
+    public function setLocale(array $locale): self
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * Get locale for the form
+     */
+    public function getLocale(): ?array
+    {
+        return $this->locale;
     }
 
     /**
@@ -809,6 +830,7 @@ class FormBuilder implements BuilderInterface
             'attributes' => $this->attributes,
             'enctype' => $this->enctype,
             'direction' => $this->direction?->value,
+            'locale' => $this->locale,
             'csrf_enabled' => $this->enableCsrf,
             'validation_enabled' => $this->enableValidation,
             'stepper_enabled' => $this->stepperEnabled,
@@ -855,6 +877,21 @@ class FormBuilder implements BuilderInterface
 
         if ($this->direction !== null) {
             $xml->addAttribute('direction', $this->direction->value);
+        }
+
+        // Add locale information
+        if ($this->locale !== null) {
+            $localeNode = $xml->addChild('locale');
+            foreach ($this->locale as $key => $value) {
+                if (is_array($value)) {
+                    $arrayNode = $localeNode->addChild($key);
+                    foreach ($value as $item) {
+                        $arrayNode->addChild('item', htmlspecialchars((string)$item));
+                    }
+                } else {
+                    $localeNode->addChild($key, htmlspecialchars((string)$value));
+                }
+            }
         }
 
         // Add attributes
@@ -995,6 +1032,11 @@ class FormBuilder implements BuilderInterface
                 $pickerOptions['rtl'] = true;
             }
 
+            // Auto-apply locale if form locale is set and not explicitly set
+            if ($this->locale !== null && !isset($pickerOptions['locale'])) {
+                $pickerOptions['locale'] = $this->locale;
+            }
+
             // Generate appropriate picker script based on type
             $scripts .= "\n" . match ($pickerType) {
                 'date' => DatePickerManager::generateScript($inputId, $pickerOptions),
@@ -1127,6 +1169,7 @@ class FormBuilder implements BuilderInterface
             'attributes' => $this->attributes,
             'enctype' => $this->enctype,
             'direction' => $this->direction?->value,
+            'locale' => $this->locale,
             'csrf_enabled' => $this->enableCsrf,
             'inputs' => array_map(fn($input) => $input->toArray(), $this->inputs),
         ];
