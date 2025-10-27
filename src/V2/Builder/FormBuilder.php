@@ -1428,10 +1428,27 @@ class FormBuilder implements BuilderInterface
         $inputsContext = [];
         $currentSectionInputs = [];
         $lastSection = null;
+        $serverSideDepsEnabled = ($this->attributes['data-server-side-dependencies'] ?? 'false') === 'true';
 
         foreach ($this->inputs as $item) {
             $input = $item['input'];
             $section = $item['section'];
+
+            // Dispatch FIELD_PRE_RENDER event
+            $preRenderEvent = $this->dispatchFieldEvent($input, \FormGenerator\V2\Event\FieldEvents::FIELD_PRE_RENDER, [
+                'form_data' => $this->data,
+            ]);
+
+            // If server-side dependency evaluation is enabled, check dependencies
+            $shouldRender = true;
+            if ($serverSideDepsEnabled) {
+                $shouldRender = $this->evaluateFieldDependencies($input);
+            }
+
+            // Skip rendering if dependencies not met and server-side evaluation is enabled
+            if (!$shouldRender) {
+                continue;
+            }
 
             // If we have sections, group inputs by section
             if (!empty($this->sections)) {
@@ -1462,6 +1479,16 @@ class FormBuilder implements BuilderInterface
             // Add direction attribute if set
             if ($this->direction !== null && !isset($inputData['attributes']['dir'])) {
                 $inputData['attributes']['dir'] = $this->direction->value;
+            }
+
+            // Dispatch FIELD_POST_RENDER event (allows modifying rendered data)
+            $postRenderEvent = $this->dispatchFieldEvent($input, \FormGenerator\V2\Event\FieldEvents::FIELD_POST_RENDER, [
+                'input_data' => $inputData,
+            ]);
+
+            // Get potentially modified input data from event
+            if ($postRenderEvent->has('input_data')) {
+                $inputData = $postRenderEvent->get('input_data');
             }
 
             if (!empty($this->sections)) {
@@ -1512,5 +1539,173 @@ class FormBuilder implements BuilderInterface
             'csrf_enabled' => $this->enableCsrf,
             'inputs' => array_map(fn($input) => $input->toArray(), $this->inputs),
         ];
+    }
+
+    // ========== Field Event System Methods ==========
+
+    /**
+     * Dispatch field-level event for a specific field
+     *
+     * @param InputBuilder $field The field to dispatch event for
+     * @param string $eventName Event name (use FieldEvents constants)
+     * @param array $context Additional context data
+     * @return \FormGenerator\V2\Event\FieldEvent The dispatched event
+     */
+    public function dispatchFieldEvent(InputBuilder $field, string $eventName, array $context = []): \FormGenerator\V2\Event\FieldEvent
+    {
+        $event = new \FormGenerator\V2\Event\FieldEvent($field, $this, $context);
+
+        // Get field-specific listeners
+        $fieldListeners = $field->getFieldEventListeners();
+
+        if (isset($fieldListeners[$eventName])) {
+            foreach ($fieldListeners[$eventName] as $listenerData) {
+                if ($event->isPropagationStopped()) {
+                    break;
+                }
+
+                call_user_func($listenerData['listener'], $event);
+            }
+        }
+
+        return $event;
+    }
+
+    /**
+     * Evaluate field dependencies based on current form data
+     *
+     * This method checks if a field's dependencies are met and dispatches
+     * appropriate events (FIELD_SHOW/FIELD_HIDE).
+     *
+     * @param InputBuilder $field The field to evaluate
+     * @return bool True if field should be visible, false otherwise
+     */
+    public function evaluateFieldDependencies(InputBuilder $field): bool
+    {
+        $fieldConfig = $field->toArray();
+        $dependencies = $fieldConfig['dependencies'] ?? [];
+
+        // No dependencies = always visible
+        if (empty($dependencies)) {
+            return true;
+        }
+
+        $isVisible = false;
+
+        // Check each dependency
+        foreach ($dependencies as $dependency) {
+            $controllerFieldName = $dependency['field'];
+            $requiredValues = $dependency['values'];
+
+            // Get controller field value from form data
+            $controllerValue = $this->data[$controllerFieldName] ?? null;
+
+            // Check if dependency is met
+            if (in_array($controllerValue, $requiredValues, true)) {
+                $isVisible = true;
+
+                // Dispatch FIELD_DEPENDENCY_MET event
+                $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_DEPENDENCY_MET, [
+                    'trigger_field' => $controllerFieldName,
+                    'trigger_value' => $controllerValue,
+                    'visible' => true,
+                ]);
+
+                break; // At least one dependency is met
+            }
+        }
+
+        // Dispatch FIELD_DEPENDENCY_CHECK event (allows custom logic)
+        $checkEvent = $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_DEPENDENCY_CHECK, [
+            'visible' => $isVisible,
+        ]);
+
+        // Get final visibility from event (may be modified by listeners)
+        $isVisible = $checkEvent->shouldBeVisible();
+
+        // Dispatch show/hide events
+        if ($isVisible) {
+            $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_SHOW, [
+                'visible' => true,
+            ]);
+        } else {
+            $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_HIDE, [
+                'visible' => false,
+            ]);
+
+            // Dispatch FIELD_DEPENDENCY_NOT_MET event
+            $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_DEPENDENCY_NOT_MET, [
+                'visible' => false,
+            ]);
+        }
+
+        return $isVisible;
+    }
+
+    /**
+     * Get input builder by field name
+     *
+     * @param string $fieldName Field name
+     * @return InputBuilder|null The input builder or null if not found
+     */
+    public function getInputBuilder(string $fieldName): ?InputBuilder
+    {
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            if ($input->getName() === $fieldName) {
+                return $input;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Trigger field value change event
+     *
+     * This method simulates a value change and triggers dependent fields.
+     * Useful for programmatic value changes that should trigger dependencies.
+     *
+     * @param string $fieldName Field name that changed
+     * @param mixed $newValue New value
+     * @param mixed $oldValue Old value (optional)
+     */
+    public function triggerFieldValueChange(string $fieldName, mixed $newValue, mixed $oldValue = null): void
+    {
+        $field = $this->getInputBuilder($fieldName);
+        if ($field === null) {
+            return;
+        }
+
+        // Update field value
+        $field->value($newValue);
+
+        // Update form data
+        $this->data[$fieldName] = $newValue;
+
+        // Dispatch FIELD_VALUE_CHANGE event
+        $this->dispatchFieldEvent($field, \FormGenerator\V2\Event\FieldEvents::FIELD_VALUE_CHANGE, [
+            'old_value' => $oldValue,
+            'new_value' => $newValue,
+        ]);
+
+        // Re-evaluate all dependent fields
+        foreach ($this->inputs as $item) {
+            $dependentField = $item['input'];
+            $this->evaluateFieldDependencies($dependentField);
+        }
+    }
+
+    /**
+     * Enable server-side dependency evaluation
+     *
+     * When enabled, fields with unmet dependencies will not be rendered
+     * in the HTML output (PHP-side conditional rendering).
+     *
+     * @param bool $enable Enable/disable server-side evaluation
+     */
+    public function enableServerSideDependencyEvaluation(bool $enable = true): self
+    {
+        $this->attributes['data-server-side-dependencies'] = $enable ? 'true' : 'false';
+        return $this;
     }
 }
