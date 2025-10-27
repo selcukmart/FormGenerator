@@ -5,6 +5,286 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2025-10-27
+
+### Added - Nested Forms & Form Collections 🎉
+
+**This is a MAJOR release** that brings FormGenerator significantly closer to Symfony Form Component parity! Version 2.4.0 introduces the most requested feature: support for hierarchical data structures with nested forms and dynamic collections.
+
+#### 🚀 Core Features
+
+**1. Nested Forms (Sub-forms)**
+- `FormBuilder::addNestedForm()` - Add nested form structures for hierarchical data
+- Full parent-child form relationships with `getParent()`, `getRoot()`, `isRoot()`
+- Automatic data mapping for nested structures via `FormDataMapper`
+- Example use cases: User with Address, Order with Shipping/Billing addresses
+
+```php
+$form = FormBuilder::create('user')
+    ->addText('name')->add()
+    ->addNestedForm('address', 'Address', function(FormBuilder $addressForm) {
+        $addressForm->addText('street')->add();
+        $addressForm->addText('city')->add();
+        $addressForm->addText('zipcode')->add();
+    })
+    ->buildForm();
+
+// Data: ['name' => 'John', 'address' => ['street' => '...', 'city' => '...', 'zipcode' => '...']]
+```
+
+**2. Form Collections**
+- `FormBuilder::addCollection()` - Dynamic lists of forms with add/delete capabilities
+- `CollectionBuilder` - Fluent interface for collection configuration
+- `FormCollection` - Stateful collection with validation and constraints
+- Allow add/delete entries dynamically (JavaScript-ready)
+- Min/max constraints for collection size
+- Prototype support for generating JavaScript templates
+- Deeply nested collections (collections within collections!)
+
+```php
+$form = FormBuilder::create('invoice')
+    ->addCollection('items', 'Line Items', function(FormBuilder $item) {
+        $item->addText('product')->add();
+        $item->addNumber('quantity')->add();
+        $item->addNumber('price')->add();
+    })
+    ->allowAdd()      // Enable adding new items
+    ->allowDelete()   // Enable removing items
+    ->min(1)          // At least 1 item required
+    ->max(20)         // Maximum 20 items
+    ->add()
+    ->buildForm();
+```
+
+**3. Stateful Form Objects**
+- `FormInterface` - Complete contract for form objects
+- `Form` class - Stateful form with full lifecycle management
+- `FormState` enum - Five lifecycle states (BUILDING, READY, SUBMITTED, VALID, INVALID)
+- State checking methods: `isSubmitted()`, `isValid()`, `isEmpty()`
+- `handleRequest()` - Automatic HTTP request handling with smart detection
+- `submit()` - Programmatic form submission
+- `validate()` - Form and child validation
+- `getData()` / `setData()` - Hierarchical data management
+
+```php
+$form = FormBuilder::create('user')
+    ->addText('name')->required()->add()
+    ->addEmail('email')->required()->add()
+    ->buildForm();
+
+$form->handleRequest($_POST);
+
+if ($form->isSubmitted() && $form->isValid()) {
+    $data = $form->getData();
+    // Save to database
+}
+
+echo $form->render($renderer, $theme);
+```
+
+**4. FormView - Presentation Layer Separation**
+- `FormView` class - Symfony-inspired view representation
+- Complete separation of data from presentation
+- View variables: name, value, label, errors, attributes, required, disabled, etc.
+- Child view management with hierarchy traversal
+- Iterator and ArrayAccess support for convenient access
+- `createView()` - Generate immutable view from form
+
+```php
+$view = $form->createView();
+
+echo $view->vars['name'];
+echo $view->vars['label'];
+echo $view->vars['errors'];
+
+foreach ($view->children as $childName => $childView) {
+    echo $childView->vars['label'];
+}
+```
+
+**5. Form Configuration**
+- `FormConfig` - Immutable configuration object (readonly class)
+- `FormConfigInterface` - Configuration contract
+- Centralized form options, attributes, and metadata
+- CSRF protection, validation, error bubbling flags
+- Compound form detection
+
+**6. Data Mapping & Transformation**
+- `FormDataMapper` - Bidirectional data mapping utilities
+- `mapDataToForms()` - Map array data to form hierarchy
+- `mapFormsToData()` - Extract data from form tree
+- `mapObjectToForms()` - Map PHP objects to forms with reflection
+- `mapFormsToObject()` - Map form data back to objects
+- Property path support with dot notation (e.g., `'address.city'`)
+- Nested object mapping with automatic type detection
+- `flattenErrors()` / `unflattenErrors()` - Error format conversion for nested structures
+
+```php
+$mapper = new FormDataMapper();
+
+// Array → Form
+$mapper->mapDataToForms(['name' => 'John', 'address' => [...]], $form);
+
+// Form → Array
+$data = $mapper->mapFormsToData($form);
+
+// Object → Form
+$mapper->mapObjectToForms($userEntity, $form);
+
+// Form → Object
+$mapper->mapFormsToObject($form, $userEntity);
+```
+
+#### 📚 New Classes & Interfaces
+
+- `src/V2/Form/FormInterface.php` - Complete form contract (20+ methods)
+- `src/V2/Form/Form.php` - Stateful form implementation (350+ lines)
+- `src/V2/Form/FormState.php` - Lifecycle states enum with helper methods
+- `src/V2/Form/FormConfig.php` - Immutable configuration (readonly)
+- `src/V2/Form/FormConfigInterface.php` - Configuration contract
+- `src/V2/Form/FormView.php` - Presentation layer (Iterator, ArrayAccess, Countable)
+- `src/V2/Form/FormCollection.php` - Collection form type (dynamic lists)
+- `src/V2/Builder/CollectionBuilder.php` - Fluent collection configuration
+- `src/V2/DataMapper/FormDataMapper.php` - Data mapping utilities (400+ lines)
+
+#### 🔧 Enhanced Classes
+
+**FormBuilder.php** - Major enhancements:
+- `buildForm()` - NEW: Returns Form object instead of HTML string
+- `addNestedForm()` - Add nested form with callback builder
+- `addCollection()` - Add dynamic collection with fluent configuration
+- `hasNestedStructure()` - Check if form has nested elements
+- `getNestedForms()` / `getCollections()` - Access nested structure
+- `getInputs()` - Internal accessor for inputs
+- Backward compatible: `build()` still returns HTML string
+
+#### 📖 Examples & Documentation
+
+**WithNestedFormsAndCollections.php** (`Examples/V2/WithNestedFormsAndCollections.php`):
+1. Simple nested form - User with Address
+2. Collection - Invoice with line items
+3. Deeply nested - Company → Departments → Employees (3 levels!)
+4. Stateful form operations - State management
+5. FormView usage - Data/presentation separation
+6. FormDataMapper - Object mapping examples
+
+#### 🎯 Use Cases
+
+1. **User Registration with Address**
+   ```php
+   $form->addText('name')->add()
+        ->addNestedForm('address', 'Address', function($addr) {
+            $addr->addText('street')->add();
+            $addr->addText('city')->add();
+        });
+   ```
+
+2. **Invoice with Dynamic Line Items**
+   ```php
+   $form->addCollection('items', 'Items', function($item) {
+       $item->addText('product')->add();
+       $item->addNumber('qty')->add();
+   })->allowAdd()->allowDelete()->min(1);
+   ```
+
+3. **E-commerce Order**
+   ```php
+   $form->addNestedForm('billing_address', 'Billing', $addressBuilder)
+        ->addNestedForm('shipping_address', 'Shipping', $addressBuilder)
+        ->addCollection('items', 'Cart Items', $itemBuilder);
+   ```
+
+4. **Deeply Nested Organizations**
+   ```php
+   $form->addCollection('departments', 'Depts', function($dept) {
+       $dept->addText('name')->add();
+       $dept->addCollection('employees', 'Staff', function($emp) {
+           $emp->addText('name')->add();
+       });
+   });
+   ```
+
+#### ⚙️ Technical Details
+
+- **PHP Version**: 8.1+ (uses readonly properties, enums, union types)
+- **Architecture**: Hierarchical tree structure with parent-child relationships
+- **Design Patterns**: Composite, Builder, Strategy, Iterator
+- **Memory**: Efficient recursive algorithms for nested traversal
+- **Performance**: Lazy evaluation, on-demand FormView generation
+- **Inspired By**: Symfony Form Component (FormInterface, FormView, FormConfig)
+
+#### 🔄 Backward Compatibility
+
+**100% backward compatible!** All existing V2.3.x code continues to work.
+
+- `FormBuilder::build()` - Still returns HTML string
+- `FormBuilder::buildForm()` - NEW: Returns Form object
+- All existing methods unchanged
+- No breaking changes to APIs
+
+#### 🚀 Migration from 2.3.x
+
+**No migration required!** To use new features:
+
+```php
+// OLD WAY (still works)
+$html = FormBuilder::create('form')
+    ->addText('name')->add()
+    ->build(); // Returns HTML
+
+// NEW WAY (v2.4.0)
+$form = FormBuilder::create('form')
+    ->addText('name')->add()
+    ->buildForm(); // Returns Form object
+
+$form->handleRequest($_POST);
+if ($form->isSubmitted() && $form->isValid()) {
+    $data = $form->getData();
+}
+```
+
+#### 📊 Comparison to Symfony Form Component
+
+| Feature | Symfony | FormGenerator 2.4.0 |
+|---------|---------|---------------------|
+| Nested Forms | ✅ Yes | ✅ **YES** (NEW!) |
+| Form Collections | ✅ Yes | ✅ **YES** (NEW!) |
+| Stateful Forms | ✅ Yes | ✅ **YES** (NEW!) |
+| FormView | ✅ Yes | ✅ **YES** (NEW!) |
+| Data Mappers | ✅ Yes | ✅ **YES** (NEW!) |
+| Form State Management | ✅ Yes | ✅ **YES** (NEW!) |
+| Parent-Child Relationships | ✅ Yes | ✅ **YES** (NEW!) |
+| Type System & Extensions | ✅ Yes | ⏳ Coming in v2.5.0 |
+| Validation Groups | ✅ Yes | ⏳ Coming in v2.7.0 |
+| Dynamic Form Modification | ✅ Yes | ⏳ Coming in v2.8.0 |
+| i18n/Translation | ✅ Yes | ⏳ Coming in v3.0.0 |
+
+#### 🎉 What's Next?
+
+FormGenerator is now ready for **complex enterprise applications** with hierarchical data!
+
+**Upcoming releases:**
+- **v2.5.0** - Type System & Extension mechanism (custom field types)
+- **v2.6.0** - Enhanced FormView & stateful improvements
+- **v2.7.0** - Cross-field validation & validation groups
+- **v2.8.0** - Dynamic form modification API (runtime field add/remove)
+- **v2.9.0** - Advanced error handling & error bubbling
+- **v3.0.0** - Complete i18n/translation & auto CSRF protection
+
+See [SYMFONY_ALTERNATIVE_ROADMAP.md](SYMFONY_ALTERNATIVE_ROADMAP.md) for the complete feature roadmap.
+
+#### 🏆 This Release Marks a Major Milestone
+
+With v2.4.0, FormGenerator becomes a **viable alternative to Symfony Form Component** for projects requiring:
+- Lightweight form handling without Symfony dependencies
+- Modern PHP 8.1+ codebase
+- Clean, fluent API
+- Complex nested data structures
+- Dynamic collections with add/delete
+- Full form lifecycle management
+
+---
+
 ## [2.3.1] - 2025-10-27
 
 ### Added - Symfony-Inspired Data Transformation System

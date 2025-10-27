@@ -18,7 +18,14 @@ use FormGenerator\V2\Contracts\{
 };
 use FormGenerator\V2\Validation\{ValidationManager, SymfonyValidator};
 use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents, EventSubscriberInterface};
-use FormGenerator\V2\Form\FormTypeInterface;
+use FormGenerator\V2\Form\{
+    FormTypeInterface,
+    Form,
+    FormInterface,
+    FormConfig,
+    FormCollection
+};
+use FormGenerator\V2\DataMapper\FormDataMapper;
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -64,6 +71,8 @@ class FormBuilder implements BuilderInterface
     private ?TextDirection $direction = null;
     private ?array $locale = null;
     private EventDispatcher $eventDispatcher;
+    private array $nestedForms = []; // v2.4.0: Nested forms
+    private array $collections = []; // v2.4.0: Collections
 
     private function __construct(string $name)
     {
@@ -1808,5 +1817,220 @@ class FormBuilder implements BuilderInterface
     {
         $this->attributes['data-server-side-dependencies'] = $enable ? 'true' : 'false';
         return $this;
+    }
+
+    // ========================================================================
+    // NESTED FORMS & COLLECTIONS (v2.4.0)
+    // ========================================================================
+
+    /**
+     * Add a nested form (sub-form)
+     *
+     * Creates a nested form structure for handling hierarchical data.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('name')->add()
+     *
+     *     // Nested address form
+     *     ->addNestedForm('address', 'Address', function(FormBuilder $addressForm) {
+     *         $addressForm->addText('street', 'Street')->add();
+     *         $addressForm->addText('city', 'City')->add();
+     *         $addressForm->addText('zipcode', 'ZIP')->add();
+     *     })
+     *
+     *     ->buildForm();
+     *
+     * // Data: ['name' => 'John', 'address' => ['street' => '...', 'city' => '...', 'zipcode' => '...']]
+     * ```
+     *
+     * @param string $name Nested form name
+     * @param string|null $label Nested form label
+     * @param callable $builder Builder callback that receives FormBuilder for sub-form
+     * @return self
+     * @since 2.4.0
+     */
+    public function addNestedForm(string $name, ?string $label = null, callable $builder): self
+    {
+        // Store nested form configuration
+        $this->nestedForms[$name] = [
+            'label' => $label ?? $name,
+            'builder' => $builder,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a collection field (dynamic list of forms)
+     *
+     * Creates a collection of forms that can be dynamically added/removed.
+     * Similar to Symfony's CollectionType.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('invoice')
+     *     ->addText('invoice_number')->add()
+     *
+     *     // Collection of line items
+     *     ->addCollection('items', 'Line Items', function(FormBuilder $itemForm) {
+     *         $itemForm->addText('product', 'Product')->add();
+     *         $itemForm->addNumber('quantity', 'Quantity')->add();
+     *         $itemForm->addNumber('price', 'Price')->add();
+     *     })
+     *     ->allowAdd()
+     *     ->allowDelete()
+     *     ->min(1)
+     *     ->max(10)
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param string $name Collection name
+     * @param string|null $label Collection label
+     * @param callable $prototypeBuilder Builder callback for each collection entry
+     * @return CollectionBuilder
+     * @since 2.4.0
+     */
+    public function addCollection(string $name, ?string $label = null, callable $prototypeBuilder): CollectionBuilder
+    {
+        $collectionBuilder = new CollectionBuilder($this, $name, $label, $prototypeBuilder);
+        $this->collections[$name] = $collectionBuilder;
+        return $collectionBuilder;
+    }
+
+    /**
+     * Build and return Form object (v2.4.0)
+     *
+     * Returns a stateful Form object instead of HTML string.
+     * Provides full control over form state, validation, and rendering.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('name')->add()
+     *     ->addEmail('email')->add()
+     *     ->buildForm();
+     *
+     * $form->handleRequest($_POST);
+     *
+     * if ($form->isSubmitted() && $form->isValid()) {
+     *     $data = $form->getData();
+     *     // Save to database
+     * }
+     *
+     * echo $form->render($renderer, $theme);
+     * ```
+     *
+     * @return FormInterface Stateful form object
+     * @since 2.4.0
+     */
+    public function buildForm(): FormInterface
+    {
+        // Create form configuration
+        $config = new FormConfig(
+            name: $this->name,
+            type: 'form',
+            method: $this->method,
+            action: $this->action,
+            attributes: $this->attributes,
+            compound: true,
+            csrfProtection: $this->enableCsrf,
+            validation: $this->enableValidation,
+        );
+
+        // Create root form
+        $form = new Form($this->name, $config);
+        $form->setRenderer($this->renderer);
+        $form->setTheme($this->theme);
+        $form->setValidator($this->validator);
+
+        // Add simple fields
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $fieldConfig = new FormConfig(
+                name: $input->getName(),
+                type: $input->getType()->value,
+                options: $input->toArray(),
+                compound: false
+            );
+
+            $field = new Form($input->getName(), $fieldConfig, $input->toArray());
+            $form->add($input->getName(), $field);
+        }
+
+        // Add nested forms
+        foreach ($this->nestedForms as $name => $nestedConfig) {
+            $nestedBuilder = new self($name);
+            $nestedBuilder->setRenderer($this->renderer);
+            $nestedBuilder->setTheme($this->theme);
+            $nestedBuilder->setValidator($this->validator);
+
+            // Build nested form using callback
+            ($nestedConfig['builder'])($nestedBuilder);
+
+            // Build nested form object
+            $nestedForm = $nestedBuilder->buildForm();
+            $form->add($name, $nestedForm);
+        }
+
+        // Add collections
+        foreach ($this->collections as $name => $collectionBuilder) {
+            $collectionForm = $collectionBuilder->buildCollectionForm();
+            $form->add($name, $collectionForm);
+        }
+
+        // Set form data if provided
+        if (!empty($this->data)) {
+            $mapper = new FormDataMapper();
+            $mapper->mapDataToForms($this->data, $form);
+        }
+
+        return $form;
+    }
+
+    /**
+     * Check if form has nested forms or collections
+     *
+     * @return bool
+     * @since 2.4.0
+     */
+    public function hasNestedStructure(): bool
+    {
+        return !empty($this->nestedForms) || !empty($this->collections);
+    }
+
+    /**
+     * Get all nested forms
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getNestedForms(): array
+    {
+        return $this->nestedForms;
+    }
+
+    /**
+     * Get all collections
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getCollections(): array
+    {
+        return $this->collections;
+    }
+
+    /**
+     * Get all inputs (for internal use)
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getInputs(): array
+    {
+        return $this->inputs;
     }
 }
