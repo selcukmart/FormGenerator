@@ -13,7 +13,16 @@
     "twig",
     "chain pattern",
     "fluent interface",
-    "form builder"
+    "form builder",
+    "validation",
+    "laravel validation",
+    "form validation",
+    "server-side validation",
+    "validation rules",
+    "form events",
+    "event-driven",
+    "php8.1",
+    "modern php"
   ],
   "license": "MIT",
   "authors": [

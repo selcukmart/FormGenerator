@@ -17,6 +17,8 @@ use FormGenerator\V2\Contracts\{
     ValidatorInterface
 };
 use FormGenerator\V2\Validation\{ValidationManager, SymfonyValidator};
+use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents, EventSubscriberInterface};
+use FormGenerator\V2\Form\FormTypeInterface;
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -61,10 +63,12 @@ class FormBuilder implements BuilderInterface
     private array $stepperOptions = [];
     private ?TextDirection $direction = null;
     private ?array $locale = null;
+    private EventDispatcher $eventDispatcher;
 
     private function __construct(string $name)
     {
         $this->name = $name;
+        $this->eventDispatcher = new EventDispatcher();
     }
 
     /**
@@ -73,6 +77,60 @@ class FormBuilder implements BuilderInterface
     public static function create(string $name): self
     {
         return new self($name);
+    }
+
+    /**
+     * Create form from FormType class (Symfony-style)
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::createFromType(new UserRegistrationForm(), [
+     *     'csrf_protection' => true,
+     *     'action' => '/register',
+     * ]);
+     * ```
+     *
+     * @param FormTypeInterface $formType Form type instance
+     * @param array $options Form options (merged with form type's default options)
+     * @return self Form builder instance
+     */
+    public static function createFromType(FormTypeInterface $formType, array $options = []): self
+    {
+        // Get form name from type
+        $formName = $formType->getName();
+
+        // Create builder instance
+        $builder = new self($formName);
+
+        // Merge options
+        $defaultOptions = $formType->configureOptions();
+        $mergedOptions = array_merge($defaultOptions, $options);
+
+        // Apply options to builder
+        if (isset($mergedOptions['method'])) {
+            $builder->setMethod($mergedOptions['method']);
+        }
+
+        if (isset($mergedOptions['action'])) {
+            $builder->setAction($mergedOptions['action']);
+        }
+
+        if (isset($mergedOptions['attr'])) {
+            $builder->attributes($mergedOptions['attr']);
+        }
+
+        if (isset($mergedOptions['csrf_protection'])) {
+            $builder->enableCsrf($mergedOptions['csrf_protection']);
+        }
+
+        if (isset($mergedOptions['validation'])) {
+            $builder->enableValidation($mergedOptions['validation']);
+        }
+
+        // Build form using the form type
+        $formType->buildForm($builder, $mergedOptions);
+
+        return $builder;
     }
 
     /**
@@ -299,6 +357,42 @@ class FormBuilder implements BuilderInterface
         return $this->locale;
     }
 
+    // ========== Event System Methods ==========
+
+    /**
+     * Add event listener
+     *
+     * @param string $eventName Event name (use FormEvents constants)
+     * @param callable $listener Listener callable
+     * @param int $priority Priority (higher = earlier execution)
+     */
+    public function addEventListener(string $eventName, callable $listener, int $priority = 0): self
+    {
+        $this->eventDispatcher->addEventListener($eventName, $listener, $priority);
+        return $this;
+    }
+
+    /**
+     * Add event subscriber
+     *
+     * @param EventSubscriberInterface $subscriber Event subscriber
+     */
+    public function addSubscriber(EventSubscriberInterface $subscriber): self
+    {
+        $this->eventDispatcher->addSubscriber($subscriber);
+        return $this;
+    }
+
+    /**
+     * Get event dispatcher
+     *
+     * @return EventDispatcher Event dispatcher instance
+     */
+    public function getEventDispatcher(): EventDispatcher
+    {
+        return $this->eventDispatcher;
+    }
+
     /**
      * Enable/disable CSRF protection
      */
@@ -313,7 +407,22 @@ class FormBuilder implements BuilderInterface
      */
     public function setData(array $data): self
     {
+        // Dispatch PRE_SET_DATA event
+        $preSetDataEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SET_DATA, $preSetDataEvent);
+
+        // Get potentially modified data from event
+        $modifiedData = $preSetDataEvent->getData();
+        if (is_array($modifiedData)) {
+            $data = $modifiedData;
+        }
+
         $this->data = $data;
+
+        // Dispatch POST_SET_DATA event
+        $postSetDataEvent = new FormEvent($this, $this->data);
+        $this->eventDispatcher->dispatch(FormEvents::POST_SET_DATA, $postSetDataEvent);
+
         return $this;
     }
 
@@ -375,6 +484,222 @@ class FormBuilder implements BuilderInterface
     public function getDto(): ?object
     {
         return $this->dto;
+    }
+
+    /**
+     * Validate form data using Laravel-style validation
+     *
+     * This method extracts validation rules from all form inputs and validates
+     * the provided data using the new Laravel-style Validator.
+     *
+     * Example:
+     * ```php
+     * try {
+     *     $validated = $form->validateData($_POST);
+     *     // Data is valid, use $validated
+     * } catch (ValidationException $e) {
+     *     $errors = $e->errors();
+     *     // Display errors
+     * }
+     * ```
+     *
+     * @param array $data Data to validate
+     * @param array $customMessages Custom error messages (optional)
+     * @param array $customAttributes Custom attribute names (optional)
+     * @param \PDO|null $dbConnection Database connection for unique/exists rules (optional)
+     * @return array Validated data
+     * @throws \FormGenerator\V2\Validation\ValidationException
+     */
+    public function validateData(
+        array $data,
+        array $customMessages = [],
+        array $customAttributes = [],
+        ?\PDO $dbConnection = null
+    ): array {
+        $rules = $this->extractValidationRules();
+
+        $validator = new \FormGenerator\V2\Validation\Validator(
+            $data,
+            $rules,
+            $customMessages,
+            $customAttributes
+        );
+
+        if ($dbConnection !== null) {
+            $validator->setDatabaseConnection($dbConnection);
+        }
+
+        // Dispatch PRE_SUBMIT event
+        $preSubmitEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SUBMIT, $preSubmitEvent);
+
+        try {
+            // Perform validation
+            $validated = $validator->validate();
+
+            // Dispatch VALIDATION_SUCCESS event
+            $validationSuccessEvent = new FormEvent($this, $validated);
+            $this->eventDispatcher->dispatch(FormEvents::VALIDATION_SUCCESS, $validationSuccessEvent);
+
+            // Dispatch POST_SUBMIT event
+            $postSubmitEvent = new FormEvent($this, $validated);
+            $this->eventDispatcher->dispatch(FormEvents::POST_SUBMIT, $postSubmitEvent);
+
+            return $validated;
+        } catch (\FormGenerator\V2\Validation\ValidationException $e) {
+            // Dispatch VALIDATION_ERROR event
+            $validationErrorEvent = new FormEvent($this, $e->errors());
+            $this->eventDispatcher->dispatch(FormEvents::VALIDATION_ERROR, $validationErrorEvent);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Extract validation rules from all form inputs
+     *
+     * Converts InputBuilder validation rules to Laravel-style rule strings.
+     *
+     * @return array Validation rules
+     */
+    private function extractValidationRules(): array
+    {
+        $rules = [];
+
+        foreach ($this->inputs as $input) {
+            $inputRules = $input->getValidationRules();
+
+            if (empty($inputRules)) {
+                continue;
+            }
+
+            $fieldName = $input->getName();
+            $ruleParts = [];
+
+            foreach ($inputRules as $ruleName => $ruleValue) {
+                // Handle Laravel-style rule strings
+                if ($ruleName === 'rules' && is_string($ruleValue)) {
+                    $ruleParts[] = $ruleValue;
+                    continue;
+                }
+
+                // Convert InputBuilder rules to Laravel-style rules
+                switch ($ruleName) {
+                    case 'required':
+                        $ruleParts[] = 'required';
+                        break;
+                    case 'email':
+                        $ruleParts[] = 'email';
+                        break;
+                    case 'minLength':
+                    case 'min':
+                        $ruleParts[] = "min:$ruleValue";
+                        break;
+                    case 'maxLength':
+                    case 'max':
+                        $ruleParts[] = "max:$ruleValue";
+                        break;
+                    case 'numeric':
+                        $ruleParts[] = 'numeric';
+                        break;
+                    case 'integer':
+                        $ruleParts[] = 'integer';
+                        break;
+                    case 'string':
+                        $ruleParts[] = 'string';
+                        break;
+                    case 'boolean':
+                        $ruleParts[] = 'boolean';
+                        break;
+                    case 'array':
+                        $ruleParts[] = 'array';
+                        break;
+                    case 'url':
+                        $ruleParts[] = 'url';
+                        break;
+                    case 'ip':
+                        if ($ruleValue === true) {
+                            $ruleParts[] = 'ip';
+                        } else {
+                            $ruleParts[] = "ip:$ruleValue";
+                        }
+                        break;
+                    case 'json':
+                        $ruleParts[] = 'json';
+                        break;
+                    case 'alpha':
+                        $ruleParts[] = 'alpha';
+                        break;
+                    case 'alpha_numeric':
+                        $ruleParts[] = 'alpha_numeric';
+                        break;
+                    case 'digits':
+                        if ($ruleValue === true) {
+                            $ruleParts[] = 'digits';
+                        } else {
+                            $ruleParts[] = "digits:$ruleValue";
+                        }
+                        break;
+                    case 'date':
+                        $ruleParts[] = 'date';
+                        break;
+                    case 'date_format':
+                        $ruleParts[] = "date_format:$ruleValue";
+                        break;
+                    case 'before':
+                        $ruleParts[] = "before:$ruleValue";
+                        break;
+                    case 'after':
+                        $ruleParts[] = "after:$ruleValue";
+                        break;
+                    case 'between':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'between:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'confirmed':
+                        $ruleParts[] = "confirmed:$ruleValue";
+                        break;
+                    case 'in':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'in:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'not_in':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'not_in:' . implode(',', $ruleValue);
+                        }
+                        break;
+                    case 'unique':
+                        if (is_array($ruleValue)) {
+                            $params = [
+                                $ruleValue['table'],
+                                $ruleValue['column'],
+                                $ruleValue['except'] ?? '',
+                                $ruleValue['idColumn'] ?? 'id'
+                            ];
+                            $ruleParts[] = 'unique:' . implode(',', $params);
+                        }
+                        break;
+                    case 'exists':
+                        if (is_array($ruleValue)) {
+                            $ruleParts[] = 'exists:' . $ruleValue['table'] . ',' . $ruleValue['column'];
+                        }
+                        break;
+                    case 'pattern':
+                        if (is_array($ruleValue) && isset($ruleValue['regex'])) {
+                            $ruleParts[] = 'regex:' . $ruleValue['regex'];
+                        }
+                        break;
+                }
+            }
+
+            if (!empty($ruleParts)) {
+                $rules[$fieldName] = implode('|', $ruleParts);
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -776,6 +1101,10 @@ class FormBuilder implements BuilderInterface
             throw new \RuntimeException('Theme not set. Use setTheme() before building.');
         }
 
+        // Dispatch PRE_BUILD event
+        $preBuildEvent = new FormEvent($this, $this->data, ['format' => 'html']);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_BUILD, $preBuildEvent);
+
         $context = [
             'form' => $this->buildFormContext(),
             'inputs' => $this->buildInputsContext(),
@@ -813,6 +1142,16 @@ class FormBuilder implements BuilderInterface
 
         // Add picker JavaScripts for inputs with pickers enabled
         $formHtml .= $this->generatePickerScripts();
+
+        // Dispatch POST_BUILD event (allows modifying final HTML)
+        $postBuildEvent = new FormEvent($this, $formHtml, ['format' => 'html']);
+        $this->eventDispatcher->dispatch(FormEvents::POST_BUILD, $postBuildEvent);
+
+        // Get potentially modified HTML from event
+        $modifiedHtml = $postBuildEvent->getData();
+        if (is_string($modifiedHtml)) {
+            $formHtml = $modifiedHtml;
+        }
 
         return $formHtml;
     }
