@@ -31,6 +31,8 @@ use FormGenerator\V2\Type\{
     TypeExtensionRegistry,
     OptionsResolver
 };
+use FormGenerator\V2\Translation\TranslatorInterface;
+use FormGenerator\V2\Security\{CsrfProtection, CsrfTokenManager};
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -80,6 +82,15 @@ class FormBuilder implements BuilderInterface
     private array $collections = []; // v2.4.0: Collections
     private array $constraints = []; // v2.7.0: Form-level constraints
     private array $validationGroups = []; // v2.7.0: Validation groups
+
+    // v3.0.0: i18n support
+    private static ?TranslatorInterface $translator = null;
+    private ?string $formLocale = null;
+
+    // v3.0.0: CSRF configuration
+    private ?string $csrfTokenId = null;
+    private string $csrfFieldName = '_csrf_token';
+    private ?CsrfProtection $csrfProtection = null;
 
     private function __construct(string $name)
     {
@@ -416,6 +427,98 @@ class FormBuilder implements BuilderInterface
     {
         $this->enableCsrf = $enable;
         return $this;
+    }
+
+    /**
+     * Set CSRF token ID (v3.0.0)
+     *
+     * @param string $tokenId Token identifier
+     */
+    public function setCsrfTokenId(string $tokenId): self
+    {
+        $this->csrfTokenId = $tokenId;
+        return $this;
+    }
+
+    /**
+     * Set CSRF field name (v3.0.0)
+     *
+     * @param string $fieldName Field name for CSRF token
+     */
+    public function setCsrfFieldName(string $fieldName): self
+    {
+        $this->csrfFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * Get CSRF protection instance (v3.0.0)
+     */
+    public function getCsrfProtection(): CsrfProtection
+    {
+        if ($this->csrfProtection === null) {
+            $this->csrfProtection = new CsrfProtection();
+        }
+
+        return $this->csrfProtection;
+    }
+
+    /**
+     * Set translator for all forms (v3.0.0)
+     *
+     * @param TranslatorInterface $translator Translator instance
+     */
+    public static function setTranslator(TranslatorInterface $translator): void
+    {
+        self::$translator = $translator;
+    }
+
+    /**
+     * Get translator (v3.0.0)
+     */
+    public static function getTranslator(): ?TranslatorInterface
+    {
+        return self::$translator;
+    }
+
+    /**
+     * Set locale for this form (v3.0.0)
+     *
+     * @param string $locale Locale code (e.g., 'en_US', 'tr_TR')
+     */
+    public function setLocale(string $locale): self
+    {
+        $this->formLocale = $locale;
+
+        if (self::$translator !== null) {
+            self::$translator->setLocale($locale);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get form locale (v3.0.0)
+     */
+    public function getFormLocale(): ?string
+    {
+        return $this->formLocale;
+    }
+
+    /**
+     * Translate a key (v3.0.0)
+     *
+     * @param string $key Translation key
+     * @param array $parameters Parameters for interpolation
+     * @return string Translated message or key if no translator
+     */
+    public function trans(string $key, array $parameters = []): string
+    {
+        if (self::$translator === null) {
+            return $key;
+        }
+
+        return self::$translator->trans($key, $parameters, $this->formLocale);
     }
 
     /**
