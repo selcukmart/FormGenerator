@@ -6,6 +6,7 @@ namespace FormGenerator\V2\Builder;
 
 use FormGenerator\V2\Contracts\InputType;
 use FormGenerator\V2\Contracts\DataProviderInterface;
+use FormGenerator\V2\Contracts\DataTransformerInterface;
 
 /**
  * Input Builder - Chain Pattern for Individual Form Inputs
@@ -40,6 +41,7 @@ class InputBuilder
     private bool $pickerEnabled = true;  // Built-in picker enabled by default
     private array $pickerOptions = [];
     private array $fieldEventListeners = []; // Field-level event listeners
+    private array $dataTransformers = []; // Data transformers (v2.3.1)
 
     public function __construct(
         private readonly FormBuilder $formBuilder,
@@ -852,6 +854,109 @@ class InputBuilder
     public function getPickerOptions(): array
     {
         return $this->pickerOptions;
+    }
+
+    // ========== Data Transformer Methods (v2.3.1) ==========
+
+    /**
+     * Add data transformer
+     *
+     * Transformers are applied in the order they are added.
+     * Multiple transformers can be chained for complex transformations.
+     *
+     * Example:
+     * ```php
+     * $form->addDate('birthday', 'Birthday')
+     *     ->addTransformer(new DateTimeToStringTransformer('Y-m-d'))
+     *     ->add();
+     *
+     * $form->addText('tags', 'Tags')
+     *     ->addTransformer(new StringToArrayTransformer(','))
+     *     ->add();
+     * ```
+     *
+     * @param DataTransformerInterface $transformer The data transformer
+     */
+    public function addTransformer(DataTransformerInterface $transformer): self
+    {
+        $this->dataTransformers[] = $transformer;
+        return $this;
+    }
+
+    /**
+     * Set data transformers (replaces existing transformers)
+     *
+     * @param array<DataTransformerInterface> $transformers Array of data transformers
+     */
+    public function setTransformers(array $transformers): self
+    {
+        foreach ($transformers as $transformer) {
+            if (!$transformer instanceof DataTransformerInterface) {
+                throw new \InvalidArgumentException(
+                    'All transformers must implement DataTransformerInterface'
+                );
+            }
+        }
+
+        $this->dataTransformers = $transformers;
+        return $this;
+    }
+
+    /**
+     * Get all data transformers
+     *
+     * @return array<DataTransformerInterface>
+     */
+    public function getTransformers(): array
+    {
+        return $this->dataTransformers;
+    }
+
+    /**
+     * Check if this input has any transformers
+     */
+    public function hasTransformers(): bool
+    {
+        return !empty($this->dataTransformers);
+    }
+
+    /**
+     * Transform value from model to view format
+     *
+     * Applies all transformers in order (model -> view).
+     *
+     * @param mixed $value The model value
+     * @return mixed The transformed view value
+     * @internal Used by FormBuilder
+     */
+    public function transformValue(mixed $value): mixed
+    {
+        foreach ($this->dataTransformers as $transformer) {
+            $value = $transformer->transform($value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Transform value from view to model format
+     *
+     * Applies all transformers in reverse order (view -> model).
+     *
+     * @param mixed $value The view value
+     * @return mixed The transformed model value
+     * @internal Used by FormBuilder
+     */
+    public function reverseTransformValue(mixed $value): mixed
+    {
+        // Apply transformers in reverse order
+        $transformers = array_reverse($this->dataTransformers);
+
+        foreach ($transformers as $transformer) {
+            $value = $transformer->reverseTransform($value);
+        }
+
+        return $value;
     }
 
     /**

@@ -5,6 +5,199 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2025-10-27
+
+### Added - Symfony-Inspired Data Transformation System
+
+Complete data transformation support for converting data between model format (normalized) and view format (denormalized), inspired by Symfony's DataTransformerInterface.
+
+#### Core Data Transformer Features
+
+- **DataTransformerInterface** (`FormGenerator\V2\Contracts\DataTransformerInterface`)
+  - `transform($value)` - Convert model → view format
+  - `reverseTransform($value)` - Convert view → model format
+  - Standard contract for all transformers
+  - Exception handling support
+
+- **AbstractDataTransformer** (`FormGenerator\V2\DataTransformer\AbstractDataTransformer`)
+  - Base class with common transformation utilities
+  - Null value handling
+  - Empty value handling
+  - Type validation helpers
+  - Error handling and logging
+
+#### Built-in Transformers
+
+- **DateTimeToStringTransformer** (`FormGenerator\V2\DataTransformer\DateTimeToStringTransformer`)
+  - Convert DateTime/DateTimeImmutable ↔ formatted string
+  - Customizable date format (Y-m-d, d/m/Y, etc.)
+  - Timezone support (input/output timezones)
+  - Error handling for invalid dates
+  - Example: `new DateTime('2024-01-15')` ↔ `'2024-01-15'`
+
+- **StringToArrayTransformer** (`FormGenerator\V2\DataTransformer\StringToArrayTransformer`)
+  - Convert array ↔ delimited string
+  - Customizable delimiter (comma, semicolon, pipe, etc.)
+  - Automatic trimming of values
+  - Empty value filtering
+  - Example: `['php', 'symfony', 'laravel']` ↔ `'php, symfony, laravel'`
+
+- **NumberToLocalizedStringTransformer** (`FormGenerator\V2\DataTransformer\NumberToLocalizedStringTransformer`)
+  - Convert number ↔ localized string representation
+  - Customizable decimal separator
+  - Customizable thousands separator
+  - Precision control
+  - Rounding mode support
+  - Example: `75000.50` ↔ `'75,000.50'` (US) or `'75.000,50'` (EU)
+
+- **BooleanToStringTransformer** (`FormGenerator\V2\DataTransformer\BooleanToStringTransformer`)
+  - Convert boolean ↔ string representation
+  - Customizable true/false values
+  - Smart parsing (yes/no, on/off, 1/0, true/false)
+  - Example: `true` ↔ `'yes'` or `'1'` or `'active'`
+
+- **CallbackTransformer** (`FormGenerator\V2\DataTransformer\CallbackTransformer`)
+  - Custom transformation logic using closures
+  - Perfect for quick transformations
+  - No need to create dedicated transformer class
+  - Example: Entity ↔ ID, uppercase/lowercase, JSON encoding, etc.
+
+#### InputBuilder Integration
+
+- **addTransformer()** Method
+  - Add transformer to input field
+  - Chainable with other InputBuilder methods
+  - Multiple transformers can be added (chaining)
+  - Transformers applied in order
+
+- **setTransformers()** Method
+  - Replace all transformers at once
+  - Array of DataTransformerInterface instances
+
+- **getTransformers()** Method
+  - Get all transformers for the field
+
+- **hasTransformers()** Method
+  - Check if field has any transformers
+
+- **transformValue()** Method
+  - Apply transformations (model → view)
+  - Called automatically during form build
+  - Internal use by FormBuilder
+
+- **reverseTransformValue()** Method
+  - Apply reverse transformations (view → model)
+  - Applied in reverse order
+  - Internal use by FormBuilder
+
+#### FormBuilder Integration
+
+- **Automatic Transform Application**
+  - Transformers automatically applied during `buildInputsContext()`
+  - Model data transformed to view format before rendering
+  - Graceful error handling with logging
+
+- **applyReverseTransform()** Method
+  - Transform submitted form data back to model format
+  - Call after form submission to get properly typed data
+  - Returns array with transformed values
+  - Preserves non-transformed fields
+  - Error handling with detailed messages
+
+- **applyTransformToValue()** Private Method
+  - Internal method for applying transformations
+  - Error logging on transformation failure
+  - Returns original value on error
+
+#### Examples & Documentation
+
+- **WithDataTransformation.php** (`Examples/V2/WithDataTransformation.php`)
+  - Comprehensive examples of all transformers
+  - Basic transformation examples
+  - Custom transformation with callbacks
+  - Form submission processing
+  - Chaining multiple transformers
+  - Real-world use cases
+
+- **DataTransformationController.php** (`Examples/Symfony/DataTransformationController.php`)
+  - Symfony controller integration example
+  - Entity ↔ ID transformation
+  - JSON array transformation
+  - DateTime transformation
+  - Database entity loading
+  - API endpoint with transformations
+
+#### Use Cases
+
+1. **DateTime Handling**
+   ```php
+   ->addDate('birthday', 'Birthday')
+       ->addTransformer(new DateTimeToStringTransformer('Y-m-d'))
+       ->add()
+   ```
+
+2. **Array/Tags Input**
+   ```php
+   ->addText('tags', 'Skills')
+       ->addTransformer(new StringToArrayTransformer(', '))
+       ->add()
+   ```
+
+3. **Entity Selection**
+   ```php
+   ->addSelect('department', 'Department')
+       ->options($departmentOptions)
+       ->addTransformer(new CallbackTransformer(
+           fn($dept) => $dept?->getId(),
+           fn($id) => $repository->find($id)
+       ))
+       ->add()
+   ```
+
+4. **Localized Numbers**
+   ```php
+   ->addText('price', 'Price')
+       ->addTransformer(new NumberToLocalizedStringTransformer(2, ',', '.'))
+       ->add()
+   ```
+
+5. **Boolean Radio Buttons**
+   ```php
+   ->addRadio('is_active', 'Status')
+       ->options(['yes' => 'Active', 'no' => 'Inactive'])
+       ->addTransformer(new BooleanToStringTransformer('yes', 'no'))
+       ->add()
+   ```
+
+### Technical Details
+
+- **PHP Version**: Requires PHP 8.1+
+- **Features Used**: readonly properties, typed properties, union types, mixed type
+- **Architecture**: Strategy pattern with composition
+- **Inspired By**: Symfony DataTransformerInterface
+- **Backward Compatibility**: Fully backward compatible
+- **Error Handling**: Graceful degradation with logging
+
+### Breaking Changes
+
+None. All changes are backward compatible.
+
+### Migration Notes
+
+Data transformation is opt-in. Existing forms continue to work without any changes. To use transformers:
+
+```php
+// Before (manual conversion)
+$birthday = new DateTime($_POST['birthday']);
+
+// After (automatic transformation)
+$form->addDate('birthday')->addTransformer(new DateTimeToStringTransformer('Y-m-d'));
+$modelData = $form->applyReverseTransform($_POST);
+// $modelData['birthday'] is already a DateTime object
+```
+
+---
+
 ## [2.2.0] - 2025-10-27
 
 ### Added - Blade Template Engine Support

@@ -1064,6 +1064,102 @@ class FormBuilder implements BuilderInterface
     }
 
     /**
+     * Apply transformers to form data (model -> view)
+     *
+     * This is called automatically when building inputs context.
+     *
+     * @param InputBuilder $input The input builder
+     * @param mixed $value The model value
+     * @return mixed The transformed view value
+     * @internal
+     */
+    private function applyTransformToValue(InputBuilder $input, mixed $value): mixed
+    {
+        if (!$input->hasTransformers()) {
+            return $value;
+        }
+
+        try {
+            return $input->transformValue($value);
+        } catch (\Exception $e) {
+            // Log or handle transformation errors gracefully
+            error_log(sprintf(
+                'Data transformation error for field "%s": %s',
+                $input->getName(),
+                $e->getMessage()
+            ));
+
+            // Return original value on transformation failure
+            return $value;
+        }
+    }
+
+    /**
+     * Apply reverse transformers to submitted data (view -> model)
+     *
+     * Call this method after form submission to transform the submitted data
+     * back to model format.
+     *
+     * Example:
+     * ```php
+     * $submittedData = $_POST;
+     * $modelData = $form->applyReverseTransform($submittedData);
+     * // Now $modelData contains DateTime objects, entities, etc.
+     * ```
+     *
+     * @param array $data The submitted form data (view format)
+     * @return array The transformed data (model format)
+     */
+    public function applyReverseTransform(array $data): array
+    {
+        $transformedData = [];
+
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $fieldName = $input->getName();
+
+            // Skip if field not in submitted data
+            if (!array_key_exists($fieldName, $data)) {
+                continue;
+            }
+
+            $value = $data[$fieldName];
+
+            // Apply reverse transformation if transformers exist
+            if ($input->hasTransformers()) {
+                try {
+                    $value = $input->reverseTransformValue($value);
+                } catch (\Exception $e) {
+                    // Log transformation error
+                    error_log(sprintf(
+                        'Reverse data transformation error for field "%s": %s',
+                        $fieldName,
+                        $e->getMessage()
+                    ));
+
+                    // You might want to throw or handle this differently
+                    throw new \RuntimeException(sprintf(
+                        'Failed to transform field "%s": %s',
+                        $fieldName,
+                        $e->getMessage()
+                    ), 0, $e);
+                }
+            }
+
+            $transformedData[$fieldName] = $value;
+        }
+
+        // Include fields that weren't transformed
+        foreach ($data as $key => $value) {
+            if (!array_key_exists($key, $transformedData)) {
+                $transformedData[$key] = $value;
+            }
+        }
+
+        return $transformedData;
+    }
+
+    /**
      * Add input builder to form (called by InputBuilder)
      *
      * @internal
@@ -1470,6 +1566,11 @@ class FormBuilder implements BuilderInterface
             $inputData = $input->toArray();
             $inputData['template'] = $this->theme->getInputTemplate($input->getType());
             $inputData['classes'] = $this->theme->getInputClasses($input->getType());
+
+            // Apply data transformers (model -> view) before rendering
+            if ($input->hasTransformers() && $inputData['value'] !== null) {
+                $inputData['value'] = $this->applyTransformToValue($input, $inputData['value']);
+            }
 
             // Sanitize values if security is enabled
             if ($this->security !== null && $inputData['value'] !== null) {
