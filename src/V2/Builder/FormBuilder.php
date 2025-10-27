@@ -12,6 +12,7 @@ use FormGenerator\V2\Contracts\{
     RendererInterface,
     ScopeType,
     SecurityInterface,
+    TextDirection,
     ThemeInterface,
     ValidatorInterface
 };
@@ -58,6 +59,7 @@ class FormBuilder implements BuilderInterface
     private ?object $dto = null;
     private bool $stepperEnabled = false;
     private array $stepperOptions = [];
+    private ?TextDirection $direction = null;
 
     private function __construct(string $name)
     {
@@ -254,6 +256,26 @@ class FormBuilder implements BuilderInterface
     public function isStepperEnabled(): bool
     {
         return $this->stepperEnabled;
+    }
+
+    /**
+     * Set text direction for the form (LTR or RTL)
+     * This will apply to all inputs and pickers automatically
+     *
+     * @param TextDirection $direction Text direction (LTR or RTL)
+     */
+    public function setDirection(TextDirection $direction): self
+    {
+        $this->direction = $direction;
+        return $this;
+    }
+
+    /**
+     * Get text direction for the form
+     */
+    public function getDirection(): ?TextDirection
+    {
+        return $this->direction;
     }
 
     /**
@@ -786,6 +808,7 @@ class FormBuilder implements BuilderInterface
             'scope' => $this->scope->value,
             'attributes' => $this->attributes,
             'enctype' => $this->enctype,
+            'direction' => $this->direction?->value,
             'csrf_enabled' => $this->enableCsrf,
             'validation_enabled' => $this->enableValidation,
             'stepper_enabled' => $this->stepperEnabled,
@@ -828,6 +851,10 @@ class FormBuilder implements BuilderInterface
 
         if ($this->enctype) {
             $xml->addAttribute('enctype', $this->enctype);
+        }
+
+        if ($this->direction !== null) {
+            $xml->addAttribute('direction', $this->direction->value);
         }
 
         // Add attributes
@@ -963,6 +990,11 @@ class FormBuilder implements BuilderInterface
             $pickerType = $config['pickerType'];
             $pickerOptions = $config['pickerOptions'] ?? [];
 
+            // Auto-apply RTL if form direction is RTL and not explicitly set
+            if ($this->direction === TextDirection::RTL && !isset($pickerOptions['rtl'])) {
+                $pickerOptions['rtl'] = true;
+            }
+
             // Generate appropriate picker script based on type
             $scripts .= "\n" . match ($pickerType) {
                 'date' => DatePickerManager::generateScript($inputId, $pickerOptions),
@@ -990,6 +1022,11 @@ class FormBuilder implements BuilderInterface
 
         if ($this->enctype !== null) {
             $attributes['enctype'] = $this->enctype;
+        }
+
+        // Add direction attribute if set
+        if ($this->direction !== null) {
+            $attributes['dir'] = $this->direction->value;
         }
 
         return [
@@ -1041,6 +1078,11 @@ class FormBuilder implements BuilderInterface
                 $inputData['value'] = $this->security->sanitize($inputData['value']);
             }
 
+            // Add direction attribute if set
+            if ($this->direction !== null && !isset($inputData['attributes']['dir'])) {
+                $inputData['attributes']['dir'] = $this->direction->value;
+            }
+
             if (!empty($this->sections)) {
                 $currentSectionInputs[] = $inputData;
             } else {
@@ -1084,6 +1126,7 @@ class FormBuilder implements BuilderInterface
             'scope' => $this->scope->value,
             'attributes' => $this->attributes,
             'enctype' => $this->enctype,
+            'direction' => $this->direction?->value,
             'csrf_enabled' => $this->enableCsrf,
             'inputs' => array_map(fn($input) => $input->toArray(), $this->inputs),
         ];

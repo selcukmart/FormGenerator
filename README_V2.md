@@ -1526,79 +1526,128 @@ DateTimePickerManager::LOCALE_HE  // Hebrew (RTL)
 
 ### RTL (Right-to-Left) Support
 
-Full support for right-to-left languages like Arabic and Hebrew.
+Full support for right-to-left languages like Arabic and Hebrew. **Set direction once at form level** and it automatically applies to all inputs and pickers.
+
+**✨ New: Form-Level Direction Support**
 
 ```php
-$form = FormBuilder::create('arabic_form')
-    ->setTheme(new Bootstrap5Theme())
+use FormGenerator\V2\Contracts\TextDirection;
 
-    // Arabic date picker
+// Arabic form - Set RTL once for the entire form
+$form = FormBuilder::create('arabic_form')
+    ->setRenderer($renderer)
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)  // 🎯 Set once - applies to everything!
+
+    // All inputs and pickers automatically get RTL
+    ->addText('name', 'الاسم الكامل')
+        ->required()
+        ->add()
+
     ->addDate('birth_date', 'تاريخ الميلاد')
         ->setPickerLocale(DatePickerManager::LOCALE_AR)
         ->setPickerOptions([
-            'rtl' => true,          // Enable RTL
+            // No need to set 'rtl' => true anymore!
             'weekStart' => 6,       // Saturday
             'format' => 'dd-mm-yyyy',
         ])
         ->add()
 
-    // Arabic time picker
     ->addTime('appointment_time', 'وقت الموعد')
         ->setPickerLocale(TimePickerManager::LOCALE_AR)
         ->setPickerOptions([
-            'rtl' => true,
+            // RTL automatically applied!
             'format' => '12',
         ])
         ->add()
 
-    // Arabic datetime picker
     ->addDatetime('meeting_datetime', 'تاريخ ووقت الاجتماع')
         ->setPickerLocale(DateTimePickerManager::LOCALE_AR)
         ->setPickerOptions([
-            'rtl' => true,
+            // RTL automatically applied!
             'timeFormat' => '24',
         ])
         ->add()
 
-    ->addSubmit('حفظ', 'حفظ')
+    ->addSubmit('submit', 'حفظ')
     ->build();
 ```
 
 **Hebrew Example:**
 ```php
+use FormGenerator\V2\Contracts\TextDirection;
+
 $form = FormBuilder::create('hebrew_form')
+    ->setRenderer($renderer)
     ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::RTL)  // 🎯 Set once!
+
+    ->addText('name', 'שם מלא')
+        ->required()
+        ->add()
 
     ->addDate('date_field', 'תאריך')
         ->setPickerLocale(DatePickerManager::LOCALE_HE)
         ->setPickerOptions([
-            'rtl' => true,
+            // RTL automatically applied!
             'weekStart' => 0,  // Sunday (common in Israel)
         ])
         ->add()
 
     ->addTime('time_field', 'שעה')
         ->setPickerLocale(TimePickerManager::LOCALE_HE)
-        ->setPickerOptions(['rtl' => true])
         ->add()
 
     ->addSubmit('save', 'שמור')
     ->build();
 ```
 
+**LTR (Left-to-Right) Example:**
+```php
+use FormGenerator\V2\Contracts\TextDirection;
+
+// English form - LTR is default but can be set explicitly
+$form = FormBuilder::create('english_form')
+    ->setRenderer($renderer)
+    ->setTheme(new Bootstrap5Theme())
+    ->setDirection(TextDirection::LTR)  // Optional - LTR is default
+
+    ->addText('name', 'Full Name')->required()->add()
+    ->addDate('birth_date', 'Birth Date')
+        ->setPickerLocale(DatePickerManager::LOCALE_EN)
+        ->add()
+    ->addSubmit('submit', 'Submit')
+    ->build();
+```
+
+**How It Works:**
+1. **Set Once**: Use `setDirection(TextDirection::RTL)` or `setDirection(TextDirection::LTR)` when creating the form
+2. **Auto-Apply to Form**: The `<form>` element gets `dir="rtl"` or `dir="ltr"` attribute
+3. **Auto-Apply to Inputs**: All input fields get the `dir` attribute automatically
+4. **Auto-Apply to Pickers**: All pickers (date, time, datetime, range) automatically get `rtl: true` or `rtl: false`
+5. **No Repetition**: No need to set RTL option for each picker individually
+
 **RTL Features:**
-- **Automatic Direction**: Input fields get `dir="rtl"` attribute
+- **Form-Level Setting**: Set direction once, applies to everything
+- **Automatic Direction**: All inputs and form elements get correct `dir` attribute
 - **Layout Adjustment**: Picker popups align correctly for RTL
 - **CSS Support**: All pickers have RTL-specific styling
 - **Flex Direction**: Navigation buttons flip for RTL
 - **Built-in Locales**: Arabic and Hebrew locales included
 - **Custom Locales**: Easy to add more RTL languages
+- **Output Formats**: Direction included in JSON and XML output
 
 **Supported in All Pickers:**
 - Date Picker (`addDate()`)
 - Time Picker (`addTime()`)
 - DateTime Picker (`addDatetime()`)
 - Range Slider (`addRange()`)
+
+**Benefits:**
+- ✅ Cleaner code - no repetition
+- ✅ Easier maintenance - change once
+- ✅ Less error-prone - can't forget to set RTL on a picker
+- ✅ Works with all output formats (HTML, JSON, XML)
 
 ### Multiple Output Formats
 
