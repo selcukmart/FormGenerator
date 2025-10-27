@@ -6,6 +6,7 @@ namespace FormGenerator\V2\Form;
 
 use FormGenerator\V2\Contracts\{RendererInterface, ThemeInterface, ValidatorInterface};
 use FormGenerator\V2\Validation\ValidationManager;
+use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents};
 
 /**
  * Form - Stateful Form Object with Nested Support
@@ -89,6 +90,11 @@ class Form implements FormInterface
      */
     private array $metadata = [];
 
+    /**
+     * Event dispatcher (v2.8.0)
+     */
+    private EventDispatcher $eventDispatcher;
+
     public function __construct(
         string $name,
         ?FormConfigInterface $config = null,
@@ -101,6 +107,7 @@ class Form implements FormInterface
         );
         $this->metadata = $metadata;
         $this->state = FormState::READY;
+        $this->eventDispatcher = new EventDispatcher();
     }
 
     public function getName(): string
@@ -110,6 +117,13 @@ class Form implements FormInterface
 
     public function setData(array $data): self
     {
+        // Dispatch PRE_SET_DATA event
+        $preEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SET_DATA, $preEvent);
+
+        // Use potentially modified data from event
+        $data = $preEvent->getData();
+
         $this->data = $data;
 
         // Set data on children recursively
@@ -124,6 +138,10 @@ class Form implements FormInterface
                 }
             }
         }
+
+        // Dispatch POST_SET_DATA event
+        $postEvent = new FormEvent($this, $this->data);
+        $this->eventDispatcher->dispatch(FormEvents::POST_SET_DATA, $postEvent);
 
         return $this;
     }
@@ -174,6 +192,13 @@ class Form implements FormInterface
 
     public function submit(array $data): self
     {
+        // Dispatch PRE_SUBMIT event
+        $preEvent = new FormEvent($this, $data);
+        $this->eventDispatcher->dispatch(FormEvents::PRE_SUBMIT, $preEvent);
+
+        // Use potentially modified data from event
+        $data = $preEvent->getData();
+
         $this->submittedData = $data;
         $this->state = FormState::SUBMITTED;
 
@@ -187,6 +212,10 @@ class Form implements FormInterface
         // Validate after submission
         $this->errors = $this->validate();
         $this->state = empty($this->errors) ? FormState::VALID : FormState::INVALID;
+
+        // Dispatch POST_SUBMIT event
+        $postEvent = new FormEvent($this, $this->getData());
+        $this->eventDispatcher->dispatch(FormEvents::POST_SUBMIT, $postEvent);
 
         return $this;
     }
@@ -433,5 +462,29 @@ class Form implements FormInterface
     public function getState(): FormState
     {
         return $this->state;
+    }
+
+    /**
+     * Add event listener (v2.8.0)
+     *
+     * @param string $eventName Event name (use FormEvents constants)
+     * @param callable $listener Listener callable
+     * @param int $priority Priority (higher = earlier execution)
+     * @return self
+     */
+    public function addEventListener(string $eventName, callable $listener, int $priority = 0): self
+    {
+        $this->eventDispatcher->addEventListener($eventName, $listener, $priority);
+        return $this;
+    }
+
+    /**
+     * Get event dispatcher (v2.8.0)
+     *
+     * @return EventDispatcher Event dispatcher instance
+     */
+    public function getEventDispatcher(): EventDispatcher
+    {
+        return $this->eventDispatcher;
     }
 }

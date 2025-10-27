@@ -5,6 +5,86 @@ All notable changes to FormGenerator V2 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2025-10-27
+
+### Added - Dynamic Form Modification API 🔄
+
+**DYNAMIC FORMS UNLOCKED!** Version 2.8.0 adds powerful runtime form modification capabilities with event-based architecture, enabling forms to adapt dynamically based on data, user input, and business logic.
+
+#### New Features
+
+**1. Event-Based Form Modification**
+- PRE_SET_DATA, POST_SET_DATA, PRE_SUBMIT, POST_SUBMIT events
+- Form::addEventListener() for runtime event listeners
+- Modify form structure based on loaded or submitted data
+- Full event propagation control
+
+**2. Runtime Field Manipulation**
+- Form::add() - Add fields at runtime (already existed, now with events)
+- Form::remove() - Remove fields dynamically
+- Form::has() - Check field existence
+- Form::get() - Get field instance
+- Form::all() - Get all fields
+
+**3. FormEvent Enhanced**
+- Now supports both FormBuilder and Form objects
+- Union type: FormBuilder|FormInterface
+- Seamless event handling for build-time and runtime
+
+**4. Form Class Event Support**
+- EventDispatcher integration in Form class
+- Event firing in setData(), submit(), handleRequest()
+- Full lifecycle event coverage
+
+#### Use Cases
+
+**Product Form with Category-Specific Fields**
+```php
+$form->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) {
+    $data = $event->getData();
+    if ($data['category'] === 'physical') {
+        $event->getForm()->add('weight', 'number', ['label' => 'Weight']);
+    }
+});
+```
+
+**User Registration with Type-Based Fields**
+```php
+$form->addEventListener(FormEvents::PRE_SUBMIT, function(FormEvent $event) {
+    $data = $event->getData();
+    if ($data['user_type'] === 'business') {
+        $event->getForm()->add('tax_id', 'text', ['required' => true]);
+    }
+});
+```
+
+**Conditional Field Building**
+```php
+if ($jobType === 'remote') {
+    $builder->addField('timezone', 'select', ['required' => true]);
+}
+```
+
+#### Enhanced Classes
+- Form: Added addEventListener(), getEventDispatcher(), event firing
+- FormEvent: Enhanced to support Form objects (FormBuilder|FormInterface)
+- FormEvents: Complete event constants (already existed)
+
+#### Examples
+- Examples/V2/WithDynamicFormModification.php (6 comprehensive scenarios)
+
+#### Breaking Changes
+None - Fully backward compatible
+
+#### Comparison with Symfony
+- ✅ PRE_SET_DATA, POST_SET_DATA, PRE_SUBMIT, POST_SUBMIT events
+- ✅ Runtime field addition/removal
+- ✅ Event-based form modification
+- ✅ Conditional field building
+- 🚀 Better: Simpler API, no compiler passes needed
+
+---
+
 ## [2.7.0] - 2025-10-27
 
 ### Added - Cross-Field Validation & Validation Groups ✅
