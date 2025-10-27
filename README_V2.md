@@ -614,6 +614,144 @@ $form->dispatchFieldEvent($field, FieldEvents::FIELD_SHOW);
 
 See `/Examples/V2/WithEventDrivenDependencies.php` for comprehensive examples.
 
+### 🔗 Query String Based Conditional Rendering
+
+**Control field visibility using URL query parameters** - Perfect for feature flags, role-based forms, and dynamic pricing!
+
+Use query strings to conditionally render fields based on URL parameters:
+
+```php
+// Get query parameters
+$mode = $_GET['mode'] ?? '';
+$role = $_GET['role'] ?? '';
+
+$form = FormBuilder::create('query_form')
+    ->setRenderer($renderer)
+    ->setTheme($theme)
+    ->enableServerSideDependencyEvaluation() // PHP-side rendering
+    ->setData([
+        'mode' => $mode,
+        'role' => $role,
+    ]);
+
+// Add query params as hidden fields
+$form->addHidden('mode', $mode)->isDependency()->add();
+$form->addHidden('role', $role)->isDependency()->add();
+
+$form->addText('username', 'Username')->required()->add();
+
+// Show only with ?mode=advanced
+$form->addText('advanced_settings', 'Advanced Settings')
+    ->dependsOn('mode', 'advanced')
+    ->add();
+
+// Show only with ?role=admin (NOT rendered in HTML if condition unmet)
+$form->addTextarea('admin_notes', 'Admin Notes')
+    ->dependsOn('role', 'admin')
+    ->add();
+
+echo $form->build();
+```
+
+**Complex Conditions** - Multiple query parameters:
+
+```php
+// Show only when ?country=US AND ?role=admin
+$form->addText('us_tax_settings', 'US Tax Settings')
+    ->dependsOn('country', 'US')
+    ->onDependencyCheck(function(FieldEvent $event) use ($request) {
+        $country = $request->query->get('country', '');
+        $role = $request->query->get('role', '');
+
+        $visible = ($country === 'US' && $role === 'admin');
+        $event->setVisible($visible);
+    })
+    ->add();
+```
+
+**Real-World Example** - Dynamic Pricing Form:
+
+```php
+$plan = $_GET['plan'] ?? 'basic';
+$promoCode = $_GET['promo'] ?? '';
+
+$form->enableServerSideDependencyEvaluation()
+    ->setData(['plan' => $plan, 'promo' => $promoCode]);
+
+$form->addHidden('plan', $plan)->isDependency()->add();
+$form->addHidden('promo', $promoCode)->isDependency()->add();
+
+// Basic plan fields (?plan=basic)
+$form->addNumber('users_basic', 'Users (max 10)')
+    ->dependsOn('plan', 'basic')
+    ->helpText('$10/month')
+    ->add();
+
+// Pro plan fields (?plan=pro)
+$form->addNumber('users_pro', 'Users (max 100)')
+    ->dependsOn('plan', 'pro')
+    ->helpText('$50/month')
+    ->add();
+
+// Enterprise plan fields (?plan=enterprise)
+$form->addText('dedicated_manager', 'Account Manager')
+    ->dependsOn('plan', 'enterprise')
+    ->add();
+
+// Promo code field (?promo=SAVE20)
+$form->addText('promo_display', 'Promo Code Applied!')
+    ->dependsOn('promo', 'SAVE20')
+    ->value('20% discount applied!')
+    ->readonly()
+    ->add();
+```
+
+**Symfony Controller Integration**:
+
+```php
+use Symfony\Component\HttpFoundation\Request;
+
+#[Route('/form/query-based')]
+public function queryBasedForm(Request $request): Response
+{
+    $mode = $request->query->get('mode', '');
+    $role = $request->query->get('role', '');
+
+    $form = FormBuilder::create('query_form')
+        ->setRenderer($renderer)
+        ->setTheme($theme)
+        ->enableServerSideDependencyEvaluation()
+        ->setData(['mode' => $mode, 'role' => $role]);
+
+    $form->addHidden('mode', $mode)->isDependency()->add();
+    $form->addHidden('role', $role)->isDependency()->add();
+
+    // Only with ?mode=advanced
+    $form->addText('advanced_settings', 'Advanced Settings')
+        ->dependsOn('mode', 'advanced')
+        ->add();
+
+    // Only with ?role=admin
+    $form->addTextarea('admin_notes', 'Admin Notes')
+        ->dependsOn('role', 'admin')
+        ->add();
+
+    return $this->render('form.html.twig', [
+        'form' => $form->build(),
+    ]);
+}
+```
+
+**Use Cases**:
+- ✅ **Feature Flags**: `?feature=beta` → Show beta features
+- ✅ **Role-Based Forms**: `?role=admin` → Show admin controls
+- ✅ **Pricing Plans**: `?plan=premium` → Show premium fields
+- ✅ **A/B Testing**: `?variant=B` → Show variant B fields
+- ✅ **Localization**: `?country=US` → Show country-specific fields
+- ✅ **Debug Mode**: `?debug=true` → Show debug fields
+
+See `/Examples/V2/WithQueryStringDependencies.php` and `/Examples/Symfony/QueryStringFormController.php` for complete examples.
+
 ## ✅ Validation System
 
 **Built-in dual validation** - Both PHP backend and JavaScript frontend validation included!
