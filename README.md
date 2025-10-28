@@ -35,7 +35,7 @@ A production-ready, feature-complete form builder with Symfony parity, offering 
 - Configurable token lifetime (default: 2 hours)
 - Zero configuration required
 
-### 📖 [Read Full V2/V3 Documentation →](README_V2.md)
+### 📖 [Read Full V3 Documentation →](README_V3.md)
 
 ### Quick Start - Simple Contact Form with i18n & CSRF
 
@@ -288,7 +288,8 @@ See [SYMFONY_ALTERNATIVE_ROADMAP.md](SYMFONY_ALTERNATIVE_ROADMAP.md) for complet
 ## 📚 Complete Documentation
 
 ### Core Documentation
-- **[Complete V2/V3 Documentation](README_V2.md)** - Full feature guide ⭐
+- **[Complete V3 Documentation](README_V3.md)** - Full feature guide ⭐
+- **[V2 Documentation](README_V2.md)** - Legacy V2 documentation
 - **[Symfony Alternative Guide](SYMFONY_ALTERNATIVE_ROADMAP.md)** - Migration from Symfony Forms
 - **[Upgrade Guide](UPGRADE.md)** - Version migration guides
 - **[Changelog](CHANGELOG.md)** - Version history
