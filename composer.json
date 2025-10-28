@@ -1,5 +1,6 @@
 {
   "name": "selcukmart/form-generator",
+  "version": "3.0.0",
   "description": "Modern PHP Form Generator with Chain Pattern - Supports Symfony, Laravel, Twig, and Smarty",
   "minimum-stability": "stable",
   "type": "library",
@@ -71,7 +72,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "2.x-dev"
+      "dev-main": "3.x-dev"
     }
   },
   "config": {

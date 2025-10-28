@@ -18,7 +18,21 @@ use FormGenerator\V2\Contracts\{
 };
 use FormGenerator\V2\Validation\{ValidationManager, SymfonyValidator};
 use FormGenerator\V2\Event\{EventDispatcher, FormEvent, FormEvents, EventSubscriberInterface};
-use FormGenerator\V2\Form\FormTypeInterface;
+use FormGenerator\V2\Form\{
+    FormTypeInterface,
+    Form,
+    FormInterface,
+    FormConfig,
+    FormCollection
+};
+use FormGenerator\V2\DataMapper\FormDataMapper;
+use FormGenerator\V2\Type\{
+    TypeRegistry,
+    TypeExtensionRegistry,
+    OptionsResolver
+};
+use FormGenerator\V2\Translation\TranslatorInterface;
+use FormGenerator\V2\Security\{CsrfProtection, CsrfTokenManager};
 
 /**
  * Form Builder - Main Entry Point with Chain Pattern
@@ -64,6 +78,19 @@ class FormBuilder implements BuilderInterface
     private ?TextDirection $direction = null;
     private ?array $locale = null;
     private EventDispatcher $eventDispatcher;
+    private array $nestedForms = []; // v2.4.0: Nested forms
+    private array $collections = []; // v2.4.0: Collections
+    private array $constraints = []; // v2.7.0: Form-level constraints
+    private array $validationGroups = []; // v2.7.0: Validation groups
+
+    // v3.0.0: i18n support
+    private static ?TranslatorInterface $translator = null;
+    private ?string $formLocale = null;
+
+    // v3.0.0: CSRF configuration
+    private ?string $csrfTokenId = null;
+    private string $csrfFieldName = '_csrf_token';
+    private ?CsrfProtection $csrfProtection = null;
 
     private function __construct(string $name)
     {
@@ -400,6 +427,98 @@ class FormBuilder implements BuilderInterface
     {
         $this->enableCsrf = $enable;
         return $this;
+    }
+
+    /**
+     * Set CSRF token ID (v3.0.0)
+     *
+     * @param string $tokenId Token identifier
+     */
+    public function setCsrfTokenId(string $tokenId): self
+    {
+        $this->csrfTokenId = $tokenId;
+        return $this;
+    }
+
+    /**
+     * Set CSRF field name (v3.0.0)
+     *
+     * @param string $fieldName Field name for CSRF token
+     */
+    public function setCsrfFieldName(string $fieldName): self
+    {
+        $this->csrfFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * Get CSRF protection instance (v3.0.0)
+     */
+    public function getCsrfProtection(): CsrfProtection
+    {
+        if ($this->csrfProtection === null) {
+            $this->csrfProtection = new CsrfProtection();
+        }
+
+        return $this->csrfProtection;
+    }
+
+    /**
+     * Set translator for all forms (v3.0.0)
+     *
+     * @param TranslatorInterface $translator Translator instance
+     */
+    public static function setTranslator(TranslatorInterface $translator): void
+    {
+        self::$translator = $translator;
+    }
+
+    /**
+     * Get translator (v3.0.0)
+     */
+    public static function getTranslator(): ?TranslatorInterface
+    {
+        return self::$translator;
+    }
+
+    /**
+     * Set locale for this form (v3.0.0)
+     *
+     * @param string $locale Locale code (e.g., 'en_US', 'tr_TR')
+     */
+    public function setLocale(string $locale): self
+    {
+        $this->formLocale = $locale;
+
+        if (self::$translator !== null) {
+            self::$translator->setLocale($locale);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get form locale (v3.0.0)
+     */
+    public function getFormLocale(): ?string
+    {
+        return $this->formLocale;
+    }
+
+    /**
+     * Translate a key (v3.0.0)
+     *
+     * @param string $key Translation key
+     * @param array $parameters Parameters for interpolation
+     * @return string Translated message or key if no translator
+     */
+    public function trans(string $key, array $parameters = []): string
+    {
+        if (self::$translator === null) {
+            return $key;
+        }
+
+        return self::$translator->trans($key, $parameters, $this->formLocale);
     }
 
     /**
@@ -1808,5 +1927,514 @@ class FormBuilder implements BuilderInterface
     {
         $this->attributes['data-server-side-dependencies'] = $enable ? 'true' : 'false';
         return $this;
+    }
+
+    // ========================================================================
+    // NESTED FORMS & COLLECTIONS (v2.4.0)
+    // ========================================================================
+
+    /**
+     * Add a nested form (sub-form)
+     *
+     * Creates a nested form structure for handling hierarchical data.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('name')->add()
+     *
+     *     // Nested address form
+     *     ->addNestedForm('address', 'Address', function(FormBuilder $addressForm) {
+     *         $addressForm->addText('street', 'Street')->add();
+     *         $addressForm->addText('city', 'City')->add();
+     *         $addressForm->addText('zipcode', 'ZIP')->add();
+     *     })
+     *
+     *     ->buildForm();
+     *
+     * // Data: ['name' => 'John', 'address' => ['street' => '...', 'city' => '...', 'zipcode' => '...']]
+     * ```
+     *
+     * @param string $name Nested form name
+     * @param string|null $label Nested form label
+     * @param callable $builder Builder callback that receives FormBuilder for sub-form
+     * @return self
+     * @since 2.4.0
+     */
+    public function addNestedForm(string $name, ?string $label = null, callable $builder): self
+    {
+        // Store nested form configuration
+        $this->nestedForms[$name] = [
+            'label' => $label ?? $name,
+            'builder' => $builder,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a collection field (dynamic list of forms)
+     *
+     * Creates a collection of forms that can be dynamically added/removed.
+     * Similar to Symfony's CollectionType.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('invoice')
+     *     ->addText('invoice_number')->add()
+     *
+     *     // Collection of line items
+     *     ->addCollection('items', 'Line Items', function(FormBuilder $itemForm) {
+     *         $itemForm->addText('product', 'Product')->add();
+     *         $itemForm->addNumber('quantity', 'Quantity')->add();
+     *         $itemForm->addNumber('price', 'Price')->add();
+     *     })
+     *     ->allowAdd()
+     *     ->allowDelete()
+     *     ->min(1)
+     *     ->max(10)
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param string $name Collection name
+     * @param string|null $label Collection label
+     * @param callable $prototypeBuilder Builder callback for each collection entry
+     * @return CollectionBuilder
+     * @since 2.4.0
+     */
+    public function addCollection(string $name, ?string $label = null, callable $prototypeBuilder): CollectionBuilder
+    {
+        $collectionBuilder = new CollectionBuilder($this, $name, $label, $prototypeBuilder);
+        $this->collections[$name] = $collectionBuilder;
+        return $collectionBuilder;
+    }
+
+    /**
+     * Build and return Form object (v2.4.0)
+     *
+     * Returns a stateful Form object instead of HTML string.
+     * Provides full control over form state, validation, and rendering.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('name')->add()
+     *     ->addEmail('email')->add()
+     *     ->buildForm();
+     *
+     * $form->handleRequest($_POST);
+     *
+     * if ($form->isSubmitted() && $form->isValid()) {
+     *     $data = $form->getData();
+     *     // Save to database
+     * }
+     *
+     * echo $form->render($renderer, $theme);
+     * ```
+     *
+     * @return FormInterface Stateful form object
+     * @since 2.4.0
+     */
+    public function buildForm(): FormInterface
+    {
+        // Create form configuration
+        $config = new FormConfig(
+            name: $this->name,
+            type: 'form',
+            method: $this->method,
+            action: $this->action,
+            attributes: $this->attributes,
+            compound: true,
+            csrfProtection: $this->enableCsrf,
+            validation: $this->enableValidation,
+        );
+
+        // Create root form
+        $form = new Form($this->name, $config);
+        $form->setRenderer($this->renderer);
+        $form->setTheme($this->theme);
+        $form->setValidator($this->validator);
+
+        // Add simple fields
+        foreach ($this->inputs as $item) {
+            $input = $item['input'];
+            $fieldConfig = new FormConfig(
+                name: $input->getName(),
+                type: $input->getType()->value,
+                options: $input->toArray(),
+                compound: false
+            );
+
+            $field = new Form($input->getName(), $fieldConfig, $input->toArray());
+            $form->add($input->getName(), $field);
+        }
+
+        // Add nested forms
+        foreach ($this->nestedForms as $name => $nestedConfig) {
+            $nestedBuilder = new self($name);
+            $nestedBuilder->setRenderer($this->renderer);
+            $nestedBuilder->setTheme($this->theme);
+            $nestedBuilder->setValidator($this->validator);
+
+            // Build nested form using callback
+            ($nestedConfig['builder'])($nestedBuilder);
+
+            // Build nested form object
+            $nestedForm = $nestedBuilder->buildForm();
+            $form->add($name, $nestedForm);
+        }
+
+        // Add collections
+        foreach ($this->collections as $name => $collectionBuilder) {
+            $collectionForm = $collectionBuilder->buildCollectionForm();
+            $form->add($name, $collectionForm);
+        }
+
+        // Set form data if provided
+        if (!empty($this->data)) {
+            $mapper = new FormDataMapper();
+            $mapper->mapDataToForms($this->data, $form);
+        }
+
+        return $form;
+    }
+
+    /**
+     * Check if form has nested forms or collections
+     *
+     * @return bool
+     * @since 2.4.0
+     */
+    public function hasNestedStructure(): bool
+    {
+        return !empty($this->nestedForms) || !empty($this->collections);
+    }
+
+    /**
+     * Get all nested forms
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getNestedForms(): array
+    {
+        return $this->nestedForms;
+    }
+
+    /**
+     * Get all collections
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getCollections(): array
+    {
+        return $this->collections;
+    }
+
+    /**
+     * Get all inputs (for internal use)
+     *
+     * @return array
+     * @since 2.4.0
+     */
+    public function getInputs(): array
+    {
+        return $this->inputs;
+    }
+
+    // ========================================================================
+    // TYPE SYSTEM (v2.5.0)
+    // ========================================================================
+
+    /**
+     * Add field using type system (v2.5.0)
+     *
+     * Create a field using a registered type with options.
+     * Supports custom types, built-in types, and type extensions.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addField('email', 'email', [
+     *         'label' => 'Email Address',
+     *         'required' => true,
+     *         'help' => 'We will never share your email',
+     *     ])
+     *
+     *     ->addField('phone', 'phone', [
+     *         'label' => 'Phone Number',
+     *         'country' => 'US',
+     *     ])
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param string $name Field name
+     * @param string $type Type name (registered type or built-in)
+     * @param array $options Field options
+     * @return InputBuilder
+     * @since 2.5.0
+     */
+    public function addField(string $name, string $type, array $options = []): InputBuilder
+    {
+        // Ensure built-in types are registered
+        TypeRegistry::registerBuiltInTypes();
+
+        // Get type instance
+        if (!TypeRegistry::has($type)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Type "%s" is not registered. Did you forget to register it with TypeRegistry::register()?',
+                $type
+            ));
+        }
+
+        $typeInstance = TypeRegistry::get($type);
+
+        // Build type hierarchy (type + all parents)
+        $typeHierarchy = TypeRegistry::getTypeHierarchy($type);
+
+        // Create options resolver
+        $resolver = new OptionsResolver();
+
+        // Configure options (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->configureOptions($resolver);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->configureOptions($resolver);
+            }
+        }
+
+        // Resolve options
+        $resolvedOptions = $resolver->resolve($options);
+
+        // Create input builder (we need to determine InputType from the type)
+        // For now, create a generic TEXT type and let the type configure it
+        $input = $this->createInput($name, InputType::TEXT, $resolvedOptions['label'] ?? $name);
+
+        // Build field (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->buildField($input, $resolvedOptions);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->buildField($input, $resolvedOptions);
+            }
+        }
+
+        // Finish view (starting from root type)
+        foreach (array_reverse($typeHierarchy) as $typeInHierarchy) {
+            $typeInHierarchy->finishView($input, $resolvedOptions);
+
+            // Apply type extensions
+            $extensions = TypeExtensionRegistry::getExtensionsForType($typeInHierarchy->getName());
+            foreach ($extensions as $extension) {
+                $extension->finishView($input, $resolvedOptions);
+            }
+        }
+
+        return $input;
+    }
+
+    /**
+     * Register a custom type
+     *
+     * Convenience method for registering types
+     *
+     * @param string $name Type name
+     * @param string $className Type class name
+     * @since 2.5.0
+     */
+    public static function registerType(string $name, string $className): void
+    {
+        TypeRegistry::register($name, $className);
+    }
+
+    /**
+     * Register a type extension
+     *
+     * Convenience method for registering extensions
+     *
+     * @param TypeExtensionInterface $extension Type extension
+     * @since 2.5.0
+     */
+    public static function registerTypeExtension($extension): void
+    {
+        TypeExtensionRegistry::register($extension);
+    }
+
+    /**
+     * Check if a type is registered
+     *
+     * @param string $name Type name
+     * @return bool
+     * @since 2.5.0
+     */
+    public static function hasType(string $name): bool
+    {
+        TypeRegistry::registerBuiltInTypes();
+        return TypeRegistry::has($name);
+    }
+
+    /**
+     * Get all registered type names
+     *
+     * @return array<string>
+     * @since 2.5.0
+     */
+    public static function getRegisteredTypes(): array
+    {
+        TypeRegistry::registerBuiltInTypes();
+        return TypeRegistry::getTypeNames();
+    }
+
+    // ========================================================================
+    // CROSS-FIELD VALIDATION & GROUPS (v2.7.0)
+    // ========================================================================
+
+    /**
+     * Add form-level constraint (v2.7.0)
+     *
+     * Add a constraint that validates the entire form data.
+     * Perfect for cross-field validation.
+     *
+     * Example:
+     * ```php
+     * use FormGenerator\V2\Validation\Constraints\Callback;
+     *
+     * $form = FormBuilder::create('user')
+     *     ->addPassword('password')->add()
+     *     ->addPassword('password_confirm')->add()
+     *
+     *     // Cross-field validation
+     *     ->addConstraint(new Callback(function($data, $context) {
+     *         if ($data['password'] !== $data['password_confirm']) {
+     *             $context->buildViolation('Passwords do not match')
+     *                     ->atPath('password_confirm')
+     *                     ->addViolation();
+     *         }
+     *     }))
+     *
+     *     ->buildForm();
+     * ```
+     *
+     * @param object $constraint Constraint instance
+     * @return self
+     * @since 2.7.0
+     */
+    public function addConstraint(object $constraint): self
+    {
+        $this->constraints[] = $constraint;
+        return $this;
+    }
+
+    /**
+     * Get all form-level constraints
+     *
+     * @return array
+     * @since 2.7.0
+     */
+    public function getConstraints(): array
+    {
+        return $this->constraints;
+    }
+
+    /**
+     * Set validation groups for this form (v2.7.0)
+     *
+     * Define which validation groups to use when validating.
+     *
+     * Example:
+     * ```php
+     * $form = FormBuilder::create('user')
+     *     ->addText('username')
+     *         ->required(['groups' => ['registration', 'profile']])
+     *         ->minLength(3, ['groups' => ['registration']])
+     *         ->add()
+     *
+     *     ->setValidationGroups(['registration']) // Only validate registration rules
+     *     ->buildForm();
+     * ```
+     *
+     * @param array $groups Validation group names
+     * @return self
+     * @since 2.7.0
+     */
+    public function setValidationGroups(array $groups): self
+    {
+        $this->validationGroups = $groups;
+        return $this;
+    }
+
+    /**
+     * Get validation groups
+     *
+     * @return array
+     * @since 2.7.0
+     */
+    public function getValidationGroups(): array
+    {
+        return empty($this->validationGroups) ? ['Default'] : $this->validationGroups;
+    }
+
+    /**
+     * Validate form data with cross-field validation and groups (v2.7.0)
+     *
+     * Enhanced validation that supports:
+     * - Cross-field validation via constraints
+     * - Validation groups
+     * - ExecutionContext for better error handling
+     *
+     * @param array $data Data to validate
+     * @param array $groups Validation groups (overrides form groups)
+     * @return array Validation errors
+     * @since 2.7.0
+     */
+    public function validateWithConstraints(array $data, array $groups = []): array
+    {
+        $groups = !empty($groups) ? $groups : $this->getValidationGroups();
+        $errors = [];
+
+        // First, validate fields using standard validation
+        if ($this->validator !== null) {
+            $result = $this->validator->validate($data);
+            if (!$result->isValid()) {
+                $errors = $result->getErrors();
+            }
+        }
+
+        // Then, run form-level constraints
+        $context = new \FormGenerator\V2\Validation\ExecutionContext($data);
+
+        foreach ($this->constraints as $constraint) {
+            // Check if constraint applies to current groups
+            if (method_exists($constraint, 'getGroups')) {
+                $constraintGroups = $constraint->getGroups();
+                if (!array_intersect($groups, $constraintGroups)) {
+                    continue; // Skip this constraint
+                }
+            }
+
+            if (method_exists($constraint, 'validate')) {
+                $constraint->validate($data, $context);
+            }
+        }
+
+        // Merge constraint violations with field errors
+        if ($context->hasViolations()) {
+            foreach ($context->getViolations() as $path => $messages) {
+                if (!isset($errors[$path])) {
+                    $errors[$path] = [];
+                }
+                $errors[$path] = array_merge($errors[$path], $messages);
+            }
+        }
+
+        return $errors;
     }
 }

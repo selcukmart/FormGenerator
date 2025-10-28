@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace FormGenerator\V2\Event;
 
 use FormGenerator\V2\Builder\FormBuilder;
+use FormGenerator\V2\Form\FormInterface;
 
 /**
  * Form Event - Container for event data
  *
  * Carries information about the form and its data during event dispatch.
+ * Supports both FormBuilder (for build-time events) and Form objects (for runtime events).
  *
  * Example:
  * ```php
+ * // With FormBuilder (build-time)
  * $event = new FormEvent($builder, $data);
+ *
+ * // With Form (runtime)
+ * $event = new FormEvent($form, $data);
  *
  * // Get data
  * $data = $event->getData();
@@ -24,29 +30,32 @@ use FormGenerator\V2\Builder\FormBuilder;
  * // Stop event propagation
  * $event->stopPropagation();
  * ```
+ *
+ * @author selcukmart
+ * @since 2.8.0 - Added Form object support
  */
 class FormEvent
 {
     private bool $propagationStopped = false;
 
     /**
-     * @param FormBuilder $form Form builder instance
+     * @param FormBuilder|FormInterface $form Form builder or form instance
      * @param mixed $data Form data
      * @param array $context Additional context data
      */
     public function __construct(
-        private FormBuilder $form,
+        private FormBuilder|FormInterface $form,
         private mixed $data = null,
         private array $context = []
     ) {
     }
 
     /**
-     * Get the form builder
+     * Get the form builder or form instance
      *
-     * @return FormBuilder Form builder instance
+     * @return FormBuilder|FormInterface Form builder or form instance
      */
-    public function getForm(): FormBuilder
+    public function getForm(): FormBuilder|FormInterface
     {
         return $this->form;
     }
