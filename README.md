@@ -2,26 +2,26 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.2.1-blue.svg)](CHANGELOG.md)
 [![Tests](https://img.shields.io/badge/tests-500%2B-success.svg)](tests/)
 
-**Modern PHP Form Generator - Now a Complete Symfony Form Component Alternative!**
+**Modern PHP Form Generator**
 
-A production-ready, feature-complete form builder with Symfony parity, offering nested forms, type system, cross-field validation, dynamic form modification, advanced error handling, i18n, and automatic CSRF protection.
+A production-ready form builder library offering nested forms, type system, cross-field validation, dynamic form modification, advanced error handling, internationalization, and automatic CSRF protection.
 
 ---
 
-## 🎉 Version 3.0.0 - Production Ready!
+## Version 3.0.0 - Production Ready
 
-**FormGenerator V3.0.0** achieves **100% feature parity** with Symfony Form Component while maintaining a simpler, more intuitive API.
+FormGenerator V3.0.0 is a comprehensive form building library with an intuitive fluent API.
 
-### 🚀 What Makes v3.0.0 Special?
+### Key Features
 
-✨ **Complete Symfony Alternative**
-- All major Symfony Form features implemented
-- Simpler API with chain pattern
-- Zero Symfony dependencies (standalone or integrate)
-- **500+ comprehensive unit tests**
+**Enterprise-Grade Form Builder**
+- Comprehensive form building capabilities
+- Fluent chain pattern API
+- Framework-agnostic design (standalone or integrate with Symfony/Laravel)
+- 500+ comprehensive unit tests
 
 🌍 **Internationalization (NEW in v3.0.0)**
 - Multi-language form labels and messages
@@ -389,4 +389,4 @@ If this project helped you, please give it a ⭐ on GitHub!
 
 **Made with ❤️ using modern PHP 8.1+**
 
-**🎯 Production-ready • 🚀 Symfony Alternative • 🔒 Secure by Default • 🌍 Internationalized**
+**Production-ready • Secure by Default • Internationalized • Framework-agnostic**
